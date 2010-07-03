@@ -92,4 +92,7 @@ def main():
     cm.man(args[0])
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception, e:
+        print e

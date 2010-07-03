@@ -27,7 +27,9 @@ import os.path
 home = os.path.expanduser('~')
 #man_dir = home + '/.local/share/man/man3/'
 #index_db = home + '/.config/cppman/index.db'
+viewer = './viewer.sh'
 
 man_dir = 'man3/'
 index_db = 'index.db'
+
 

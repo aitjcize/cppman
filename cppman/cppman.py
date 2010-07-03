@@ -110,24 +110,36 @@ class cppman(Crawler):
         f.close()
 
     def clear_cache(self):
+        '''
+        Clear all cache in man3
+        '''
         shutil.rmtree(environ.man_dir)
 
     def man(self, pattern):
         '''
         Call viewer.sh to view man page
         '''
+        try:
+            os.mkdir(environ.man_dir)
+        except: pass
+
         avail = subprocess.Popen('ls %s' % environ.man_dir, shell=True,
                                  stdout=subprocess.PIPE).stdout.read()
         conn = sqlite3.connect(environ.index_db)
         cursor = conn.cursor()
-        page_name, url = cursor.execute('SELECT name,url FROM CPPMAN WHERE'
-                            ' name LIKE "%%%s%%"' % pattern).fetchone()
-        conn.close()
+        try:
+            page_name, url = cursor.execute('SELECT name,url FROM CPPMAN WHERE'
+                                ' name LIKE "%%%s%%"' % pattern).fetchone()
+        except TypeError:
+            raise RuntimeError('No manual entry for ' + pattern)
+        finally:
+            conn.close()
 
         if page_name + '.3.gz' not in avail:
             self.cache_man_page(url)
 
-        os.execl('./viewer.sh', 'dummy', environ.man_dir + page_name + '.3.gz')
+        os.execl(environ.viewer, 'dummy', str(formatter.get_width()),
+                 environ.man_dir + page_name + '.3.gz')
 
     def find(self, pattern):
         pass

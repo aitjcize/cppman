@@ -141,13 +141,7 @@ def groff2man(data):
     '''
     Read groff-formated text and output man pages.
     '''
-    
-    # Get terminal size
-    ws = struct.pack("HHHH", 0, 0, 0, 0)
-    ws = fcntl.ioctl(0, termios.TIOCGWINSZ, ws)
-    lines, columns, x, y = struct.unpack("HHHH", ws)
-    width = columns * 39 / 40
-    if width >= columns -2: width = columns -2
+    width = get_width()
 
     cmd = 'groff -t -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)
     handle = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
@@ -164,6 +158,18 @@ def cplusplus2man(data):
     man_text = groff2man(groff_text)
     return man_text
 
+def get_width():
+    '''
+    Calculate appropriate width for groff
+    '''
+    # Get terminal size
+    ws = struct.pack("HHHH", 0, 0, 0, 0)
+    ws = fcntl.ioctl(0, termios.TIOCGWINSZ, ws)
+    lines, columns, x, y = struct.unpack("HHHH", ws)
+    width = columns * 39 / 40
+    if width >= columns -2: width = columns -2
+    return width
+
 def test():
     '''
     Simple Text
@@ -171,7 +177,7 @@ def test():
     #name = raw_input('What manual page do you want?')
     name = 'list'
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    print cplusplus2groff(ifs.read()),
+    print cplusplus2man(ifs.read()),
 
 if __name__ == '__main__':
     test()
