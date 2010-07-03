@@ -6,7 +6,7 @@
 # Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
 #
-# This program is part of the project 'manpages-cpp'.
+# This file is part of manpages-cpp.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,8 +24,12 @@
 #
 
 import datetime
+import fcntl
 import re
+import struct
+import subprocess
 import sys
+import termios
 import urllib
 
 # Format replacement RE list
@@ -35,7 +39,7 @@ rps = [
          r'</div><div class="docsubtop"><div class="right">(.*)</div>\n'
          r'<div class="prototype">(.*)</div>\n</div>'
          r'<p><strong>(.+?)</strong></p>\n</div><div id="content">(.+?)<br>',
-         r'.TH "\1" 3 "%s" "cplusplus" "C++ Programmer\'s Manual"\n'
+         r'.TH "\1" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
          r'\n.SH NAME\n\1 - \5\n'
          r'\n.SH TYPE\n\2\n'
          r'\n.SH SYNOPSIS\n\4\n'
@@ -58,14 +62,14 @@ rps = [
         (r'<b>(.+?)</b>:<br>', r'.SS \1\n'),
         # Member functions / See Also table
         (r'<div class="auto"><table class="keywordlink"><tr><td class="tit">'
-         r'<a href= "[^"]*"><b>([^<]+)</b></a></td><td class="des">([^<]+)'
-         r'<span class="typ">([^<]+)</span></td></tr></table></div>',
+         r'<a href= "[^"]*">(.+?)</a></td><td class="des">(.+?)'
+         r'<span class="typ">(.+?)</span>',
          r'.IP "\1"\n\2 \3\n'),
         # Member types table
-        (r'<table class="boxed">\n<tr><th>(.+?)</th><th>(.+?)</th></tr>'
+        (r'<table class="boxed">\s+<tr><th>(.+?)</th><th>(.+?)</th></tr>'
          r'((.|\n)*?)</table>',
-         r'\n.TS\ncenter tab(|);\nc c\nl l .\n\1|\2\n=\n\3\n.TE\n'),
-        (r'<tr><td>(.+?)</td><td>(.+?)</td></tr>', r'\1|\2\n'),
+         r'\n.TS\ntab(|);\nc c\nl lx .\n\1|\2\n=\n\3\n.TE\n'),
+        (r'<tr><td>(.+?)</td><td>(.+?)</td></tr>', r'\1|T{\n\2\nT}\n'),
         # Snippet
         (r'<td class="rownum">.+</td>', r''),
         
@@ -75,7 +79,7 @@ rps = [
         # 'br' tag
         (r'<br>', r'\n.br\n'),
         # 'dd' 'dt' tag
-        (r'<dt>(.+?)</dt>\s*<dd>((.|\n)+?)</dd>', r'.IP \1\n\2\n'),
+        (r'<dt>(.+?)</dt>\s*<dd>((.|\n)+?)</dd>', r'.IP "\1"\n\2\n'),
         # Bold
         (r'<strong>(.+?)</strong>', r'.B \1\n'),
         # -
@@ -95,6 +99,9 @@ rps = [
       ]
 
 def to_groff(data):
+    '''
+    Read HTML formated data and convert it into groff syntax.
+    '''
     # Remove sidebar
     try:
         data = data[data.index('<div class="doctop"><h1>'):]
@@ -120,10 +127,34 @@ def to_groff(data):
         data = re.sub(sh, sh.upper(), data)
     return name, data
 
+def to_man(data):
+    '''
+    Read HTML formated data and output man-like formated text.
+    '''
+    name, groff_text = to_groff(data)
+    
+    # Get terminal size
+    ws = struct.pack("HHHH", 0, 0, 0, 0)
+    ws = fcntl.ioctl(0, termios.TIOCGWINSZ, ws)
+    lines, columns, x, y = struct.unpack("HHHH", ws)
+    width = columns * 39 / 40
+    if width >= columns -2: width = columns -2
+
+    cmd = 'groff -t -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)
+    handle = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+                                               stdout=subprocess.PIPE,
+                                               stderr=subprocess.PIPE)
+    man_text, stderr = handle.communicate(groff_text)
+    return name, man_text
+
 def test():
-    #ifs = open('index.html', 'r')
-    ifs = urllib.urlopen('http://www.cplusplus.com/reference/stl/vector/')
-    print to_groff(ifs.read())[1]
+    '''
+    Simple Text
+    '''
+    #name = raw_input('What man page do you want? ')
+    #ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
+    ifs = open('index.html', 'r')
+    print to_man(ifs.read())[1],
 
 if __name__ == '__main__':
     test()
