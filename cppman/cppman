@@ -77,10 +77,12 @@ def main():
     if options.clear_cache:
         cm = cppman()
         cm.clear_cache()
+        sys.exit(0)
 
     if options.rebuild_index:
         cm = cppman()
         cm.rebuild_index()
+        sys.exit(0)
 
     if len(args) == 0:
         print >> sys.stderr, 'What manual page do you want?'

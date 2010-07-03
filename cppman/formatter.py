@@ -74,7 +74,7 @@ rps = [
          r'((.|\n)*?)</table>',
          r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n'),
         (r'<tr><td>(.+?)</td><td>((.|\n)+?)</td></tr>', r'\1|T{\n\2\nT}\n'),
-        # Snippet
+        # Remove snippet line numbers
         (r'<td class="rownum">.+</td>', r''),
         
         # Footer

@@ -26,7 +26,9 @@ import urllib
 import re
 
 class Crawler:
-
+    '''
+    A Crawler that crawls through cplusplus.com
+    '''
     def __init__(self):
         self.origin = 'http://www.cplusplus.com/reference/'
         self.url_base = 'http://www.cplusplus.com'
