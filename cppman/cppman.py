@@ -124,14 +124,21 @@ class cppman(Crawler):
         except: pass
 
         avail = subprocess.Popen('ls %s' % environ.man_dir, shell=True,
-                                 stdout=subprocess.PIPE).stdout.read()
+                                 stdout=subprocess.PIPE).stdout.read().split()
         conn = sqlite3.connect(environ.index_db)
         cursor = conn.cursor()
         try:
             page_name, url = cursor.execute('SELECT name,url FROM CPPMAN WHERE'
-                                ' name LIKE "%%%s%%"' % pattern).fetchone()
+                                ' name="%s"' % pattern).fetchone()
         except TypeError:
-            raise RuntimeError('No manual entry for ' + pattern)
+            # Try ambiguous search
+            try:
+                page_name, url = cursor.execute('SELECT name,url FROM CPPMAN'
+                            ' WHERE name LIKE "%%%s%%"' % pattern).fetchone()
+            except TypeError:
+                raise RuntimeError('No manual entry for ' + pattern)
+            finally:
+                conn.close()
         finally:
             conn.close()
 

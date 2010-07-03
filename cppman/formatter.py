@@ -57,6 +57,8 @@ rps = [
         (r'</code>', r'\n.in\n.sp\n'),
         # 'samp' tag
         (r'<samp>((.|\n)+?)</samp>', r'\n.nf\n\1\n.fi\n'),
+        # 'pre' tag
+        (r'<pre\s*>((.|\n)+?)</pre\s*>', r'\n.nf\n\1\n.fi\n'),
         # Subsections
         (r'<b>(.+?)</b>:<br>', r'.SS \1\n'),
         # Member functions / See Also table
@@ -73,7 +75,12 @@ rps = [
         (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th></tr>'
          r'((.|\n)*?)</table>',
          r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n'),
-        (r'<tr><td>(.+?)</td><td>((.|\n)+?)</td></tr>', r'\1|T{\n\2\nT}\n'),
+        (r'<tr><td>(.+?)</td><td>((.|\n)+?)</td></tr>',
+         r'\1|T{\n\2\nT}\n'),
+        # Single-column table
+        (r'<table class="boxed"><tr><th>(.+?)</th></tr>((.|\n)*?)</table>',
+         r'\n.TS\nallbox;\nc\nl .\n\1\n\2\n.TE\n.sp\n'),
+        (r'<tr><td>(.+?)</td></tr>', r'\nT{\1\nT}\n.sp\n'),
         # Remove snippet line numbers
         (r'<td class="rownum">.+</td>', r''),
         
@@ -129,8 +136,8 @@ def cplusplus2groff(data):
 
     # Fix Table
     for tb in re.findall(r'\.TS(.+?)\.TE', data, re.DOTALL):
-        tbs = re.sub(r'\n\...\n', r'', tb)
-        tbs = re.sub(r'\n\.B (.+?)\n', r'\1', tb)
+        tbs = re.sub(r'\n\...\n', r'\n', tb)
+        tbs = re.sub(r'\n\.B (.+?)\n', r'\1', tbs)
         tbs = re.sub(r'\n\.', r'\n\\.', tbs)
         index = data.index(tb)
         data = data[:index] + tbs + data[index + len(tb):]
@@ -175,9 +182,9 @@ def test():
     Simple Text
     '''
     #name = raw_input('What manual page do you want?')
-    name = 'list'
+    name = 'fprintf'
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    print cplusplus2man(ifs.read()),
+    print cplusplus2groff(ifs.read()),
 
 if __name__ == '__main__':
     test()
