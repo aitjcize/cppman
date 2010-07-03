@@ -98,9 +98,9 @@ rps = [
         (r'\n\n+', r'\n'),
       ]
 
-def to_groff(data):
+def cplusplus2groff(data):
     '''
-    Read HTML formated data and convert it into groff syntax.
+    Convert HTML text from cplusplus.com to Groff-formated text.
     '''
     # Remove sidebar
     try:
@@ -124,14 +124,14 @@ def to_groff(data):
 
     # Upper case all section headers
     for sh in re.findall('.SH .*\n', data):
-        data = re.sub(sh, sh.upper(), data)
+        index = data.index(sh)
+        data = data[:index] + sh.upper() + data[index + len(sh):]
     return name, data
 
-def to_man(data):
+def groff2man(data):
     '''
-    Read HTML formated data and output man-like formated text.
+    Read groff-formated text and output man pages.
     '''
-    name, groff_text = to_groff(data)
     
     # Get terminal size
     ws = struct.pack("HHHH", 0, 0, 0, 0)
@@ -144,7 +144,15 @@ def to_man(data):
     handle = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
                                                stdout=subprocess.PIPE,
                                                stderr=subprocess.PIPE)
-    man_text, stderr = handle.communicate(groff_text)
+    man_text, stderr = handle.communicate(data)
+    return man_text
+
+def cplusplus2man(data):
+    '''
+    Convert HTML text from cplusplus.com to man pages.
+    '''
+    name, groff_text = cplusplus2groff(data)
+    man_text = groff2man(groff_text)
     return name, man_text
 
 def test():
@@ -154,7 +162,7 @@ def test():
     #name = raw_input('What man page do you want? ')
     #ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
     ifs = open('index.html', 'r')
-    print to_man(ifs.read())[1],
+    print cplusplus2man(ifs.read())[1],
 
 if __name__ == '__main__':
     test()
