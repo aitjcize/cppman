@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 #-*- coding: utf-8 -*-
 # 
-# cppman.py
+# cppman.py 
 #
 # Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -23,41 +22,112 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import subprocess
-import formatter
-import urllib
+import gzip
 import os
-from optparse import OptionParser
+import os.path
+import re
+import shutil
+import sqlite3
+import subprocess
+import urllib
 
-option_list = [
-    make_option('-v', '--version', action = 'store_true', dest='version',
-                default = False, help = 'Show version information'),
-    make_option('-c', '--cache-all', action = 'store_true', dest='cache_all',
-                default = False,
-                help = 'Cache all available man pages from cplusplus.com.'),
-    make_option('-k', '--clear-all', action = 'store_true', dest='clear_all',
-                default = False,
-                help = 'Clear all cached files.'),
-    make_option('-C', '--cache-clibrary', action = 'store_true', dest='cache_c',
-                default = False,
-                help = 'Cache C Library (which is available in manpages-dev)'),
-    make_option('-r', '--rebuild-index', action = 'store_true', dest='rindex',
-                default = False,
-                help = 'Cache C Library (which is available in manpages-dev)')
-]
+import environ
+import formatter
+from crawler import Crawler
 
-parser = OptionParser(option_list=option_list)
+class cppman(Crawler):
+    '''
+    Mange cpp man pages, indexes
+    '''
+    def __init__(self):
+        Crawler.__init__(self)
+        self.forced = False
 
+    def extract_name(self, data):
+        '''
+        Extract man page name from cplusplus web page.
+        '''
+        name = re.search('<h1>(.+?)</h1>', data).group(1)
+        name = re.sub(r'<([^>]+)>', r'', name)
+        return name
 
+    def rebuild_index(self):
+        try:
+            os.remove(environ.index_db)
+        except: pass
+        self.db_conn = sqlite3.connect(environ.index_db)
+        self.db_cursor = self.db_conn.cursor()
+        self.db_cursor.execute('CREATE TABLE CPPMAN (name varchar(255), '
+                               'url varchar(255))')
+        self.crawl(self.insert_index)
+        self.db_conn.commit()
+        self.db_conn.close()
 
+    def insert_index(self, url):
+        '''
+        callback to insert index
+        '''
+        name = self.extract_name(urllib.urlopen(url).read())
+        self.db_cursor.execute('INSERT INTO CPPMAN (name, url) VALUES '
+                               '("%s", "%s")' % (name, url))
 
+    def cache_all(self, forced = False):
+        '''
+        Cache all available man pages from cplusplus.com to 
+        '''
+        self.forced = forced
 
+        print 'By defualt, cppman fetch pages on the fly if coressponding '\
+            'page is not found in the cache. The "cache-all" option is only '\
+            'useful if you want to view man pages offline.'
+        print 'Caching all contents from cplusplus.com could take a LONG '\
+            'time, do you want to continue [Y/n]? ',
 
+        respond = raw_input()
+        if respond.lower() not in ['y', 'ye', 'yes']:
+            print 'Aborted.'
+            return
 
+        try:
+            os.mkdir(environ.man_dir)
+        except: pass
+        self.crawl(self.cache_man_page)
 
-data = urllib.urlopen('http://www.cplusplus.com/reference/algorithm/').read()
-with open('test', 'w') as f:
-    f.write(formatter.cplusplus2man(data)[1])
+    def cache_man_page(self, url):
+        '''
+        callback to cache new man page
+        '''
+        data = urllib.urlopen(url).read()
+        groff_text = formatter.cplusplus2groff(data)
+        name = self.extract_name(data)
 
+        # Skip if already exists, override if forced flag is true
+        outname = environ.man_dir + name + '.3.gz'
+        if os.path.exists(outname) and not self.forced:
+            return
+        f = gzip.open(outname, 'w')
+        f.write(groff_text)
+        f.close()
 
-os.execl("./viewer.sh", "")
+    def clear_cache(self):
+        shutil.rmtree(environ.man_dir)
+
+    def man(self, pattern):
+        '''
+        Call viewer.sh to view man page
+        '''
+        avail = subprocess.Popen('ls %s' % environ.man_dir, shell=True,
+                                 stdout=subprocess.PIPE).stdout.read()
+        conn = sqlite3.connect(environ.index_db)
+        cursor = conn.cursor()
+        page_name, url = cursor.execute('SELECT name,url FROM CPPMAN WHERE'
+                            ' name LIKE "%%%s%%"' % pattern).fetchone()
+        conn.close()
+
+        if page_name + '.3.gz' not in avail:
+            self.cache_man_page(url)
+
+        os.execl('./viewer.sh', 'dummy', environ.man_dir + page_name + '.3.gz')
+
+    def find(self, pattern):
+        pass

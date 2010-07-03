@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+# 
+# cppman.py
+#
+# Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
+# All Rights reserved.
+#
+# This file is part of manpages-cpp.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+
+import subprocess
+import sys
+import os
+from optparse import OptionParser, make_option
+
+from cppman import cppman
+
+program_name = sys.argv[0]
+program_version = 'git-repo'
+
+def version():
+    sys.stderr.write(
+'%s Ver %s\n\
+Copyright (C) 2010 Aitjcize (Wei-Ning Huang)\n\
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\nThis is free software: you are free to change and redistribute it.\n\
+There is NO WARRANTY, to the extent permitted by law.\n\n\
+Written by Aitjcize (Wei-Ning Huang).\n' %
+    (program_name, program_version))
+
+def main():
+    option_list = [
+        make_option('-c', '--cache-all', action = 'store_true',
+                    dest='cache_all', default = False,
+                    help = 'cache all available man pages from cplusplus.com '
+                           'to enable offline browsing.'),
+        make_option('-C', '--clear-cache', action = 'store_true',
+                    dest='clear_cache', default = False,
+                    help = 'clear all cached files'),
+        make_option('-f', '--force', action = 'store_true',
+                    dest='force', default = False,
+                    help = 'force cppman to overwrite existing cache'),
+        make_option('-r', '--rebuild-index', action = 'store_true',
+                    dest='rebuild_index', default = False,
+                    help = 'rebuild index database from cplusplus.com'),
+        make_option('-v', '--version', action = 'store_true', dest='version',
+                    default = False, help = 'show version information')
+    ]
+    parser = OptionParser(usage = 'Usage: cppman [OPTION...] PAGE...',
+                          option_list=option_list)
+
+    options, args = parser.parse_args()
+
+    if options.version:
+        version()
+        sys.exit(0)
+
+    if options.cache_all:
+        cm = cppman()
+        cm.cache_all(options.force)
+        sys.exit(0)
+
+    if options.clear_cache:
+        cm = cppman()
+        cm.clear_cache()
+
+    if options.rebuild_index:
+        cm = cppman()
+        cm.rebuild_index()
+
+    if len(args) == 0:
+        print >> sys.stderr, 'What manual page do you want?'
+        sys.exit(1)
+
+    cm = cppman()
+    cm.man(args[0])
+
+if __name__ == '__main__':
+    main()

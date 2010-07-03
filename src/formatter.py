@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #-*- coding: utf-8 -*-
 # 
 # Formatter.py - format html from cplusplus.com to groff syntax
@@ -61,15 +60,20 @@ rps = [
         # Subsections
         (r'<b>(.+?)</b>:<br>', r'.SS \1\n'),
         # Member functions / See Also table
-        (r'<div class="auto"><table class="keywordlink"><tr><td class="tit">'
-         r'<a href= "[^"]*">(.+?)</a></td><td class="des">(.+?)'
-         r'<span class="typ">(.+?)</span>',
-         r'.IP "\1"\n\2 \3\n'),
-        # Member types table
-        (r'<table class="boxed">\s+<tr><th>(.+?)</th><th>(.+?)</th></tr>'
+        (r'<table class="keywordlink"><tr><td.+?>(.+?)</td><td.+?>(.+?)'
+         r'<span class="typ">(.+?)</span></td></tr></table>',
+         r'\n.IP \1\n\2 \3\n'),
+        # Three-column table
+        (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)'
+         r'</th></tr>((.|\n)*?)</table>',
+         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n'),
+        (r'<tr><td>(.+?)</td><td>(.+?)</td><td>(.+?)</td></tr>',
+         r'\1|T{\n\2\nT}|T{\n\3\nT}\n'),
+        # Two-column table
+        (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th></tr>'
          r'((.|\n)*?)</table>',
-         r'\n.TS\ntab(|);\nc c\nl lx .\n\1|\2\n=\n\3\n.TE\n'),
-        (r'<tr><td>(.+?)</td><td>(.+?)</td></tr>', r'\1|T{\n\2\nT}\n'),
+         r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n'),
+        (r'<tr><td>(.+?)</td><td>((.|\n)+?)</td></tr>', r'\1|T{\n\2\nT}\n'),
         # Snippet
         (r'<td class="rownum">.+</td>', r''),
         
@@ -81,7 +85,7 @@ rps = [
         # 'dd' 'dt' tag
         (r'<dt>(.+?)</dt>\s*<dd>((.|\n)+?)</dd>', r'.IP "\1"\n\2\n'),
         # Bold
-        (r'<strong>(.+?)</strong>', r'.B \1\n'),
+        (r'<strong>(.+?)</strong>', r'\n.B \1\n'),
         # -
         (r'-', r'\-'),
         # Any other tags
@@ -119,9 +123,18 @@ def cplusplus2groff(data):
         data = re.sub(rp[0], rp[1], data)
 
     # Upper case all section headers
-    for sh in re.findall('.SH .*\n', data):
+    for sh in re.findall(r'.SH .*\n', data):
         index = data.index(sh)
         data = data[:index] + sh.upper() + data[index + len(sh):]
+
+    # Fix Table
+    for tb in re.findall(r'\.TS(.+?)\.TE', data, re.DOTALL):
+        tbs = re.sub(r'\n\...\n', r'', tb)
+        tbs = re.sub(r'\n\.B (.+?)\n', r'\1', tb)
+        tbs = re.sub(r'\n\.', r'\n\\.', tbs)
+        index = data.index(tb)
+        data = data[:index] + tbs + data[index + len(tb):]
+        
     return data
 
 def groff2man(data):
@@ -155,10 +168,10 @@ def test():
     '''
     Simple Text
     '''
-    #name = raw_input('What man page do you want? ')
-    #ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    ifs = open('index.html', 'r')
-    print cplusplus2man(ifs.read()),
+    #name = raw_input('What manual page do you want?')
+    name = 'list'
+    ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
+    print cplusplus2groff(ifs.read()),
 
 if __name__ == '__main__':
     test()
