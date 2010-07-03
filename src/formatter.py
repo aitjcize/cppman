@@ -43,7 +43,7 @@ rps = [
          r'\n.SH NAME\n\1 - \5\n'
          r'\n.SH TYPE\n\2\n'
          r'\n.SH SYNOPSIS\n\4\n'
-         r'\n.SH DESCRIPTION\n\6\n' % datetime.date.today()),
+         r'\n.SH DESCRIPTION\n\6\n.sp\n' % datetime.date.today()),
         # Remove empty sections
         (r'\n.SH (.+?)\n\n', r''),
         # Section headers
@@ -107,10 +107,6 @@ def cplusplus2groff(data):
         data = data[data.index('<div class="doctop"><h1>'):]
     except ValueError: pass
 
-    # Get name
-    name = re.search('<h1>(.+?)</h1>', data).group(1)
-    name = re.sub(r'<([^>]+)>', r'', name)
-
     # Preprocess 'code' tag
     code_sections = re.findall(r'<code>.+?</code>', data, re.DOTALL)
     for cs in code_sections:
@@ -126,7 +122,7 @@ def cplusplus2groff(data):
     for sh in re.findall('.SH .*\n', data):
         index = data.index(sh)
         data = data[:index] + sh.upper() + data[index + len(sh):]
-    return name, data
+    return data
 
 def groff2man(data):
     '''
@@ -151,9 +147,9 @@ def cplusplus2man(data):
     '''
     Convert HTML text from cplusplus.com to man pages.
     '''
-    name, groff_text = cplusplus2groff(data)
+    groff_text = cplusplus2groff(data)
     man_text = groff2man(groff_text)
-    return name, man_text
+    return man_text
 
 def test():
     '''
@@ -162,7 +158,7 @@ def test():
     #name = raw_input('What man page do you want? ')
     #ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
     ifs = open('index.html', 'r')
-    print cplusplus2man(ifs.read())[1],
+    print cplusplus2man(ifs.read()),
 
 if __name__ == '__main__':
     test()

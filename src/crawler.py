@@ -23,30 +23,31 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import formatter
+import gzip
 import os.path
+import sqlite3
 import sys
 import urllib
 import re
 
+import environ
+import formatter
+
 class Crawler:
     point_of_origin = 'http://www.cplusplus.com/reference/'
     url_base = 'http://www.cplusplus.com'
-    man_base = 'man3/'
     visited = []
 
     def __init__(self, forced):
         self.forced = forced
 
-    def crawl(self):
-        self.crawl_page(self.point_of_origin, 0)
+    def crawl(self, callback):
+        self.crawl_page(self.point_of_origin, callback)
 
-    def crawl_page(self, url, depth):
+    def crawl_page(self, url, callback):
         '''
         Crawl a new page.
         '''
-        print '----------- In depth ', depth
-
         data = urllib.urlopen(url).read()
 
         # Remove sidebar
@@ -59,25 +60,59 @@ class Crawler:
         links = list(set(links))
 
         for link in links:
-            urlobj = urllib.urlopen(self.url_base + link)
-            real_url = urlobj.geturl()
+            real_url = urllib.urlopen(self.url_base + link).geturl()
             if real_url in self.visited or not real_url.startswith(
                 'http://www.cplusplus.com/reference/'):
                 continue
+
             print real_url
-
             self.visited.append(real_url)
-            name, groff_text = formatter.cplusplus2groff(urlobj.read())
 
-            # Skip if already exists, override if forced flag is true
-            if os.path.exists(self.man_base + name) and not self.forced:
-                continue
+            # Run callback
+            callback(real_url)
 
-            with open(self.man_base + name, 'w') as f:
-                f.write(groff_text)
+            self.crawl_page(self.url_base + link, callback)
 
-        for link in links:
-            self.crawl_page(self.url_base + link, depth + 1)
+    def extract_name(self, data):
+        '''
+        Extract man page name from cplusplus web page.
+        '''
+        name = re.search('<h1>(.+?)</h1>', data).group(1)
+        name = re.sub(r'<([^>]+)>', r'', name)
+        return name
 
-cw = Crawler(False)
-cw.crawl()
+    def build_index(self):
+        try:
+            os.remove(environ.index_db)
+        except: pass
+        self.db_conn = sqlite3.connect(environ.index_db)
+        self.db_cursor = self.db_conn.cursor()
+        self.db_cursor.execute('CREATE TABLE CPPMAN (name varchar(255), '
+                               'url varchar(255))')
+        self.crawl(self.insert_index)
+        self.db_conn.commit()
+
+    def insert_index(self, url):
+        name = self.extract_name(urllib.urlopen(url).read())
+        self.db_cursor.execute('INSERT INTO CPPMAN (name, url) VALUES '
+                               '("%s", "%s")' % (name, url))
+
+    def cache_all(self):
+        self.crawl(self.cache_man_page)
+
+    def cache_man_page(self, url):
+        data = urllib.urlopen(url).read()
+        groff_text = formatter.cplusplus2groff(data)
+        name = self.extract_name(data)
+
+        # Skip if already exists, override if forced flag is true
+        outname = environ.man_dir + name + '.3.gz'
+        if os.path.exists(outname) and not self.forced:
+            return
+        f = gzip.open(outname, 'w')
+        f.write(groff_text)
+        f.close()
+
+if __name__ == '__main__':
+    cw = Crawler(False)
+    cw.build_index()
