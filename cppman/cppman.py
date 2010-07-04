@@ -112,13 +112,13 @@ class cppman(Crawler):
         except: pass
         self.crawl(self.cache_man_page)
 
-    def cache_man_page(self, url):
+    def cache_man_page(self, url, name=None):
         '''
         callback to cache new man page
         '''
         data = urllib.urlopen(url).read()
         groff_text = Formatter.cplusplus2groff(data)
-        name = self.extract_name(data)
+        if not name: name = self.extract_name(data)
 
         # Skip if already exists, override if forced flag is true
         outname = Environ.man_dir + name + '.3.gz'
@@ -162,7 +162,7 @@ class cppman(Crawler):
             conn.close()
 
         if page_name + '.3.gz' not in avail or self.forced:
-            self.cache_man_page(url)
+            self.cache_man_page(url, page_name)
 
         # Call viewer
         pid = os.fork()
@@ -181,4 +181,4 @@ class cppman(Crawler):
             for name, url in selected:
                 print re.sub(pattern, '\033[1;31m%s\033[0m' % pattern, name)
         else:
-            print '%s: nothing appropriate.' % pattern
+            raise RuntimeError('%s: nothing appropriate.' % pattern)

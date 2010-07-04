@@ -102,7 +102,7 @@ def main():
     cm = cppman(options.force)
     for i in args:
         if i != args[0]:
-            print '--CppMan-- next: %s [ view (return) | skip (Ctrl-D) '\
+            print '--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '\
                   '| quit (Ctrl-C) ]' % i
             # For some reason, if only one layer of try...except is used
             # pressing CTRL-D CTRL-C, the second CTRL-C didn't catch by the
@@ -127,4 +127,6 @@ if __name__ == '__main__':
     try:
         main()
     except Exception, e:
-        print traceback.print_exc()
+        print e
+        pass
+        #print traceback.print_exc()
