@@ -23,9 +23,10 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+import os
 import subprocess
 import sys
-import os
+import traceback
 from optparse import OptionParser, make_option
 
 from cppman import cppman
@@ -47,13 +48,18 @@ def main():
         make_option('-c', '--cache-all', action = 'store_true',
                     dest='cache_all', default = False,
                     help = 'cache all available man pages from cplusplus.com '
-                           'to enable offline browsing.'),
+                           'to enable offline browsing'),
         make_option('-C', '--clear-cache', action = 'store_true',
                     dest='clear_cache', default = False,
                     help = 'clear all cached files'),
-        make_option('-f', '--force', action = 'store_true',
+        make_option('-f', '--find-page', action = 'store', type='string',
+                    dest='keyword', default = None,
+                    help = 'find man page'),
+        make_option('-o', '--force-update', action = 'store_true',
                     dest='force', default = False,
-                    help = 'force cppman to overwrite existing cache'),
+                    help = "force cppman to update existing cache when "\
+                    "'--cache-all' or browsing man pages that were already "\
+                    "cached"),
         make_option('-r', '--rebuild-index', action = 'store_true',
                     dest='rebuild_index', default = False,
                     help = 'rebuild index database from cplusplus.com'),
@@ -70,13 +76,18 @@ def main():
         sys.exit(0)
 
     if options.cache_all:
-        cm = cppman()
-        cm.cache_all(options.force)
+        cm = cppman(options.force)
+        cm.cache_all()
         sys.exit(0)
 
     if options.clear_cache:
         cm = cppman()
         cm.clear_cache()
+        sys.exit(0)
+
+    if options.keyword:
+        cm = cppman()
+        cm.find(options.keyword)
         sys.exit(0)
 
     if options.rebuild_index:
@@ -88,11 +99,32 @@ def main():
         print >> sys.stderr, 'What manual page do you want?'
         sys.exit(1)
 
-    cm = cppman()
-    cm.man(args[0])
+    cm = cppman(options.force)
+    for i in args:
+        if i != args[0]:
+            print '--CppMan-- next: %s [ view (return) | skip (Ctrl-D) '\
+                  '| quit (Ctrl-C) ]' % i
+            # For some reason, if only one layer of try...except is used
+            # pressing CTRL-D CTRL-C, the second CTRL-C didn't catch by the
+            # try..except clause. As a workaround, I add another layer to catch
+            # the KeyboardInterrupt exception
+            # TODO: find out what happened
+            try:
+                try:
+                    raw_input()
+                except EOFError:
+                    continue
+                except KeyboardInterrupt:
+                    print '\n'
+                    break
+            except KeyboardInterrupt:
+                print '\n'
+                break
+        pid = cm.man(i)
+        os.waitpid(pid, 0)
 
 if __name__ == '__main__':
     try:
         main()
     except Exception, e:
-        print e
+        print traceback.print_exc()

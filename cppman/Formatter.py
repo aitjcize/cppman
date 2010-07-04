@@ -46,7 +46,7 @@ rps = [
         # Remove empty sections
         (r'\n.SH (.+?)\n\n', r''),
         # Section headers
-        (r'.*<h3>(.+?)</h3>', r'.SH \1\n'),
+        (r'.*<h3>(.+?)</h3>', r'.SH "\1"\n'),
         # 'ul' tag
         (r'<ul>', r'\n.in +2n\n.sp\n'),
         (r'</ul>', r'\n.in\n'),
@@ -64,7 +64,7 @@ rps = [
         # Member functions / See Also table
         (r'<table class="keywordlink"><tr><td.+?>(.+?)</td><td.+?>(.+?)'
          r'<span class="typ">(.+?)</span></td></tr></table>',
-         r'\n.IP \1\n\2 \3\n'),
+         r'\n.IP "\1(3)"\n\2 \3\n'),
         # Three-column table
         (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)'
          r'</th></tr>((.|\n)*?)</table>',
@@ -96,8 +96,10 @@ rps = [
         # -
         (r'-', r'\-'),
         # Any other tags
+        # [^-] is used to prevent mismatch on operator->, for example:
+        # <a href=".../operator->/"><b>operator-></b> ...
         (r'<script[^>]*>[^<]*</script>', r''),
-        (r'<([^>]+)>', r''),
+        (r'<(.|\n)*?[^-]>', r''),
         # Misc
         (r'&lt;', r'<'), 
         (r'&gt;', r'>'),
@@ -107,6 +109,8 @@ rps = [
         # Remove empty lines
         (r'\n\s*\n+', r'\n'),
         (r'\n\n+', r'\n'),
+        # Remove dumplicate .br
+        (r'\n.br\n.br\n', r'\n.br\n')
       ]
 
 def cplusplus2groff(data):
@@ -120,28 +124,44 @@ def cplusplus2groff(data):
 
     # Preprocess 'code' tag
     code_sections = re.findall(r'<code>.+?</code>', data, re.DOTALL)
-    for cs in code_sections:
-        css = re.sub(r'\n', r'\n.br\n', cs)
-        index = data.index(cs)
-        data = data[:index] + css + data[index + len(cs):]
+    for st in code_sections:
+        sts = re.sub(r'\n', r'\n.br\n', st)
+        index = data.index(st)
+        data = data[:index] + sts + data[index + len(st):]
 
     # Replace all
     for rp in rps:
         data = re.sub(rp[0], rp[1], data)
 
     # Upper case all section headers
-    for sh in re.findall(r'.SH .*\n', data):
-        index = data.index(sh)
-        data = data[:index] + sh.upper() + data[index + len(sh):]
+    for st in re.findall(r'.SH .*\n', data):
+        index = data.index(st)
+        data = data[:index] + st.upper() + data[index + len(st):]
 
-    # Fix Table
-    for tb in re.findall(r'\.TS(.+?)\.TE', data, re.DOTALL):
-        tbs = re.sub(r'\n\...\n', r'\n', tb)
-        tbs = re.sub(r'\n\.B (.+?)\n', r'\1', tbs)
-        tbs = re.sub(r'\n\.', r'\n\\.', tbs)
-        index = data.index(tb)
-        data = data[:index] + tbs + data[index + len(tb):]
-        
+    # Add prefix to member functions
+    if 'class' in re.search(r'\n.SH TYPE\n(.+?)\n', data).group(1):
+        cl = re.search(r'\n.SH NAME\n(.+?) ', data).group(1)
+        try:
+            st = re.search(r'\n.SH "MEMBER FUNCTIONS"(.+?)\n.SH',
+                           data,re.DOTALL).group(1)
+        except AttributeError:
+            st = re.search(r'\n.SH "PUBLIC MEMBERS"(.+?)\n.SH',
+                                    data,re.DOTALL).group(1)
+        sts = re.sub(r'\n.IP "(.+)"', r'\n.IP "%s::\1"' % cl, st)
+        # Replace (constructor) (destructor)
+        sts = re.sub(r'\(constructor\)', r'%s' % cl, sts)
+        sts = re.sub(r'\(destructor\)', r'~%s' % cl, sts)
+        index = data.index(st)
+        data = data[:index] + sts + data[index + len(st):]
+
+    # Remove invalid marking in tables
+    for st in re.findall(r'\.TS(.+?)\.TE', data, re.DOTALL):
+        sts = re.sub(r'\n\...\n', r'\n', st)
+        sts = re.sub(r'\n\.B (.+?)\n', r'\1', sts)
+        sts = re.sub(r'\n\.', r'\n\\.', sts)
+        index = data.index(st)
+        data = data[:index] + sts + data[index + len(st):]
+
     return data
 
 def groff2man(data):
@@ -182,7 +202,7 @@ def test():
     Simple Text
     '''
     #name = raw_input('What manual page do you want?')
-    name = 'fprintf'
+    name = 'auto_ptr'
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
     print cplusplus2groff(ifs.read()),
 

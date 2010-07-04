@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 # 
-# environ.py
+# Environ.py
 #
 # Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.

@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 # 
-# crawler.py
+# Crawler.py
 #
 # Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -54,6 +54,9 @@ class Crawler:
 
         for link in links:
             real_url = urllib.urlopen(self.url_base + link).geturl()
+            real_url = re.sub(r'%3E', r'>', real_url)
+            real_url = re.sub(r'%3C', r'<', real_url)
+
             if real_url in self.visited or not real_url.startswith(
                 'http://www.cplusplus.com/reference/'):
                 continue
