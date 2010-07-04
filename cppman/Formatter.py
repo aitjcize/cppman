@@ -42,75 +42,76 @@ rps = [
          r'\n.SH NAME\n\1 - \5\n'
          r'\n.SH TYPE\n\2\n'
          r'\n.SH SYNOPSIS\n\4\n'
-         r'\n.SH DESCRIPTION\n\6\n.sp\n' % datetime.date.today()),
+         r'\n.SH DESCRIPTION\n\6\n.sp\n' % datetime.date.today(), re.DOTALL),
         # Remove empty sections
-        (r'\n.SH (.+?)\n\n', r''),
+        (r'\n.SH (.+?)\n\n', r'', 0),
         # Section headers
-        (r'.*<h3>(.+?)</h3>', r'.SH "\1"\n'),
+        (r'.*<h3>(.+?)</h3>', r'.SH "\1"\n', 0),
         # 'ul' tag
-        (r'<ul>', r'\n.in +2n\n.sp\n'),
-        (r'</ul>', r'\n.in\n'),
+        (r'<ul>', r'\n.in +2n\n.sp\n', 0),
+        (r'</ul>', r'\n.in\n', 0),
         # 'li' tag
-        (r'<li>(.+?)</li>', r'* \1\n.sp\n'),
+        (r'<li>(.+?)</li>', r'* \1\n.sp\n', 0),
         # 'code' tag
-        (r'<code>', r'\n.in +2n\n.sp\n'),
-        (r'</code>', r'\n.in\n.sp\n'),
+        (r'<code>', r'\n.in +2n\n.sp\n', 0),
+        (r'</code>', r'\n.in\n.sp\n', 0),
         # 'samp' tag
-        (r'<samp>((.|\n)+?)</samp>', r'\n.nf\n\1\n.fi\n'),
+        (r'<samp>(.+?)</samp>', r'\n.nf\n\1\n.fi\n', re.DOTALL),
         # 'pre' tag
-        (r'<pre\s*>((.|\n)+?)</pre\s*>', r'\n.nf\n\1\n.fi\n'),
+        (r'<pre\s*>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.DOTALL),
         # Subsections
-        (r'<b>(.+?)</b>:<br>', r'.SS \1\n'),
+        (r'<b>(.+?)</b>:<br>', r'.SS \1\n', 0),
         # Member functions / See Also table
         (r'<table class="keywordlink"><tr><td.+?>(.+?)</td><td.+?>(.+?)'
          r'<span class="typ">(.+?)</span></td></tr></table>',
-         r'\n.IP "\1(3)"\n\2 \3\n'),
+         r'\n.IP "\1(3)"\n\2 \3\n', 0),
         # Three-column table
         (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)'
-         r'</th></tr>((.|\n)*?)</table>',
-         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n'),
+         r'</th></tr>((.|\n)+?)</table>',
+         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n', 0),
         (r'<tr><td>(.+?)</td><td>(.+?)</td><td>(.+?)</td></tr>',
-         r'\1|T{\n\2\nT}|T{\n\3\nT}\n'),
+         r'\1|T{\n\2\nT}|T{\n\3\nT}\n', 0),
         # Two-column table
         (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th></tr>'
-         r'((.|\n)*?)</table>',
-         r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n'),
-        (r'<tr><td>(.+?)</td><td>((.|\n)+?)</td></tr>',
-         r'\1|T{\n\2\nT}\n'),
+         r'((.|\n)+?)</table>',
+         r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n', 0),
+        (r'<tr><td>(.+?)</td><td>(.+?)</td></tr>',
+         r'\1|T{\n\2\nT}\n', re.DOTALL),
         # Single-column table
-        (r'<table class="boxed"><tr><th>(.+?)</th></tr>((.|\n)*?)</table>',
-         r'\n.TS\nallbox;\nc\nl .\n\1\n\2\n.TE\n.sp\n'),
-        (r'<tr><td>(.+?)</td></tr>', r'\nT{\1\nT}\n.sp\n'),
+        (r'<table class="boxed"><tr><th>(.+?)</th></tr>(.+?)</table>',
+         r'\n.TS\nallbox;\nc\nl .\n\1\n\2\n.TE\n.sp\n', 0),
+        (r'<tr><td>(.+?)</td></tr>', r'\nT{\1\nT}\n.sp\n', 0),
         # Remove snippet line numbers
-        (r'<td class="rownum">.+</td>', r''),
+        (r'<td class="rownum">.+</td>', r'', 0),
         
         # Footer
-        (r'<div id="footer">(.|\n)*</div>',
-         r'\n.SH REFERENCE\ncplusplus.com, 2000-2010 - All rights reserved.'),
+        (r'<div id="footer">.*?</div>',
+         r'\n.SH REFERENCE\ncplusplus.com, 2000-2010 - All rights reserved.',
+         re.DOTALL),
         # 'br' tag
-        (r'<br>', r'\n.br\n'),
+        (r'<br>', r'\n.br\n', 0),
         # 'dd' 'dt' tag
-        (r'<dt>(.+?)</dt>\s*<dd>((.|\n)+?)</dd>', r'.IP "\1"\n\2\n'),
+        (r'<dt>(.+?)</dt>\s*<dd>(.+?)</dd>', r'.IP "\1"\n\2\n', re.DOTALL),
         # Bold
-        (r'<strong>(.+?)</strong>', r'\n.B \1\n'),
+        (r'<strong>(.+?)</strong>', r'\n.B \1\n', 0),
         # -
-        (r'-', r'\-'),
+        (r'-', r'\-', 0),
         # Any other tags
-        # [^-] is used to prevent mismatch on operator->, for example:
-        # <a href=".../operator->/"><b>operator-></b> ...
-        (r'<script[^>]*>[^<]*</script>', r''),
-        (r'<(.|\n)*?[^-]>', r''),
+        (r'<script[^>]*>[^<]*</script>', r'', 0),
+        (r'<.*?>', r'', re.DOTALL),
         # Misc
-        (r'&lt;', r'<'), 
-        (r'&gt;', r'>'),
-        (r'&amp;', r'&'),
-        (r'&nbsp;', r' '),
-        (u'\x0d', r'\n.br\n'),
+        (r'&lt;', r'<', 0), 
+        (r'&gt;', r'>', 0),
+        (r'&amp;', r'&', 0),
+        (r'&nbsp;', r' ', 0),
+        (u'\x0d', r'\n.br\n', 0),
+        (r'>/">', r'', 0),
+        (r'/">', r'', 0),
         # Remove empty lines
-        (r'\n\s*\n+', r'\n'),
-        (r'\n\n+', r'\n'),
+        (r'\n\s*\n+', r'\n', 0),
+        (r'\n\n+', r'\n', 0),
         # Remove dumplicate .br
-        (r'\n.br\n.br\n', r'\n.br\n')
+        (r'\n.br\n.br\n', r'\n.br\n', 0)
       ]
 
 def cplusplus2groff(data):
@@ -131,28 +132,59 @@ def cplusplus2groff(data):
 
     # Replace all
     for rp in rps:
-        data = re.sub(rp[0], rp[1], data)
+        data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
         index = data.index(st)
         data = data[:index] + st.upper() + data[index + len(st):]
 
-    # Add prefix to member functions
-    if 'class' in re.search(r'\n.SH TYPE\n(.+?)\n', data).group(1):
-        cl = re.search(r'\n.SH NAME\n(.+?) ', data).group(1)
-        try:
-            st = re.search(r'\n.SH "MEMBER FUNCTIONS"(.+?)\n.SH',
-                           data,re.DOTALL).group(1)
-        except AttributeError:
-            st = re.search(r'\n.SH "PUBLIC MEMBERS"(.+?)\n.SH',
-                                    data,re.DOTALL).group(1)
-        sts = re.sub(r'\n.IP "(.+)"', r'\n.IP "%s::\1"' % cl, st)
+    # Add tags to member functions
+    if 'class' in re.search(r'\n\.SH TYPE\n(.+?)\n', data).group(1):
+        # Member functions
+        class_name = re.search(r'\n\.SH NAME\n(.+?) ', data).group(1)
+
+        for pat in ['MEMBER FUNCTIONS', 'PUBLIC MEMBERS', 'MEMBERS']:
+            try:
+                st = re.search(r'\n\.SH "%s"(.+?)\n\.SH' % pat,
+                                                data,re.DOTALL).group(1)
+                if st: break
+            except AttributeError:
+                if pat != 'MEMBERS': continue
+                raise Exception('pattern not match')
+
+        sts = re.sub(r'\n.IP "(.+)"', r'\n.IP "%s::\1"' % class_name, st)
         # Replace (constructor) (destructor)
-        sts = re.sub(r'\(constructor\)', r'%s' % cl, sts)
-        sts = re.sub(r'\(destructor\)', r'~%s' % cl, sts)
+        sts = re.sub(r'\(constructor\)', r'%s' % class_name, sts)
+        sts = re.sub(r'\(destructor\)', r'~%s' % class_name, sts)
         index = data.index(st)
         data = data[:index] + sts + data[index + len(st):]
+
+        # Inherited members tags
+        for pat in ['MEMBERS', 'MEMBER FUNCTIONS']:
+            # secs = re.findall(r'(\n\.SH "%s INHERITED FROM .+?".*?)\n\.SH'
+            #                  % pat, data, re.DOTALL)
+            #
+            # re only retern the first match, don't know why.
+            # Workaround: use string index instead
+            secs = []
+            index1 = 0
+            while True:
+                try:
+                    index1 = data.index('.SH "%s INHERITED FROM' % pat, index1)
+                    index2 = data.index('.SH', index1 + 3)
+                except ValueError:
+                    break
+                secs.append(data[index1: index2])
+                index1 = index2
+
+            for st in secs:
+                class_name = re.search(r'\.SH "%s INHERITED FROM (.+?)"'
+                                       % pat, st).group(1).lower()
+                sts = re.sub(r'\n\.IP "(.+)"', r'\n\.IP "%s::\1"' %
+                                                        class_name, st)
+                index = data.index(st)
+                data = data[:index] + sts + data[index + len(st):]
 
     # Remove invalid marking in tables
     for st in re.findall(r'\.TS(.+?)\.TE', data, re.DOTALL):

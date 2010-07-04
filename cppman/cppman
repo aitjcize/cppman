@@ -120,13 +120,18 @@ def main():
             except KeyboardInterrupt:
                 print '\n'
                 break
-        pid = cm.man(i)
-        os.waitpid(pid, 0)
+        try:
+            pid = cm.man(i)
+        except RuntimeError, e:
+            print e
+            continue
+        else:
+            os.waitpid(pid, 0)
 
 if __name__ == '__main__':
     try:
         main()
     except Exception, e:
-        print e
+        #print e
         pass
-        #print traceback.print_exc()
+        print traceback.print_exc()

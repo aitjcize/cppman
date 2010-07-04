@@ -27,6 +27,4 @@
 #
 # 
 
-vim_settings='set ft=man iskeyword+=:,=,~,[,],>,* keywordprg=./cppman | map q :q<CR> | syn match manReference "[^ ]\+([1-9][a-z]\=)"'
-
-cat "$1" | gunzip | groff -t -m man -Tascii -rLL=$2n -rLT=$2n | col -bx | vim -R -c 'set ft=man iskeyword+=:,=,~,[,],>,* keywordprg=./cppman | map q :q<CR> | syn match manReference "[^ ]\+([1-9][a-z]\=)"' -
+cat "$1" | gunzip | groff -t -m man -Tascii -rLL=$2n -rLT=$2n | col -bx | vim -R -c 'set ft=man iskeyword+=:,=,~,[,],>,* keywordprg=./cppman | map q :q<CR> | syn case ignore | syn match manReference "[^ ]\+([1-9][a-z]\=)" | syn match manSectionHeading "^[a-z][a-z_ ]*[a-z]$"' -

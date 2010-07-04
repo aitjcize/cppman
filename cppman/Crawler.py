@@ -65,6 +65,11 @@ class Crawler:
             self.visited.append(real_url)
 
             # Run callback
-            callback(real_url)
+            try:
+                callback(real_url)
+            except Exception, e:
+                print real_url
+                with open('log.txt', 'a') as f:
+                    f.write('%s :: %s\n' %(real_url, e))
 
             self.crawl_page(self.url_base + link, callback)
