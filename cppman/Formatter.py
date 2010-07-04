@@ -153,7 +153,7 @@ def cplusplus2groff(data):
                 if pat != 'MEMBERS': continue
                 raise Exception('pattern not match')
 
-        sts = re.sub(r'\n.IP "(.+)"', r'\n.IP "%s::\1"' % class_name, st)
+        sts = re.sub(r'\n.IP "([^:]+)"', r'\n.IP "%s::\1"' % class_name, st)
         # Replace (constructor) (destructor)
         sts = re.sub(r'\(constructor\)', r'%s' % class_name, sts)
         sts = re.sub(r'\(destructor\)', r'~%s' % class_name, sts)

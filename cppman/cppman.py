@@ -94,7 +94,7 @@ class cppman(Crawler):
 
     def cache_all(self):
         '''
-        Cache all available man pages from cplusplus.com to 
+        Cache all available man pages from cplusplus.com
         '''
         print 'By defualt, cppman fetch pages on the fly if coressponding '\
             'page is not found in the cache. The "cache-all" option is only '\
@@ -110,7 +110,20 @@ class cppman(Crawler):
         try:
             os.mkdir(Environ.man_dir)
         except: pass
-        self.crawl(self.cache_man_page)
+
+        conn = sqlite3.connect(Environ.index_db)
+        cursor = conn.cursor()
+
+        data = cursor.execute('SELECT name, url FROM CPPMAN').fetchall()
+
+        for name, url in data:
+            try:
+                print url
+                self.cache_man_page(url, name)
+            except Exception, e:
+                with open('log.txt', 'a') as f:
+                    f.write('%s :: %s\n' %(url, e))
+        conn.close()
 
     def cache_man_page(self, url, name=None):
         '''
@@ -179,6 +192,6 @@ class cppman(Crawler):
                             ' WHERE name LIKE "%%%s%%"' % pattern).fetchall()
         if selected:
             for name, url in selected:
-                print re.sub(pattern, '\033[1;31m%s\033[0m' % pattern, name)
+                print name.replace(pattern, '\033[1;31m%s\033[0m' % pattern)
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
