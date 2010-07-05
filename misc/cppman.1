@@ -1,0 +1,35 @@
+.TH CPPMAN 1 "MAY 2010" Linux "User Manuals"
+.SH NAME
+cppman - C++ manual page viewer / fetcher
+.SH SYNOPSIS
+.B cppman [
+.I OPTIONS...
+.B ] PAGE...
+.SH DESCRIPTION
+cppman is part of the package manpages-cpp.
+cppman generates C++ manual pages from cplusplus.com and provide a man-like interface to view man pages.
+.SH OPTIONS
+.IP "-c, --cache-all"
+cache all available man pages from cplusplus.com to enable offline browsing
+.IP "-C, --clear-cache"
+clear all cached files
+.IP "-f KEYWORD, --find-page=KEYWORD"
+find man page
+.IP "-o, --force-update"
+force cppman to update existing cache when '--cache-all' or browsing man pages that were already cached
+.IP "-r, --rebuild-index"
+rebuild index database from cplusplus.com
+.IP "-v, --version"
+show version information
+.IP "-h, --help"
+show this help message and exit
+.SH NOTE
+All contents should be fetched by the user, manpages-cpp does not contain any pre-fetched contents.
+.sp
+Do not distribute the fetched man pages without the permision of cplusplus.com.
+.SH BUGS
+Please report all bugs at http://github.com/Aitjcize/gettube/issues or
+.br
+email to: aitjcize@gmail.com
+.SH AUTHOR
+Wei-Ning Huang (AZ) <aitjcize@gmail.com>

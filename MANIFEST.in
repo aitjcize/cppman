@@ -1,0 +1,8 @@
+include bin/*
+include cppman/*
+include lib/*
+include misc/*
+include README
+include AUTHORS
+include COPYING
+include Changlog
