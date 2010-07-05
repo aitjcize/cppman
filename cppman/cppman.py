@@ -108,6 +108,7 @@ class cppman(Crawler):
             return
 
         try:
+            os.mkdir(os.path.realpath(Environ.man_dir + '/..'))
             os.mkdir(Environ.man_dir)
         except: pass
 
@@ -118,7 +119,7 @@ class cppman(Crawler):
 
         for name, url in data:
             try:
-                print url
+                print 'Caching %s ...' % name
                 self.cache_man_page(url, name)
             except Exception, e:
                 with open('log.txt', 'a') as f:
@@ -152,6 +153,7 @@ class cppman(Crawler):
         Call viewer.sh to view man page
         '''
         try:
+            os.mkdir(os.path.realpath(Environ.man_dir + '/..'))
             os.mkdir(Environ.man_dir)
         except: pass
 

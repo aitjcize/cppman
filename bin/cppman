@@ -24,15 +24,23 @@
 #
 
 import os
+import os.path
 import subprocess
 import sys
 import traceback
 from optparse import OptionParser, make_option
 
-from cppman import cppman
+program = sys.argv[0]
+LANUCH_DIR = os.path.dirname(os.path.abspath(sys.path[0]))
+
+# If launched from source directory
+if program.startswith('./') or program.startswith('bin/'):
+    sys.path.insert(0, LANUCH_DIR)
+
+from cppman.cppman import cppman
 
 program_name = sys.argv[0]
-program_version = 'git-repo'
+program_version = '0.1.0'
 
 def version():
     sys.stderr.write(

@@ -23,13 +23,17 @@
 #
 
 import os.path
+import sys
 
 home = os.path.expanduser('~')
-#man_dir = home + '/.local/share/man/man3/'
-#index_db = home + '/.config/cppman/index.db'
-viewer = './viewer.sh'
 
-man_dir = 'man3/'
-index_db = 'index.db'
-
-
+# If launched from source directory
+if not sys.argv[0].startswith('/usr/bin'):
+    prefix = os.path.dirname(os.path.abspath(sys.argv[0]))
+    man_dir = home + '/.local/share/man/man3/'
+    index_db = prefix + '/../lib/index.db'
+    viewer = prefix + '/../lib/viewer.sh'
+else:
+    man_dir = home + '/.local/share/man/man3/'
+    index_db = home + '/usr/lib/cppman/index.db'
+    viewer = '/usr/lib/cppman/viewer.sh'
