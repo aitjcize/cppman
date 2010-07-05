@@ -122,8 +122,7 @@ class cppman(Crawler):
                 print 'Caching %s ...' % name
                 self.cache_man_page(url, name)
             except Exception, e:
-                with open('log.txt', 'a') as f:
-                    f.write('%s :: %s\n' %(url, e))
+                print 'Error caching %s ...', name
         conn.close()
 
     def cache_man_page(self, url, name=None):

@@ -8,7 +8,7 @@ cd ../../
 cp -r manpages-cpp manpages-cpp-$ver
 mv manpages-cpp-$ver manpages-cpp/dev
 cd manpages-cpp/dev/
-tar -zcf manpages-cpp-$ver.orig.tar.gz manpages-cpp-$ver
+tar -zcf manpages-cpp_$ver.orig.tar.gz manpages-cpp-$ver
 
 cd manpages-cpp-$ver
 dh_make -s -b
@@ -18,4 +18,4 @@ cp dev/rules dev/control debian
 cd debian
 rm *.ex *.EX README.*
 cd ..
-fakeroot debian/rules binary
+dpkg-buildpackage -rfakeroot

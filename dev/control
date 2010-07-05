@@ -1,7 +1,7 @@
 Source: manpages-cpp
 Section: misc
 Priority: optional
-Maintainer: Wei-Ning Huang <aitjcize@gmail.com>
+Maintainer: Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 Build-Depends: cdbs (>=0.4.49), debhelper (>= 5), python-central (>=0.5.6)
 XS-Python-Version: >=2.6
 Standards-Version: 3.7.2
