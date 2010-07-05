@@ -8,6 +8,8 @@ cppman - C++ manual page viewer / fetcher
 .SH DESCRIPTION
 cppman is part of the package manpages-cpp.
 cppman generates C++ manual pages from cplusplus.com and provide a man-like interface to view man pages.
+.sp
+By default, cppman fetches man pages on demand, but by running the command 'cppman -c', all available manpages are cached, making offline browsing possible.
 .SH OPTIONS
 .IP "-c, --cache-all"
 cache all available man pages from cplusplus.com to enable offline browsing

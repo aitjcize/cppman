@@ -40,7 +40,7 @@ rps = [
          r'(</code>)?</div>\s*<div class="prototype">(.*?)</div>\s*</div>'
          r'<p><strong>(.+?)</strong>',
          r'.TH "\1" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-         r'\n.SH NAME\n\1 - \r\n'
+         r'\n.SH NAME\n\1 - \7\n'
          r'\n.SE\n.SH TYPE\n\2\n'
          r'\n.SE\n.SH SYNOPSIS\n#include \4\n.sp\n\6\n'
          r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
