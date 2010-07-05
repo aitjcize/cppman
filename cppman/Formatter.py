@@ -32,18 +32,18 @@ import termios
 import urllib
 
 # Format replacement RE list
-# The '.SE' pseudo macro is described in function: cplusplus2groff
+# The '.SE' pseudo macro is described in the function: cplusplus2groff
 rps = [
         # Header, Name
         (r'<div class="doctop"><h1>(.+?)</h1><div class="right"><br>(.*?)</div>'
-         r'</div><div class="docsubtop"><div class="right"><code>(.*)</code>'
-         r'</div>\n<div class="prototype">(.*)</div>\n</div>'
-         r'<p><strong>(.+?)</strong></p>\n</div><div id="content">(.+?)<br>',
+         r'</div><div class="docsubtop"><div class="right">(<code>)?(.*?)'
+         r'(</code>)?</div>\s*<div class="prototype">(.*?)</div>\s*</div>'
+         r'<p><strong>(.+?)</strong>',
          r'.TH "\1" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-         r'\n.SH NAME\n\1 - \5\n'
+         r'\n.SH NAME\n\1 - \r\n'
          r'\n.SE\n.SH TYPE\n\2\n'
-         r'\n.SE\n.SH SYNOPSIS\n#include \3\n.sp\n\4\n'
-         r'\n.SE\n.SH DESCRIPTION\n\6\n.sp\n'% datetime.date.today(),re.DOTALL),
+         r'\n.SE\n.SH SYNOPSIS\n#include \4\n.sp\n\6\n'
+         r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
         # Remove empty sections
         (r'\n.SH (.+?)\n\n', r'', 0),
         # Section headers
@@ -57,9 +57,9 @@ rps = [
         (r'<code>', r'\n.in +2n\n.sp\n', 0),
         (r'</code>', r'\n.in\n.sp\n', 0),
         # 'samp' tag
-        (r'<samp>(.+?)</samp>', r'\n.nf\n\1\n.fi\n', re.DOTALL),
+        (r'<samp>(.+?)</samp>', r'\n.nf\n\1\n.fi\n', re.S),
         # 'pre' tag
-        (r'<pre\s*>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.DOTALL),
+        (r'<pre\s*>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.S),
         # Subsections
         (r'<b>(.+?)</b>:<br>', r'.SS \1\n', 0),
         # Member functions / See Also table
@@ -77,7 +77,7 @@ rps = [
          r'((.|\n)+?)</table>',
          r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n', 0),
         (r'<tr><td>(.+?)</td><td>(.+?)</td></tr>',
-         r'\1|T{\n\2\nT}\n', re.DOTALL),
+         r'\1|T{\n\2\nT}\n', re.S),
         # Single-column table
         (r'<table class="boxed"><tr><th>(.+?)</th></tr>(.+?)</table>',
          r'\n.TS\nallbox;\nc\nl .\n\1\n\2\n.TE\n.sp\n', 0),
@@ -89,18 +89,19 @@ rps = [
         (r'<div id="footer">.*?</div>',
          r'\n.SE\n.SH REFERENCE\n'
          r'cplusplus.com, 2000-2010 - All rights reserved.',
-         re.DOTALL),
+         re.S),
         # 'br' tag
         (r'<br>', r'\n.br\n', 0),
+        (r'\n.br\n.br\n', r'\n.sp\n', 0),
         # 'dd' 'dt' tag
-        (r'<dt>(.+?)</dt>\s*<dd>(.+?)</dd>', r'.IP "\1"\n\2\n', re.DOTALL),
+        (r'<dt>(.+?)</dt>\s*<dd>(.+?)</dd>', r'.IP "\1"\n\2\n', re.S),
         # Bold
         (r'<strong>(.+?)</strong>', r'\n.B \1\n', 0),
         # -
         (r'-', r'\-', 0),
         # Any other tags
         (r'<script[^>]*>[^<]*</script>', r'', 0),
-        (r'<.*?>', r'', re.DOTALL),
+        (r'<.*?>', r'', re.S),
         # Misc
         (r'&lt;', r'<', 0), 
         (r'&gt;', r'>', 0),
@@ -111,9 +112,7 @@ rps = [
         (r'/">', r'', 0),
         # Remove empty lines
         (r'\n\s*\n+', r'\n', 0),
-        (r'\n\n+', r'\n', 0),
-        # Remove dumplicate .br
-        (r'\n.br\n.br\n', r'\n.br\n', 0)
+        (r'\n\n+', r'\n', 0)
       ]
 
 def cplusplus2groff(data):
@@ -126,10 +125,10 @@ def cplusplus2groff(data):
     except ValueError: pass
 
     # Preprocess 'code' tag
-    code_sections = re.findall(r'<code>.+?</code>', data, re.DOTALL)
-    for st in code_sections:
-        sts = re.sub(r'\n', r'\n.br\n', st)
-        data = data.replace(st, sts)
+    #code_sections = re.findall(r'<code>.+?</code>', data, re.S)
+    #for st in code_sections:
+    #    sts = re.sub(r'\n', r'\n.br\n', st)
+    #    data = data.replace(st, sts)
 
     # Replace all
     for rp in rps:
@@ -139,25 +138,25 @@ def cplusplus2groff(data):
     for st in re.findall(r'.SH .*\n', data):
         data = data.replace(st, st.upper())
 
-    # Add tags to member functions
+    # Add tags to member/inherited member functions
     # e.g. insert -> vector::insert
     #
     # .SE is a pseudo macro I created which means 'SECTION END'
     # The reason I use it is because I need a marker to know where section ends.
     # re.findall find patterns which do not overlap, which means if I do this:
-    # secs = re.findall(r'\n\.SH "(.+?)"(.+?)\.SH', data, re.DOTALL)
+    # secs = re.findall(r'\n\.SH "(.+?)"(.+?)\.SH', data, re.S)
     # re.findall will skip the later .SH tag and thus skip the later section.
     # To fix this, '.SE' is used to mark the end of the section so the next
     # '.SH' can be find by re.findall
 
     page_type =  re.search(r'\n\.SH TYPE\n(.+?)\n', data)
     if page_type and 'class' in page_type.group(1):
-        # Member functions
         class_name = re.search(r'\n\.SH NAME\n(.+?) ', data).group(1)
 
-        secs = re.findall(r'\n\.SH "(.+?)"(.+?)\.SE', data, re.DOTALL)
+        secs = re.findall(r'\n\.SH "(.+?)"(.+?)\.SE', data, re.S)
 
         for sec, content in secs:
+            # Member functions
             if 'MEMBER' in sec and 'INHERITED' not in sec and\
                sec != 'MEMBER TYPES':
                 contents = re.sub(r'\n\.IP "([^:]+?)"', r'\n\.IP "%s::\1"'
@@ -168,6 +167,7 @@ def cplusplus2groff(data):
                 contents = re.sub(r'\(destructor\)', r'~%s' % class_name,
                                   contents)
                 data = data.replace(content, contents)
+            # Inherited member functions
             elif 'MEMBER' in sec and 'INHERITED' in sec:
                 inherit = re.search(r'.+?INHERITED FROM (.+)',
                                     sec).group(1).lower()
@@ -175,15 +175,15 @@ def cplusplus2groff(data):
                                   % inherit, content)
                 data = data.replace(content, contents)
 
-    # Remove invalid marking in tables
-    for st in re.findall(r'\.TS(.+?)\.TE', data, re.DOTALL):
+    # Remove invalid markings in tables
+    for st in re.findall(r'\.TS(.+?)\.TE', data, re.S):
         sts = re.sub(r'\n\...\n', r'\n', st)
         sts = re.sub(r'\n\.B (.+?)\n', r'\1', sts)
         sts = re.sub(r'\n\.', r'\n\\.', sts)
         index = data.index(st)
         data = data[:index] + sts + data[index + len(st):]
 
-    # Remove pseudo macro .SE
+    # Remove pseudo macro '.SE'
     data = data.replace('\n.SE', '')
 
     return data

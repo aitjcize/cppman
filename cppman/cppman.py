@@ -99,8 +99,8 @@ class cppman(Crawler):
         print 'By defualt, cppman fetch pages on the fly if coressponding '\
             'page is not found in the cache. The "cache-all" option is only '\
             'useful if you want to view man pages offline.'
-        print 'Caching all contents from cplusplus.com could take a LONG '\
-            'time, do you want to continue [Y/n]?',
+        print 'Caching all contents from cplusplus.com will take about 20 '\
+            'minutes, do you want to continue [Y/n]?',
 
         respond = raw_input()
         if respond.lower() not in ['y', 'ye', 'yes']:
@@ -155,8 +155,7 @@ class cppman(Crawler):
             os.mkdir(Environ.man_dir)
         except: pass
 
-        avail = subprocess.Popen('ls %s' % Environ.man_dir, shell=True,
-                                 stdout=subprocess.PIPE).stdout.read().split()
+        avail = os.listdir(Environ.man_dir)
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
 
