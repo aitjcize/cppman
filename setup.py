@@ -5,7 +5,7 @@ from DistUtilsExtra.command import *
 
 _data_files = [
 	('lib/cppman', ['lib/index.db', 'lib/viewer.sh']),
-        ('share/doc',  ['README', 'AUTHORS', 'COPYING', 'Changlog']),
+        ('share/doc',  ['README', 'AUTHORS', 'COPYING', 'ChangeLog']),
 	('share/man/man1', ['misc/cppman.1'])
 	]
 

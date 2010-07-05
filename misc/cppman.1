@@ -10,6 +10,11 @@ cppman is part of the package manpages-cpp.
 cppman generates C++ manual pages from cplusplus.com and provide a man-like interface to view man pages.
 .sp
 By default, cppman fetches man pages on demand, but by running the command 'cppman -c', all available manpages are cached, making offline browsing possible.
+.SS Browsing man pages
+cppman uses Vi Improved as a pager.
+.br
+Press 'q' to leave pager.
+Press 'K' on an entry like 'vector::insert(3)' links you to the manual page of vector::insert, like a hyperlink.
 .SH OPTIONS
 .IP "-c, --cache-all"
 cache all available man pages from cplusplus.com to enable offline browsing
@@ -26,12 +31,18 @@ show version information
 .IP "-h, --help"
 show this help message and exit
 .SH NOTE
-All contents should be fetched by the user, manpages-cpp does not contain any pre-fetched contents.
+All contents should be cached by the user, manpages-cpp does not contain any pre-cached contents.
 .sp
-Do not distribute the fetched man pages without the permision of cplusplus.com.
+Do not distribute the cached man pages without the permision of cplusplus.com.
 .SH BUGS
-Please report all bugs at http://github.com/Aitjcize/gettube/issues or
+Although I spend a lot of time checking the format, there are still pages that won't display correctly.
 .br
-email to: aitjcize@gmail.com
+Feel free to report the bug at:
+.sp
+http://github.com/Aitjcize/gettube/issues or
+.br
+mail://aitjcize@gmail.com.
+.sp
+Please include the page name in the bug report.
 .SH AUTHOR
 Wei-Ning Huang (AZ) <aitjcize@gmail.com>

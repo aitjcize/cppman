@@ -35,5 +35,5 @@ if not sys.argv[0].startswith('/usr/bin'):
     viewer = prefix + '/../lib/viewer.sh'
 else:
     man_dir = home + '/.local/share/man/man3/'
-    index_db = home + '/usr/lib/cppman/index.db'
+    index_db = '/usr/lib/cppman/index.db'
     viewer = '/usr/lib/cppman/viewer.sh'
