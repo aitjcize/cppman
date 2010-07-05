@@ -1,0 +1,3 @@
+manpages-cpp is a project that generated C++ man pages from cplusplus.com
+
+cppman, the man page browser/fetcher generates C++ manual pages from cplusplus.com and provide a man-like interface to view man pages.
