@@ -17,5 +17,11 @@ echo `pwd`
 cp dev/rules dev/control debian
 cd debian
 rm *.ex *.EX README.*
+dch -e
 cd ..
-dpkg-buildpackage -rfakeroot
+
+if [ "$1" == "build" ]; then
+  dpkg-buildpackage -rfakeroot
+elif [ "$1" == "ppa" ]; then
+  debuild -S
+fi
