@@ -1,5 +1,5 @@
 Source: manpages-cpp
-Section: misc
+Section: devel
 Priority: optional
 Maintainer: Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 Build-Depends: cdbs (>=0.4.49), debhelper (>= 5), python-central (>=0.5.6)
@@ -9,5 +9,7 @@ Standards-Version: 3.7.2
 Package: manpages-cpp
 Architecture: all
 XB-Python-Version: ${python:Versions}
-Depends: ${python:Depends}, ${misc:Depends}, vim
-Description: C++ man pages generater, cppman generates C++ manual pages from cplusplus.com and provide a man-like interface to view man pages.
+Depends: ${python:Depends}, vim
+Description: C++ man pages generater
+ cppman generates C++ manual pages from cplusplus.com and provide a man-like
+ interface to view man pages.

@@ -11,7 +11,7 @@ cd manpages-cpp/dev/
 tar -zcf manpages-cpp_$ver.orig.tar.gz manpages-cpp-$ver
 
 cd manpages-cpp-$ver
-dh_make -s -b
+dh_make -s -b -p manpages-cpp
 
 echo `pwd`
 cp dev/rules dev/control debian

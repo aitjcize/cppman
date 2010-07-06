@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
-from DistUtilsExtra.command import *
 
 _data_files = [
 	('lib/cppman', ['lib/index.db', 'lib/viewer.sh']),
@@ -20,6 +19,5 @@ setup(
 	license = 'GPL',
     	packages = ['cppman'],
 	scripts = ['bin/cppman'],
-	data_files = _data_files,
-        cmdclass = { "build": build_extra.build_extra }
+	data_files = _data_files
 )
