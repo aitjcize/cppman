@@ -1,0 +1,21 @@
+因為Ubuntu套件庫中並沒有C++的manual page
+所以有時候寫C++突然要查某個函式的用法時，必須連上網路，有些麻煩
+因此我寫了這個程式。
+manpages-cpp 包含一個程式叫做cppman
+他的用法與man類似，他的功用是自動從http://www.cplusplus.com/ 下載對應的內容
+並轉成man pages的格式，在終端中顯示。所有的內容可以被cache起來，方便離線查看。當然你也可以'cppman -c'
+把所有可用的man pages cache起來，如此就不必連上網了
+由於版權的問題，所以manpages-cpp並不包含預先cache的內容。
+
+詳細可以到manpages-cpp的github wiki http://wiki.github.com/Aitjcize/manpages-cpp 查看
+
+DEB/RPM/源碼可在github上找到
+
+另外: manpages-cpp也有ubuntu的PPA
+https://launchpad.net/~aitjcize/+archive/manpages-cpp
+
+安裝方式:
+sudo add-apt-repository ppa:aitjcize/manpages-cpp
+sudo apt-get update; sudo apt-get install manpages-cpp
+
+如果有發現顯示錯誤的頁面，也歡迎到http://github.com/Aitjcize/manpages-cpp/issues回報問題，謝謝。
