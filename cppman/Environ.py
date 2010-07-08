@@ -22,6 +22,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+import os
 import os.path
 import sys
 
@@ -32,8 +33,19 @@ if not sys.argv[0].startswith('/usr/bin'):
     prefix = os.path.dirname(os.path.abspath(sys.argv[0]))
     man_dir = home + '/.local/share/man/man3/'
     index_db = prefix + '/../lib/index.db'
+    index_db_re = index_db
     viewer = prefix + '/../lib/viewer.sh'
 else:
+    config_dir = home + '/.config/cppman/'
+    try:
+        os.mkdir(config_dir)
+    except: pass
+
+    index_db_re = config_dir + 'index.db'
+    if os.path.exists(index_db_re):
+        index_db = index_db_re
+    else:
+        index_db = '/usr/lib/cppman/index.db'
+
     man_dir = home + '/.local/share/man/man3/'
-    index_db = '/usr/lib/cppman/index.db'
     viewer = '/usr/lib/cppman/viewer.sh'

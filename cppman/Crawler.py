@@ -54,8 +54,9 @@ class Crawler:
 
         for link in links:
             real_url = urllib.urlopen(self.url_base + link).geturl()
-            real_url = re.sub(r'%3E', r'>', real_url)
-            real_url = re.sub(r'%3C', r'<', real_url)
+            real_url = real_url.replace('%3E', '>')
+            real_url = real_url.replace('%3C', '<')
+            real_url = real_url.replace('%20', ' ')
 
             if real_url in self.visited or not real_url.startswith(
                 'http://www.cplusplus.com/reference/'):
