@@ -149,6 +149,9 @@ class cppman(Crawler):
 
         try:
             os.mkdir(os.path.realpath(Environ.man_dir + '/..'))
+        except: pass
+
+        try:
             os.mkdir(Environ.man_dir)
         except: pass
 
@@ -193,6 +196,9 @@ class cppman(Crawler):
         '''
         try:
             os.mkdir(os.path.realpath(Environ.man_dir + '/..'))
+        except: pass
+
+        try:
             os.mkdir(Environ.man_dir)
         except: pass
 
