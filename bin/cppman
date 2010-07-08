@@ -27,7 +27,6 @@ import os
 import os.path
 import subprocess
 import sys
-import traceback
 from optparse import OptionParser, make_option
 
 program = sys.argv[0]
@@ -140,6 +139,5 @@ if __name__ == '__main__':
     try:
         main()
     except Exception, e:
-        #print e
+        print e
         pass
-        print traceback.print_exc()
