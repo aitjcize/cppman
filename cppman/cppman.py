@@ -29,6 +29,7 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import sys
 import urllib
 
 import Environ
@@ -42,6 +43,9 @@ class cppman(Crawler):
     def __init__(self, forced=False):
         Crawler.__init__(self)
         self.forced = forced
+        self.success_count = None
+        self.failure_count = None
+
         self.blacklist = ['STL Containers']
         self.name_exceptions = [
             'http://www.cplusplus.com/reference/string/swap/'
@@ -155,6 +159,9 @@ class cppman(Crawler):
             os.mkdir(Environ.man_dir)
         except: pass
 
+        self.success_count = 0
+        self.failure_count = 0
+
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
 
@@ -166,7 +173,13 @@ class cppman(Crawler):
                 self.cache_man_page(url, name)
             except Exception, e:
                 print 'Error caching %s ...', name
+                self.failure_count += 1
+            else:
+                self.success_count += 1
         conn.close()
+
+        print '%d manual pages cahced successfully.' % self.success_count
+        print '%d manual pages failed to cache.' % self.failure_count
 
     def cache_man_page(self, url, name=None):
         '''
@@ -249,6 +262,9 @@ class cppman(Crawler):
                             ' WHERE name LIKE "%%%s%%"' % pattern).fetchall()
         if selected:
             for name, url in selected:
-                print name.replace(pattern, '\033[1;31m%s\033[0m' % pattern)
+                if os.isatty(sys.stdout.fileno()):
+                    print name.replace(pattern, '\033[1;31m%s\033[0m' % pattern)
+                else:
+                    print name
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
