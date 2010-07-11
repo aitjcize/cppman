@@ -103,30 +103,39 @@ class cppman(Crawler):
         self.db_cursor = self.db_conn.cursor()
         self.db_cursor.execute('CREATE TABLE CPPMAN (name VARCHAR(255), '
                                'url VARCHAR(255))')
-        self.crawl(self.insert_index)
-        
-        # Rename dumplicate entries
-        dumplicates = self.db_cursor.execute('SELECT name, COUNT(name) AS NON '
-                                             'FROM CPPMAN '
-                                             'GROUP BY NAME '
-                                             'HAVING (NON > 1)').fetchall()
-        for name, url in dumplicates:
-            dump = self.db_cursor.execute('SELECT name, url FROM CPPMAN '
-                                          'WHERE name="%s"' % name).fetchall()
-            for n, u in dump:
-                if n not in self.name_exceptions:
-                    new_name = re.search('/([^/]+)/%s/$' % n, u).group(1)\
-                                                                    + '::' + n
-                    self.db_cursor.execute('UPDATE CPPMAN '
-                                           'SET name="%s", url="%s" '
-                                           'WHERE url="%s"' % (new_name, u, u))
-        self.db_conn.commit()
-        self.db_conn.close()
+        try:
+            self.crawl(self.insert_index)
+
+            # Rename dumplicate entries
+            dumplicates = self.db_cursor.execute('SELECT name, COUNT(name) '
+                                                 'AS NON '
+                                                 'FROM CPPMAN '
+                                                 'GROUP BY NAME '
+                                                 'HAVING (NON > 1)').fetchall()
+            for name, url in dumplicates:
+                dump = self.db_cursor.execute('SELECT name, url FROM CPPMAN '
+                                              'WHERE name="%s"'
+                                              % name).fetchall()
+                for n, u in dump:
+                    if n not in self.name_exceptions:
+                        new_name = re.search('/([^/]+)/%s/$' % n, u).group(1)\
+                                                                + '::' + n
+                        self.db_cursor.execute('UPDATE CPPMAN '
+                                               'SET name="%s", url="%s" '
+                                               'WHERE url="%s"' %
+                                               (new_name, u, u))
+            self.db_conn.commit()
+        except KeyboardInterrupt:
+            os.remove(Environ.index_db_re)
+            raise KeyboardInterrupt
+        finally:
+            self.db_conn.close()
 
     def insert_index(self, url):
         '''
         callback to insert index
         '''
+        print "Indexing '%s' ..." % url
         if url not in self.blacklist:
             name = self.extract_name(urllib.urlopen(url).read())
             if url in self.std:
@@ -148,8 +157,7 @@ class cppman(Crawler):
 
         respond = raw_input()
         if respond.lower() not in ['y', 'ye', 'yes']:
-            print 'Aborted.'
-            return
+            raise KeyboardInterrupt
 
         try:
             os.mkdir(os.path.realpath(Environ.man_dir + '/..'))
@@ -161,6 +169,9 @@ class cppman(Crawler):
 
         self.success_count = 0
         self.failure_count = 0
+
+        if not os.path.exists(Environ.index_db):
+            raise RuntimeError("can't find index.db")
 
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
@@ -218,6 +229,10 @@ class cppman(Crawler):
         except: pass
 
         avail = os.listdir(Environ.man_dir)
+
+        if not os.path.exists(Environ.index_db):
+            raise RuntimeError("can't find index.db")
+
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
 
@@ -259,6 +274,13 @@ class cppman(Crawler):
         return pid
 
     def find(self, pattern):
+        '''
+        Find pages in database
+        '''
+
+        if not os.path.exists(Environ.index_db):
+            raise RuntimeError("can't find index.db")
+
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
         selected = cursor.execute('SELECT name,url FROM CPPMAN'
@@ -277,4 +299,4 @@ class cppman(Crawler):
             cmd = 'mandb -q'
         else:
             cmd = 'mandb'
-        handle = subprocess.Popen(cmd, shell=True)
+        handle = subprocess.Popen(cmd, shell=True).wait()

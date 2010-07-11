@@ -62,7 +62,6 @@ class Crawler:
                 'http://www.cplusplus.com/reference/'):
                 continue
 
-            print real_url
             self.visited.append(real_url)
 
             # Run callback
