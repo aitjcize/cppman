@@ -53,7 +53,7 @@ class cppman(Crawler):
 
         # They are headers, set name to std::name else conflict with other
         # classes/templates
-        self.std_library = [
+        self.std = [
             'http://www.cplusplus.com/reference/std/limits/',
             'http://www.cplusplus.com/reference/std/new/',
             'http://www.cplusplus.com/reference/std/typeinfo/',
@@ -129,7 +129,7 @@ class cppman(Crawler):
         '''
         if url not in self.blacklist:
             name = self.extract_name(urllib.urlopen(url).read())
-            if url in self.std_library:
+            if url in self.std:
                 name = 'std::' + name
             elif url in self.stl:
                 name = 'stl::' + name
@@ -178,8 +178,10 @@ class cppman(Crawler):
                 self.success_count += 1
         conn.close()
 
-        print '%d manual pages cahced successfully.' % self.success_count
+        print '\n%d manual pages cahced successfully.' % self.success_count
         print '%d manual pages failed to cache.' % self.failure_count
+        print '\nrunning mandb...'
+        self.update_mandb(False)
 
     def cache_man_page(self, url, name=None):
         '''
@@ -246,6 +248,7 @@ class cppman(Crawler):
 
         if page_name + '.3.gz' not in avail or self.forced:
             self.cache_man_page(url, page_name)
+            self.update_mandb()
 
         # Call viewer
         pid = os.fork()
@@ -268,3 +271,10 @@ class cppman(Crawler):
                     print name
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
+
+    def update_mandb(self, quiet=True):
+        if quiet:
+            cmd = 'mandb -q'
+        else:
+            cmd = 'mandb'
+        handle = subprocess.Popen(cmd, shell=True)

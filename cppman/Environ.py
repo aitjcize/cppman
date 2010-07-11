@@ -23,14 +23,15 @@
 #
 
 import os
-import os.path
 import sys
 
-home = os.path.expanduser('~')
+from os.path import expanduser, abspath, realpath, dirname
+
+home = expanduser('~')
 
 # If launched from source directory
 if not sys.argv[0].startswith('/usr/bin'):
-    prefix = os.path.dirname(os.path.abspath(sys.argv[0]))
+    prefix = dirname(abspath(sys.argv[0]))
     man_dir = home + '/.local/share/man/man3/'
     index_db = prefix + '/../lib/index.db'
     index_db_re = index_db
@@ -42,10 +43,25 @@ else:
     except: pass
 
     index_db_re = config_dir + 'index.db'
-    if os.path.exists(index_db_re):
+    if exists(index_db_re):
         index_db = index_db_re
     else:
         index_db = '/usr/lib/cppman/index.db'
 
     man_dir = home + '/.local/share/man/man3/'
     viewer = '/usr/lib/cppman/viewer.sh'
+
+# Add ~/.local/share/man to $HOME/.manpath
+manpath = '/.local/share/man'
+mf = open(realpath(home + '/.manpath'), 'a+')
+lines = mf.readlines()
+
+has_path = False
+for line in lines:
+    if manpath in line:
+        has_path = True
+        break
+
+if not has_path:
+    mf.write('MANDATORY_MANPATH\t%s\n' % realpath(home + manpath))
+mf.close()

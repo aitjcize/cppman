@@ -15,6 +15,8 @@ cppman uses Vi Improved as a pager.
 .br
 Press 'q' to leave pager.
 Press 'K' on an entry like 'vector::insert(3)' links you to the manual page of vector::insert, like a hyperlink.
+.SS man compatibility
+cppman automatically add '~/.local/share/man' to '~/.manpath', so the cached man pages can also be viewed with 'man' command. Note that to view uncached man pages, you still need to run 'cppman'.
 .SH OPTIONS
 .IP "-c, --cache-all"
 cache all available man pages from cplusplus.com to enable offline browsing

@@ -225,10 +225,9 @@ def test():
     '''
     Simple Text
     '''
-    #name = raw_input('What manual page do you want?')
-    name = 'streambuf'
+    name = raw_input('What manual page do you want?')
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    print cplusplus2groff(ifs.read()),
+    print cplusplus2man(ifs.read()),
 
 if __name__ == '__main__':
     test()
