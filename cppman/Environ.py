@@ -25,7 +25,7 @@
 import os
 import sys
 
-from os.path import expanduser, abspath, realpath, dirname
+from os.path import expanduser, abspath, realpath, dirname, exists
 
 home = expanduser('~')
 
