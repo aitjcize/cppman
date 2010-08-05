@@ -117,7 +117,7 @@ class cppman(Crawler):
                                               'WHERE name="%s"'
                                               % name).fetchall()
                 for n, u in dump:
-                    if n not in self.name_exceptions:
+                    if u not in self.name_exceptions:
                         new_name = re.search('/([^/]+)/%s/$' % n, u).group(1)\
                                                                 + '::' + n
                         self.db_cursor.execute('UPDATE CPPMAN '
