@@ -44,10 +44,10 @@ program_version = '0.1.1'
 def version():
     sys.stderr.write(
 '%s Ver %s\n\
-Copyright (C) 2010 Aitjcize (Wei-Ning Huang)\n\
+Copyright (C) 2010 Wei-Ning Huang\n\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\nThis is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n\n\
-Written by Aitjcize (Wei-Ning Huang).\n' %
+Written by Wei-Ning Huang (AZ) <aitjcize@gmail.com>.\n' %
     (program_name, program_version))
 
 def main():

@@ -124,12 +124,6 @@ def cplusplus2groff(data):
         data = data[data.index('<div class="doctop"><h1>'):]
     except ValueError: pass
 
-    # Preprocess 'code' tag
-    #code_sections = re.findall(r'<code>.+?</code>', data, re.S)
-    #for st in code_sections:
-    #    sts = re.sub(r'\n', r'\n.br\n', st)
-    #    data = data.replace(st, sts)
-
     # Replace all
     for rp in rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
@@ -143,7 +137,7 @@ def cplusplus2groff(data):
     #
     # .SE is a pseudo macro I created which means 'SECTION END'
     # The reason I use it is because I need a marker to know where section ends.
-    # re.findall find patterns which do not overlap, which means if I do this:
+    # re.findall find patterns which does not overlap, which means if I do this:
     # secs = re.findall(r'\n\.SH "(.+?)"(.+?)\.SH', data, re.S)
     # re.findall will skip the later .SH tag and thus skip the later section.
     # To fix this, '.SE' is used to mark the end of the section so the next
