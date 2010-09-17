@@ -39,7 +39,7 @@ if program.startswith('./') or program.startswith('bin/'):
 from cppman.cppman import cppman
 
 program_name = sys.argv[0]
-program_version = '0.1.1'
+program_version = '0.1.2'
 
 def version():
     sys.stderr.write(

@@ -160,11 +160,7 @@ class cppman(Crawler):
             raise KeyboardInterrupt
 
         try:
-            os.mkdir(os.path.realpath(Environ.man_dir + '/..'))
-        except: pass
-
-        try:
-            os.mkdir(Environ.man_dir)
+            os.makedirs(Environ.man_dir)
         except: pass
 
         self.success_count = 0
@@ -221,11 +217,7 @@ class cppman(Crawler):
         Call viewer.sh to view man page
         '''
         try:
-            os.mkdir(os.path.realpath(Environ.man_dir + '/..'))
-        except: pass
-
-        try:
-            os.mkdir(Environ.man_dir)
+            os.makedirs(Environ.man_dir)
         except: pass
 
         avail = os.listdir(Environ.man_dir)
