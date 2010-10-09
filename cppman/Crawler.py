@@ -41,6 +41,7 @@ class Crawler:
         '''
         Crawl a new page.
         '''
+        thread_url = []
         data = urllib.urlopen(url).read()
 
         # Remove sidebar
@@ -54,9 +55,7 @@ class Crawler:
 
         for link in links:
             real_url = urllib.urlopen(self.url_base + link).geturl()
-            real_url = real_url.replace('%3E', '>')
-            real_url = real_url.replace('%3C', '<')
-            real_url = real_url.replace('%20', ' ')
+            real_url = urllib.unquote(real_url)
 
             if real_url in self.visited or not real_url.startswith(
                 'http://www.cplusplus.com/reference/'):
