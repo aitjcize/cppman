@@ -25,6 +25,7 @@
 import gzip
 import os
 import os.path
+import platform
 import re
 import shutil
 import sqlite3
@@ -287,6 +288,9 @@ class cppman(Crawler):
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
     def update_mandb(self, quiet=True):
+        # Bug #1, FreeBSD doesn't use mandb
+        if 'bsd' in platform.system().lower():
+            return
         if quiet:
             cmd = 'mandb -q'
         else:

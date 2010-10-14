@@ -23,45 +23,51 @@
 #
 
 import os
+import platform
 import sys
 
-from os.path import expanduser, abspath, realpath, dirname, exists
+from os.path import expanduser, abspath, normpath, dirname, exists, join
 
-home = expanduser('~')
+HOME = expanduser('~')
+
+man_dir = HOME + '/.local/share/man/man3/'
+config_dir = HOME + '/.config/cppman/'
+cwd = os.getcwd()
+
+try:
+    os.makedirs(config_dir)
+except: pass
+
+cwd = cwd[:cwd.find('manpages-cpp') + len('manpages-cpp')]
 
 # If launched from source directory
-if not sys.argv[0].startswith('/usr/bin'):
-    prefix = dirname(abspath(sys.argv[0]))
-    man_dir = home + '/.local/share/man/man3/'
-    index_db = prefix + '/../lib/index.db'
+if exists(normpath(join(cwd, 'lib/viewer.sh'))):
+    index_db = normpath(join(cwd, 'lib/index.db'))
+    viewer = normpath(join(cwd, 'lib/viewer.sh'))
     index_db_re = index_db
-    viewer = prefix + '/../lib/viewer.sh'
 else:
-    config_dir = home + '/.config/cppman/'
-    try:
-        os.mkdir(config_dir)
-    except: pass
-
-    index_db_re = config_dir + 'index.db'
-    if exists(index_db_re):
-        index_db = index_db_re
+    index_db_re = normpath(join(config_dir, '/index.db'))
+    if exists(normpath(join('/usr', 'lib/viewer.sh'))):
+        prefix = '/usr'
     else:
-        index_db = '/usr/lib/cppman/index.db'
+        prefix = '/usr/local'
 
-    man_dir = home + '/.local/share/man/man3/'
-    viewer = '/usr/lib/cppman/viewer.sh'
+    index_db = normpath(join(prefix, 'lib/cppman/index.db'))
+    viewer = normpath(join(prefix, 'lib/cppman/viewer.sh'))
+    index_db = index_db_re if exists(index_db_re) else index_db
 
 # Add ~/.local/share/man to $HOME/.manpath
-manpath = '/.local/share/man'
-mf = open(realpath(home + '/.manpath'), 'a+')
-lines = mf.readlines()
+if 'bsd' not in platform.system().lower():
+    manpath = '/.local/share/man'
+    mf = open(normpath(join(HOME, '.manpath')), 'a+')
+    lines = mf.readlines()
 
-has_path = False
-for line in lines:
-    if manpath in line:
-        has_path = True
-        break
+    has_path = False
+    for line in lines:
+        if manpath in line:
+            has_path = True
+            break
 
-if not has_path:
-    mf.write('MANDATORY_MANPATH\t%s\n' % realpath(home + manpath))
-mf.close()
+    if not has_path:
+        mf.write('MANDATORY_MANPATH\t%s\n' % normpath(join(HOME, manpath)))
+    mf.close()
