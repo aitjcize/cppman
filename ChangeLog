@@ -1,46 +1,25 @@
-2010-07-05  AZ Huang <aitjcize@gmail.com>
+------------------------------------------------------------------------------
+manpages-cpp Changelog
+------------------------------------------------------------------------------
 
-  * cppman/Formatter.py: Improve formatter.
+manpages-cpp 0.1.3 (September 26th, 2010):
 
-  * cppman/Crawler.py, cppman/Formatter.py, cppman/cppman.py: cache_all: get
-  url from index.db instead of crawling through web pages
+	Features added:
+	* Add BSD support (Issue #1)
 
-  * cppman/Crawler.py, cppman/Formatter.py, cppman/cppman, cppman/cppman.py,
-  cppman/viewer.sh: Fix more on formatting
+manpages-cpp 0.1.2 (September 21th, 2010):
 
-2010-07-04  AZ Huang <aitjcize@gmail.com>
+	Bugs fixed:
+	* Minor bug fix
 
-  * cppman/index.db: update index.db
+manpages-cpp 0.1.1 (September 11th, 2010):
 
-  * cppman/cppman, cppman/cppman.py, cppman/index.db: Fix bug: when cppman
-  'DUMP_RENAMED', cache is saved as DUMP name.
+	Bugs fixed:
+	* Minor bug fix
 
-  * cppman/Crawler.py, cppman/Environ.py, cppman/Formatter.py, cppman/cppman,
-  cppman/cppman.py, cppman/crawler.py, cppman/environ.py, cppman/formatter.py,
-  cppman/viewer.sh: Improve formatting. Fixed the dumplicate key problem.
+	Features added:
+	* Enable mandb support
 
-  * cppman/cppman.py, cppman/formatter.py: Fix manpage search error, adjust
-  formatting
+manpages-cpp 0.1.0 (September 11th, 2010):
 
-2010-07-03  AZ Huang <aitjcize@gmail.com>
-
-  * AUTHORS, COPYING, cppman/cppman, cppman/cppman.py, cppman/environ.py,
-  cppman/formatter.py, cppman/viewer.sh: Add AUTHORS, COPYING, README
-
-  * cppman/cppman, cppman/cppman.py, cppman/crawler.py, cppman/environ.py,
-  cppman/formatter.py, cppman/index.db, cppman/viewer.sh, src/cppman,
-  src/cppman.py, src/crawler.py, src/environ.py, src/formatter.py,
-  src/viewer.sh: change directory name, add index.db
-
-  * src/cppman, src/cppman.py, src/crawler.py, src/environ.py,
-  src/formatter.py, src/viewer.sh: Fix table format
-
-  * src/cppman.py, src/crawler.py, src/environ.py, src/formatter.py,
-  src/mcpp-test.sh, src/viewer.sh: Add cppman.py, rename mcpp-test.sh to
-  viewer.sh
-
-  * src/crawler.py, src/formatter.py: Add crawler.py, change function names in
-  formatter.py
-
-  * src/formatter.py, src/mcpp-test.sh: Fix table: allow multiplle line in a
-  cell
+	* Initial release
