@@ -41,7 +41,6 @@ class Crawler:
         '''
         Crawl a new page.
         '''
-        thread_url = []
         data = urllib.urlopen(url).read()
 
         # Remove sidebar

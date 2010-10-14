@@ -261,7 +261,7 @@ class cppman(Crawler):
         # Call viewer
         pid = os.fork()
         if pid == 0:
-            os.execl(Environ.viewer, 'dummy',
+            os.execl(Environ.viewer, Environ.viewer,
                      Environ.man_dir + page_name + '.3.gz',
                      str(Formatter.get_width()))
         return pid

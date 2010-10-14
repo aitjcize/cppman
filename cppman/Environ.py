@@ -46,8 +46,8 @@ if exists(normpath(join(cwd, 'lib/viewer.sh'))):
     viewer = normpath(join(cwd, 'lib/viewer.sh'))
     index_db_re = index_db
 else:
-    index_db_re = normpath(join(config_dir, '/index.db'))
-    if exists(normpath(join('/usr', 'lib/viewer.sh'))):
+    index_db_re = normpath(join(config_dir, 'index.db'))
+    if exists(normpath(join('/usr', 'lib/cppman/viewer.sh'))):
         prefix = '/usr'
     else:
         prefix = '/usr/local'
@@ -58,7 +58,7 @@ else:
 
 # Add ~/.local/share/man to $HOME/.manpath
 if 'bsd' not in platform.system().lower():
-    manpath = '/.local/share/man'
+    manpath = '.local/share/man'
     mf = open(normpath(join(HOME, '.manpath')), 'a+')
     lines = mf.readlines()
 
