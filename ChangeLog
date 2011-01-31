@@ -1,6 +1,15 @@
 ------------------------------------------------------------------------------
 manpages-cpp Changelog
 ------------------------------------------------------------------------------
+manpages-cpp 0.1.5 (January 31th, 2011):
+
+	Bug fixed:
+	* Backslashs in EXAMPLE section disapears
+	* Empty "#include" line in some pages
+
+	Features added:
+	* Syntax highlighting support for SYNOPSIS and EXAMPLE section
+	* Update database
 
 manpages-cpp 0.1.3 (September 26th, 2010):
 

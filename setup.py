@@ -3,14 +3,14 @@
 from distutils.core import setup
 
 _data_files = [
-	('lib/cppman', ['lib/index.db', 'lib/viewer.sh']),
+	('lib/cppman', ['lib/index.db', 'lib/viewer.sh', 'lib/cppman.vim']),
         ('share/doc',  ['README', 'AUTHORS', 'COPYING', 'ChangeLog']),
 	('share/man/man1', ['misc/cppman.1'])
 	]
 
 setup(
 	name = 'manpages-cpp',
-	version = '0.1.3',
+	version = '0.1.5',
 	description = 'C++ man pages generater that generates C++ man pages'
                       'from cplusplus.com',
 	author = 'Wei-Ning Huang (AZ)',
