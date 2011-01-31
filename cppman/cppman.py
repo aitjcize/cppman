@@ -263,7 +263,7 @@ class cppman(Crawler):
         if pid == 0:
             os.execl(Environ.viewer, Environ.viewer,
                      Environ.man_dir + page_name + '.3.gz',
-                     str(Formatter.get_width()))
+                     str(Formatter.get_width()), Environ.viewer_config)
         return pid
 
     def find(self, pattern):

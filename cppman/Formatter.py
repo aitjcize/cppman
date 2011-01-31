@@ -84,7 +84,6 @@ rps = [
         (r'<tr><td>(.+?)</td></tr>', r'\nT{\1\nT}\n.sp\n', 0),
         # Remove snippet line numbers
         (r'<td class="rownum">.+</td>', r'', 0),
-        
         # Footer
         (r'<div id="footer">.*?</div>',
          r'\n.SE\n.SH REFERENCE\n'
@@ -112,7 +111,11 @@ rps = [
         (r'/">', r'', 0),
         # Remove empty lines
         (r'\n\s*\n+', r'\n', 0),
-        (r'\n\n+', r'\n', 0)
+        (r'\n\n+', r'\n', 0),
+        # Preserve \n" in EXAMPLE
+        (r'\\n"', r'\en"', 0),
+        # Remove empty #include
+        (r'#include \n', r'', 0)
       ]
 
 def cplusplus2groff(data):
@@ -219,7 +222,7 @@ def test():
     '''
     Simple Text
     '''
-    name = raw_input('What manual page do you want?')
+    name = raw_input('What manual page do you want? ')
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
     print cplusplus2man(ifs.read()),
 

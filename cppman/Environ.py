@@ -44,6 +44,7 @@ cwd = cwd[:cwd.find('manpages-cpp') + len('manpages-cpp')]
 if exists(normpath(join(cwd, 'lib/viewer.sh'))):
     index_db = normpath(join(cwd, 'lib/index.db'))
     viewer = normpath(join(cwd, 'lib/viewer.sh'))
+    viewer_config = normpath(join(cwd, 'lib/cppman.vim'))
     index_db_re = index_db
 else:
     index_db_re = normpath(join(config_dir, 'index.db'))
@@ -54,6 +55,7 @@ else:
 
     index_db = normpath(join(prefix, 'lib/cppman/index.db'))
     viewer = normpath(join(prefix, 'lib/cppman/viewer.sh'))
+    viewer_config = normpath(join(prefix, 'lib/cppman/cppman.vim'))
     index_db = index_db_re if exists(index_db_re) else index_db
 
 # Add ~/.local/share/man to $HOME/.manpath
