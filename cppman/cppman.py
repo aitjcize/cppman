@@ -47,7 +47,9 @@ class cppman(Crawler):
         self.success_count = None
         self.failure_count = None
 
-        self.blacklist = ['STL Containers']
+        self.blacklist = [
+            'http://www.cplusplus.com/reference/stl/'
+        ]
         self.name_exceptions = [
             'http://www.cplusplus.com/reference/string/swap/'
         ]
@@ -61,7 +63,6 @@ class cppman(Crawler):
             'http://www.cplusplus.com/reference/std/stdexcept/',
             'http://www.cplusplus.com/reference/std/utility/',
             'http://www.cplusplus.com/reference/std/functional/',
-            'http://www.cplusplus.com/reference/string/',
             'http://www.cplusplus.com/reference/std/locale/'
         ]
         self.stl = [
@@ -113,7 +114,7 @@ class cppman(Crawler):
                                                  'FROM CPPMAN '
                                                  'GROUP BY NAME '
                                                  'HAVING (NON > 1)').fetchall()
-            for name, url in dumplicates:
+            for name, num in dumplicates:
                 dump = self.db_cursor.execute('SELECT name, url FROM CPPMAN '
                                               'WHERE name="%s"'
                                               % name).fetchall()
@@ -136,8 +137,8 @@ class cppman(Crawler):
         '''
         callback to insert index
         '''
-        print "Indexing '%s' ..." % url
         if url not in self.blacklist:
+            print "Indexing '%s' ..." % url
             name = self.extract_name(urllib.urlopen(url).read())
             if url in self.std:
                 name = 'std::' + name
@@ -145,6 +146,8 @@ class cppman(Crawler):
                 name = 'stl::' + name
             self.db_cursor.execute('INSERT INTO CPPMAN (name, url) VALUES '
                                    '("%s", "%s")' % (name, url))
+        else:
+            print "Skipping blacklisted page '%s' ..." % url
 
     def cache_all(self):
         '''
