@@ -35,9 +35,9 @@ import urllib
 # The '.SE' pseudo macro is described in the function: cplusplus2groff
 rps = [
         # Header, Name
-        (r'<div class="doctop"><h1>(.+?)</h1><div class="right"><br>(.*?)</div>'
-         r'</div><div class="docsubtop"><div class="right">(<code>)?(.*?)'
-         r'(</code>)?</div>\s*<div class="prototype">(.*?)</div>\s*</div>'
+        (r'<h1>(.+?)</h1>\s*<div class="right">(.*?)</div>\s*</div>\s*'
+         r'<div class="docsubtop">\s*<div class="right">(<code>)?(.*?)'
+         r'(</code>)?</div>\s*<div class="prototype">(.*?)</div>\s*</div>\s*'
          r'<p><strong>(.+?)</strong>',
          r'.TH "\1" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
          r'\n.SH NAME\n\1 - \7\n'
@@ -63,7 +63,7 @@ rps = [
         # Subsections
         (r'<b>(.+?)</b>:<br>', r'.SS \1\n', 0),
         # Member functions / See Also table
-        (r'<table class="keywordlink"><tr><td.+?>(.+?)</td><td.+?>(.+?)'
+        (r'<table class="C_docLink"><tr><td.+?>(.+?)</td><td.+?>(.+?)'
          r'<span class="typ">(.+?)</span></td></tr></table>',
          r'\n.IP "\1(3)"\n\2 \3\n', 0),
         # Three-column table
@@ -87,8 +87,7 @@ rps = [
         # Footer
         (r'<div id="footer">.*?</div>',
          r'\n.SE\n.SH REFERENCE\n'
-         r'cplusplus.com, 2000-2010 - All rights reserved.',
-         re.S),
+         r'cplusplus.com, 2000-2010 - All rights reserved.', re.S),
         # 'br' tag
         (r'<br>', r'\n.br\n', 0),
         (r'\n.br\n.br\n', r'\n.sp\n', 0),
@@ -106,7 +105,7 @@ rps = [
         (r'&gt;', r'>', 0),
         (r'&amp;', r'&', 0),
         (r'&nbsp;', r' ', 0),
-        (u'\x0d', r'\n.br\n', 0),
+        (u'\x0d[^)]', r'\n.br\n', 0),
         (r'>/">', r'', 0),
         (r'/">', r'', 0),
         # Remove empty lines
@@ -124,7 +123,7 @@ def cplusplus2groff(data):
     '''
     # Remove sidebar
     try:
-        data = data[data.index('<div class="doctop"><h1>'):]
+        data = data[data.index('<h1>'):]
     except ValueError: pass
 
     # Replace all
