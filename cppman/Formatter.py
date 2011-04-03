@@ -85,7 +85,7 @@ rps = [
         # Remove snippet line numbers
         (r'<td class="rownum">.+</td>', r'', 0),
         # Footer
-        (r'<div id="footer">.*?</div>',
+        (r'<div id="CH_footer">.*?</div>',
          r'\n.SE\n.SH REFERENCE\n'
          r'cplusplus.com, 2000-2010 - All rights reserved.', re.S),
         # 'br' tag
