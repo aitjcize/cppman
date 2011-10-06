@@ -25,7 +25,7 @@
 import urllib
 import re
 
-class Crawler:
+class Crawler(object):
     '''
     A Crawler that crawls through cplusplus.com
     '''

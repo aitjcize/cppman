@@ -38,9 +38,7 @@ import Formatter
 from Crawler import Crawler
 
 class cppman(Crawler):
-    '''
-    Manage cpp man pages, indexes
-    '''
+    """Manage cpp man pages, indexes"""
     def __init__(self, forced=False):
         Crawler.__init__(self)
         self.forced = forced
@@ -85,9 +83,7 @@ class cppman(Crawler):
         ]
 
     def extract_name(self, data):
-        '''
-        Extract man page name from cplusplus web page.
-        '''
+        """Extract man page name from cplusplus web page."""
         name = re.search('<h1>(.+?)</h1>', data).group(1)
         name = re.sub(r'<([^>]+)>', r'', name)
         name = re.sub(r'&gt;', r'>', name)
@@ -95,9 +91,7 @@ class cppman(Crawler):
         return name
 
     def rebuild_index(self):
-        '''
-        Rebuild index database from cplusplus.com
-        '''
+        """Rebuild index database from cplusplus.com."""
         try:
             os.remove(Environ.index_db_re)
         except: pass
@@ -134,9 +128,7 @@ class cppman(Crawler):
             self.db_conn.close()
 
     def insert_index(self, url):
-        '''
-        callback to insert index
-        '''
+        """callback to insert index"""
         if url not in self.blacklist:
             print "Indexing '%s' ..." % url
             name = self.extract_name(urllib.urlopen(url).read())
@@ -150,9 +142,7 @@ class cppman(Crawler):
             print "Skipping blacklisted page '%s' ..." % url
 
     def cache_all(self):
-        '''
-        Cache all available man pages from cplusplus.com
-        '''
+        """Cache all available man pages from cplusplus.com"""
         print 'By defualt, cppman fetch pages on the fly if coressponding '\
             'page is not found in the cache. The "cache-all" option is only '\
             'useful if you want to view man pages offline.'
@@ -195,9 +185,7 @@ class cppman(Crawler):
         self.update_mandb(False)
 
     def cache_man_page(self, url, name=None):
-        '''
-        callback to cache new man page
-        '''
+        """callback to cache new man page"""
         data = urllib.urlopen(url).read()
         groff_text = Formatter.cplusplus2groff(data)
         if not name: name = self.extract_name(data)
@@ -211,15 +199,11 @@ class cppman(Crawler):
         f.close()
 
     def clear_cache(self):
-        '''
-        Clear all cache in man3
-        '''
+        """Clear all cache in man3"""
         shutil.rmtree(Environ.man_dir)
 
     def man(self, pattern):
-        '''
-        Call viewer.sh to view man page
-        '''
+        """Call viewer.sh to view man page"""
         try:
             os.makedirs(Environ.man_dir)
         except: pass
@@ -264,15 +248,13 @@ class cppman(Crawler):
         # Call viewer
         pid = os.fork()
         if pid == 0:
-            os.execl(Environ.viewer, Environ.viewer,
+            os.execl(Environ.pager, Environ.pager,
                      Environ.man_dir + page_name + '.3.gz',
-                     str(Formatter.get_width()), Environ.viewer_config)
+                     str(Formatter.get_width()), Environ.pager_config)
         return pid
 
     def find(self, pattern):
-        '''
-        Find pages in database
-        '''
+        """Find pages in database."""
 
         if not os.path.exists(Environ.index_db):
             raise RuntimeError("can't find index.db")
@@ -291,11 +273,8 @@ class cppman(Crawler):
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
     def update_mandb(self, quiet=True):
-        # Bug #1, FreeBSD doesn't use mandb
-        if 'bsd' in platform.system().lower():
+        """Update mandb."""
+        if not Environ.config.UpdateManPath:
             return
-        if quiet:
-            cmd = 'mandb -q'
-        else:
-            cmd = 'mandb'
+        cmd = 'mandb%s' % (' -q' if quiet else '')
         handle = subprocess.Popen(cmd, shell=True).wait()

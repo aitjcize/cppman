@@ -28,11 +28,16 @@ import sys
 
 from os.path import expanduser, abspath, normpath, dirname, exists, join
 
+import Config
+
 HOME = expanduser('~')
 
 man_dir = HOME + '/.local/share/man/man3/'
 config_dir = HOME + '/.config/cppman/'
+config_file = config_dir + 'cppman.cfg'
 cwd = os.getcwd()
+
+config = Config.Config(config_file)
 
 try:
     os.makedirs(config_dir)
@@ -41,35 +46,59 @@ except: pass
 cwd = cwd[:cwd.find('manpages-cpp') + len('manpages-cpp')]
 
 # If launched from source directory
-if exists(normpath(join(cwd, 'lib/viewer.sh'))):
+if exists(normpath(join(cwd, 'lib/index.db'))):
     index_db = normpath(join(cwd, 'lib/index.db'))
-    viewer = normpath(join(cwd, 'lib/viewer.sh'))
-    viewer_config = normpath(join(cwd, 'lib/cppman.vim'))
     index_db_re = index_db
+
+    pager_config = normpath(join(cwd, 'lib/cppman.vim'))
+
+    if config.pager == 'vim':
+        pager = normpath(join(cwd, 'lib/pager_vim.sh'))
+    else:
+        pager = normpath(join(cwd, 'lib/pager_less.sh'))
 else:
     index_db_re = normpath(join(config_dir, 'index.db'))
-    if exists(normpath(join('/usr', 'lib/cppman/viewer.sh'))):
+    if exists(normpath(join('/usr', 'lib/cppman/index.db'))):
         prefix = '/usr'
     else:
         prefix = '/usr/local'
 
     index_db = normpath(join(prefix, 'lib/cppman/index.db'))
-    viewer = normpath(join(prefix, 'lib/cppman/viewer.sh'))
-    viewer_config = normpath(join(prefix, 'lib/cppman/cppman.vim'))
     index_db = index_db_re if exists(index_db_re) else index_db
 
+    pager_config = normpath(join(prefix, 'lib/cppman/cppman.vim'))
+
+    if config.pager == 'vim':
+        pager = normpath(join(prefix, 'lib/cppman/pager_vim.sh'))
+    else:
+        pager = normpath(join(prefix, 'lib/cppman/pager_less.sh'))
+
+
 # Add ~/.local/share/man to $HOME/.manpath
-if 'bsd' not in platform.system().lower():
+def mandb_changed():
+    manpath_file = normpath(join(HOME, '.manpath'))
     manpath = '.local/share/man'
-    mf = open(normpath(join(HOME, '.manpath')), 'a+')
-    lines = mf.readlines()
+    lines = []
+    try:
+        with open(manpath_file, 'r') as f:
+            lines = f.readlines()
+    except IOError:
+        if not config.UpdateManPath:
+            return
 
-    has_path = False
-    for line in lines:
-        if manpath in line:
-            has_path = True
-            break
+    has_path = any([manpath in l for l in lines])
 
-    if not has_path:
-        mf.write('MANDATORY_MANPATH\t%s\n' % normpath(join(HOME, manpath)))
-    mf.close()
+    with open(manpath_file, 'w') as f:
+        if config.UpdateManPath:
+            if not has_path:
+                lines.append('MANDATORY_MANPATH\t%s\n' %
+                             normpath(join(HOME, manpath)))
+        else:
+            new_lines = []
+            for line in lines:
+                if manpath not in line:
+                    new_lines.append(line)
+            lines = new_lines
+
+        for line in lines:
+            f.write(line)

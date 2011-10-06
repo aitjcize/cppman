@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 
-# viewer.sh
+# pager_vim.sh
 #
 # Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.

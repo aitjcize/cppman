@@ -126,9 +126,7 @@ rps = [
       ]
 
 def cplusplus2groff(data):
-    '''
-    Convert HTML text from cplusplus.com to Groff-formated text.
-    '''
+    """Convert HTML text from cplusplus.com to Groff-formated text."""
     # Remove sidebar
     try:
         data = data[data.index('<h1>'):]
@@ -193,9 +191,7 @@ def cplusplus2groff(data):
     return data
 
 def groff2man(data):
-    '''
-    Read groff-formated text and output man pages.
-    '''
+    """Read groff-formated text and output man pages."""
     width = get_width()
 
     cmd = 'groff -t -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)
@@ -206,17 +202,13 @@ def groff2man(data):
     return man_text
 
 def cplusplus2man(data):
-    '''
-    Convert HTML text from cplusplus.com to man pages.
-    '''
+    """Convert HTML text from cplusplus.com to man pages."""
     groff_text = cplusplus2groff(data)
     man_text = groff2man(groff_text)
     return man_text
 
 def get_width():
-    '''
-    Calculate appropriate width for groff
-    '''
+    """Get terminal width"""
     # Get terminal size
     ws = struct.pack("HHHH", 0, 0, 0, 0)
     ws = fcntl.ioctl(0, termios.TIOCGWINSZ, ws)
@@ -226,9 +218,7 @@ def get_width():
     return width
 
 def test():
-    '''
-    Simple Text
-    '''
+    """Simple Text"""
     name = raw_input('What manual page do you want? ')
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
     print cplusplus2man(ifs.read()),

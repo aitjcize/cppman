@@ -37,9 +37,10 @@ if program.startswith('./') or program.startswith('bin/'):
     sys.path.insert(0, LANUCH_DIR)
 
 from cppman.cppman import cppman
+from cppman.Environ import config, mandb_changed
 
 program_name = sys.argv[0]
-program_version = '0.1.6.1'
+program_version = '0.1.7'
 
 def version():
     sys.stderr.write(
@@ -52,26 +53,33 @@ Written by Wei-Ning Huang (AZ) <aitjcize@gmail.com>.\n' %
 
 def main():
     option_list = [
-        make_option('-c', '--cache-all', action = 'store_true',
-                    dest='cache_all', default = False,
-                    help = 'cache all available man pages from cplusplus.com '
+        make_option('-c', '--cache-all', action='store_true',
+                    dest='cache_all', default=False,
+                    help='cache all available man pages from cplusplus.com '
                            'to enable offline browsing'),
-        make_option('-C', '--clear-cache', action = 'store_true',
-                    dest='clear_cache', default = False,
-                    help = 'clear all cached files'),
-        make_option('-f', '--find-page', action = 'store', type='string',
-                    dest='keyword', default = None,
-                    help = 'find man page'),
-        make_option('-o', '--force-update', action = 'store_true',
-                    dest='force', default = False,
-                    help = "force cppman to update existing cache when "\
-                    "'--cache-all' or browsing man pages that were already "\
+        make_option('-C', '--clear-cache', action='store_true',
+                    dest='clear_cache', default=False,
+                    help='clear all cached files'),
+        make_option('-f', '--find-page', action='store', type='string',
+                    dest='keyword', default=None,
+                    help='find man page'),
+        make_option('-o', '--force-update', action='store_true',
+                    dest='force', default=False,
+                    help="force cppman to update existing cache when "
+                    "'--cache-all' or browsing man pages that were already "
                     "cached"),
-        make_option('-r', '--rebuild-index', action = 'store_true',
-                    dest='rebuild_index', default = False,
-                    help = 'rebuild index database from cplusplus.com'),
-        make_option('-v', '--version', action = 'store_true', dest='version',
-                    default = False, help = 'show version information')
+        make_option('-m', '--use-mandb', action='store', dest='mandb',
+                    help="Accepts 'true' or 'false'. If true, cppman adds "
+                    "manpage path to mandb so that you can view C++ manpages "
+                    "with `man' command. The default value is 'false'."),
+        make_option('-p', '--pager', action='store', dest='pager',
+                    help="Select pager to use, accepts 'vim' or 'less'."
+                    "The default value is 'vim'."),
+        make_option('-r', '--rebuild-index', action='store_true',
+                    dest='rebuild_index', default=False,
+                    help='rebuild index database from cplusplus.com'),
+        make_option('-v', '--version', action='store_true', dest='version',
+                    default=False, help='show version information')
     ]
     parser = OptionParser(usage = 'Usage: cppman [OPTION...] PAGE...',
                           option_list=option_list)
@@ -95,6 +103,25 @@ def main():
     if options.keyword:
         cm = cppman()
         cm.find(options.keyword)
+        sys.exit(0)
+
+    if options.pager:
+        if options.pager == 'vim' or options.pager == 'less':
+            config.Pager = options.pager
+            print "Pager set to `%s'." % options.pager
+            sys.exit(0)
+        else:
+            raise Exception("invalid value `%s' for option `--pager'" %
+                            options.pager)
+
+    if options.mandb:
+        if options.mandb != 'true' and options.mandb != 'false':
+            raise Exception("invalid value `%s' for option `--use-mandb'" %
+                            options.mandb)
+        value = config.parseBool(options.mandb)
+        if config.UpdateManPath ^ value:
+            config.UpdateManPath = value
+            mandb_changed()
         sys.exit(0)
 
     if options.rebuild_index:
