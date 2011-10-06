@@ -1,6 +1,15 @@
 ------------------------------------------------------------------------------
 manpages-cpp Changelog
 ------------------------------------------------------------------------------
+manpages-cpp 0.1.7 (October 7th, 2011):
+
+	Bug fixed:
+	* Minor formating bug
+
+	Features added:
+	* Pager is now configurable, either 'vim' or 'less' is accepted.
+	* Integration of mandb is now configurable, default disabled.
+
 manpages-cpp 0.1.6 (April 2nd, 2011):
 
 	Bug fixed:
