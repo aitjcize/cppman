@@ -23,8 +23,9 @@
 #
 
 import ConfigParser
+import os
 
-from os.path import exists
+from os.path import dirname, exists
 
 class Config(object):
     def __init__(self, configfile):
@@ -48,6 +49,10 @@ class Config(object):
 
     def set_default(self):
         """Set config to default."""
+        try:
+            os.makedirs(dirname(self._configfile))
+        except: pass
+
         self._config = ConfigParser.RawConfigParser()
         self._config.add_section('Settings')
         self._config.set('Settings', 'UpdateManPath', 'false')
@@ -58,6 +63,10 @@ class Config(object):
 
     def store_config(self):
         """Store config back to file."""
+        try:
+            os.makedirs(dirname(self._configfile))
+        except: pass
+
         with open(self._configfile, 'w') as f:
             self._config.write(f)
 
