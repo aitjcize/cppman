@@ -35,17 +35,20 @@ import urllib
 # The '.SE' pseudo macro is described in the function: cplusplus2groff
 rps = [
         # Header, Name
+        (r'<div class="prototype">(.*?)</div>', r'\1', 0),
         (r'<h1>(.+?)</h1>\s*<div class="right">(.*?)</div>\s*</div>\s*'
-         r'<div class="docsubtop">\s*<div class="right">(<code>)?(.*?)'
-         r'(</code>)?</div>\s*<div class="prototype">(.*?)</div>\s*</div>\s*'
+         r'<div class="C_docsubtop">\s*<div class="right">(<code>)?(.*?)'
+         r'(</code>)?</div>\s*(.*?)\s*</div>\s*'
          r'<p><strong>(.+?)</strong>',
          r'.TH "\1" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
          r'\n.SH NAME\n\1 - \7\n'
          r'\n.SE\n.SH TYPE\n\2\n'
          r'\n.SE\n.SH SYNOPSIS\n#include \4\n.sp\n\6\n'
          r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+        # Remove empty #include
+        (r'#include \n.sp\n', r'', 0),
         # Remove empty sections
-        (r'\n.SH (.+?)\n\n', r'', 0),
+        (r'\n.SH (.+?)\n+.SE', r'', 0),
         # Section headers
         (r'.*<h3>(.+?)</h3>', r'\n.SE\n.SH "\1"\n', 0),
         # 'ul' tag
@@ -121,8 +124,6 @@ rps = [
         (r'\n\n+', r'\n', 0),
         # Preserve \n" in EXAMPLE
         (r'\\n"', r'\en"', 0),
-        # Remove empty #include
-        (r'#include \n', r'', 0)
       ]
 
 def cplusplus2groff(data):
