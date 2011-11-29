@@ -11,7 +11,7 @@ _data_files = [
 
 setup(
 	name = 'manpages-cpp',
-	version = '0.1.7',
+	version = '0.1.8',
 	description = 'C++ man pages generater that generates C++ man pages'
                       'from cplusplus.com',
 	author = 'Wei-Ning Huang (AZ)',
