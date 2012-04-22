@@ -35,15 +35,13 @@ import urllib
 # The '.SE' pseudo macro is described in the function: cplusplus2groff
 rps = [
         # Header, Name
-        (r'<div class="prototype">(.*?)</div>', r'\1', 0),
-        (r'<h1>(.+?)</h1>\s*<div class="right">(.*?)</div>\s*</div>\s*'
-         r'<div class="C_docsubtop">\s*<div class="right">(<code>)?(.*?)'
-         r'(</code>)?</div>\s*(.*?)\s*</div>\s*'
-         r'<p><strong>(.+?)</strong>',
-         r'.TH "\1" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-         r'\n.SH NAME\n\1 - \7\n'
-         r'\n.SE\n.SH TYPE\n\2\n'
-         r'\n.SE\n.SH SYNOPSIS\n#include \4\n.sp\n\6\n'
+        (r'\s*<div id="I_type">(.*?)\s*</div>\s*<h1>(.*?)</h1>\s*'
+         r'<div id="I_file">(.*?)</div>\s*<div class="C_prototype">'
+         r'(.*?)</div>\s*<div id="I_description">(.*?)</div>',
+         r'.TH "\2" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
+         r'\n.SH NAME\n\1 - \5\n'
+         r'\n.SE\n.SH TYPE\n\1\n'
+         r'\n.SE\n.SH SYNOPSIS\n#include \3\n.sp\n\4\n'
          r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
         # Remove empty #include
         (r'#include \n.sp\n', r'', 0),
@@ -96,7 +94,7 @@ rps = [
         # Remove snippet line numbers
         (r'<td class="rownum">.+</td>', r'', 0),
         # Footer
-        (r'<div id="CH_footer">.*?</div>',
+        (r'<div id="CH_bb">.*$',
          r'\n.SE\n.SH REFERENCE\n'
          r'cplusplus.com, 2000-2010 - All rights reserved.', re.S),
         # 'br' tag
@@ -108,6 +106,8 @@ rps = [
         (r'<strong>(.+?)</strong>', r'\n.B \1\n', 0),
         # -
         (r'-', r'\-', 0),
+        # Remove row number in EXAMPLE
+        (r'<td class="rownum">.*?</td>', r'', re.S),
         # Any other tags
         (r'<script[^>]*>[^<]*</script>', r'', 0),
         (r'<.*?>', r'', re.S),
@@ -130,7 +130,7 @@ def cplusplus2groff(data):
     """Convert HTML text from cplusplus.com to Groff-formated text."""
     # Remove sidebar
     try:
-        data = data[data.index('<h1>'):]
+        data = data[data.index('<div class="C_doc">'):]
     except ValueError: pass
 
     # Replace all
