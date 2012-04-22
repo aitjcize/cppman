@@ -49,6 +49,14 @@ rps = [
          r'\n.SH NAME\n\2 - \4\n'
          r'\n.SE\n.SH TYPE\n\1\n'
          r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+        (r'\s*<div id="I_type">(.*?)\s*</div>\s*<h1>(.*?)</h1>\s*'
+         r'<div class="C_prototype">(.*?)</div>\s*'
+         r'<div id="I_description">(.*?)</div>',
+         r'.TH "\2" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
+         r'\n.SH NAME\n\2 - \4\n'
+         r'\n.SE\n.SH TYPE\n\1\n'
+         r'\n.SE\n.SH SYNOPSIS\n\3\n'
+         r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
         # Remove empty #include
         (r'#include \n.sp\n', r'', 0),
         # Remove empty sections
