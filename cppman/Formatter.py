@@ -39,14 +39,14 @@ rps = [
          r'<div id="I_file">(.*?)</div>\s*<div class="C_prototype">'
          r'(.*?)</div>\s*<div id="I_description">(.*?)</div>',
          r'.TH "\2" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-         r'\n.SH NAME\n\1 - \5\n'
+         r'\n.SH NAME\n\2 - \5\n'
          r'\n.SE\n.SH TYPE\n\1\n'
          r'\n.SE\n.SH SYNOPSIS\n#include \3\n.sp\n\4\n'
          r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
         (r'\s*<div id="I_type">(.*?)\s*</div>\s*<h1>(.*?)</h1>\s*'
          r'<div id="I_file">(.*?)</div>\s*<div id="I_description">(.*?)</div>',
          r'.TH "\2" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-         r'\n.SH NAME\n\1 - \4\n'
+         r'\n.SH NAME\n\2 - \4\n'
          r'\n.SE\n.SH TYPE\n\1\n'
          r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
         # Remove empty #include
@@ -70,8 +70,8 @@ rps = [
         # Subsections
         (r'<b>(.+?)</b>:<br>', r'.SS \1\n', 0),
         # Member functions / See Also table
-        (r'<table class="C_docLink"><tr><td.+?>(.+?)</td><td.+?>(.+?)'
-         r'<span class="typ">(.+?)</span></td></tr></table>',
+        (r'<dl class="links"><dt>.*?<b>(.*?)</b>.*?</dt><dd>(.*?)'
+         r'<span class="typ">(.*?)</span></dd></dl>',
          r'\n.IP "\1(3)"\n\2 \3\n', 0),
         # Three-column table
         (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)'
@@ -229,6 +229,8 @@ def test():
     name = raw_input('What manual page do you want? ')
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
     print cplusplus2man(ifs.read()),
+    #with open('test.txt') as ifs:
+    #    print cplusplus2man(ifs.read()),
 
 if __name__ == '__main__':
     test()
