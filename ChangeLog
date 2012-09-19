@@ -2,6 +2,11 @@
 manpages-cpp Changelog
 ------------------------------------------------------------------------------
 
+manpages-cpp 0.2.0 (September 19th, 2012):
+
+	Bug fixed:
+	* Fix formatting due to the change of cplusplus.com
+
 manpages-cpp 0.1.9 (April 22th, 2012):
 
 	Bug fixed:
