@@ -1,4 +1,4 @@
-manpages-cpp is a project that generates C++ man pages from cplusplus.com
+cppman is a project that generates C++ man pages from cplusplus.com
 
 cppman, the man page browser/fetcher generates C++ manual pages from cplusplus.com and provide a man-like interface to view man pages.
 
@@ -6,3 +6,5 @@ Arch Linux users can install it from AUR.
 
 Ubuntu PPA can be add with following command:
 sudo add-apt-repository ppa:aitjcize/manpages-cpp
+
+* manpages-cpp is renamed to cppman since September 19, 2012

@@ -10,13 +10,13 @@ _data_files = [
 	]
 
 setup(
-	name = 'manpages-cpp',
+	name = 'cppman',
 	version = '0.2.0',
 	description = 'C++ man pages generater that generates C++ man pages'
                       'from cplusplus.com',
 	author = 'Wei-Ning Huang (AZ)',
 	author_email = 'aitjcize@gmail.com',
-        url = 'http://github.com/Aitjcize/manpages-cpp',
+        url = 'http://github.com/Aitjcize/cppman',
 	license = 'GPL',
     	packages = ['cppman'],
 	scripts = ['bin/cppman'],

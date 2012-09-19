@@ -5,7 +5,7 @@
 # Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
 #
-# This file is part of manpages-cpp.
+# This file is part of cppman.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ try:
     os.makedirs(config_dir)
 except: pass
 
-cwd = cwd[:cwd.find('manpages-cpp') + len('manpages-cpp')]
+cwd = cwd[:cwd.find('cppman') + len('cppman')]
 
 # If launched from source directory
 if exists(normpath(join(cwd, 'lib/index.db'))):
