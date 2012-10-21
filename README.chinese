@@ -22,4 +22,4 @@ Archlinux可以使用AUR的方式安裝
 yaourt -S cppman
 
 
-如果有發現顯示錯誤的頁面，也歡迎到http://github.com/Aitjcize/manpages-cpp/issues回報問題，謝謝。
+如果有發現顯示錯誤的頁面，也歡迎到http://github.com/Aitjcize/cppman/issues回報問題，謝謝。
