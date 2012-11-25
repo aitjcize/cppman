@@ -22,7 +22,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import ConfigParser
+import configparser
 import os
 
 from os.path import dirname, exists
@@ -34,7 +34,7 @@ class Config(object):
         if not exists(configfile):
             self.set_default()
         else:
-            self._config = ConfigParser.RawConfigParser()
+            self._config = configparser.RawConfigParser()
             self._config.read(self._configfile)
 
     def __getattr__(self, name):
@@ -53,7 +53,7 @@ class Config(object):
             os.makedirs(dirname(self._configfile))
         except: pass
 
-        self._config = ConfigParser.RawConfigParser()
+        self._config = configparser.RawConfigParser()
         self._config.add_section('Settings')
         self._config.set('Settings', 'UpdateManPath', 'false')
         self._config.set('Settings', 'Pager', 'vim')

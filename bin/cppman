@@ -108,7 +108,7 @@ def main():
     if options.pager:
         if options.pager == 'vim' or options.pager == 'less':
             config.Pager = options.pager
-            print "Pager set to `%s'." % options.pager
+            print("Pager set to `%s'." % options.pager)
             sys.exit(0)
         else:
             raise Exception("invalid value `%s' for option `--pager'" %
@@ -130,14 +130,14 @@ def main():
         sys.exit(0)
 
     if len(args) == 0:
-        print >> sys.stderr, 'What manual page do you want?'
+        print('What manual page do you want?', file=sys.stderr)
         sys.exit(1)
 
     cm = cppman(options.force)
     for i in args:
         if i != args[0]:
-            print '--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '\
-                  '| quit (Ctrl-C) ]' % i
+            print('--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '\
+                  '| quit (Ctrl-C) ]' % i)
             # For some reason, if only one layer of try...except is used
             # pressing CTRL-D CTRL-C, the second CTRL-C didn't catch by the
             # try..except clause. As a workaround, I add another layer to catch
@@ -145,19 +145,19 @@ def main():
             # TODO: find out what happened
             try:
                 try:
-                    raw_input()
+                    input()
                 except EOFError:
                     continue
                 except KeyboardInterrupt:
-                    print '\n'
+                    print('\n')
                     break
             except KeyboardInterrupt:
-                print '\n'
+                print('\n')
                 break
         try:
             pid = cm.man(i)
-        except RuntimeError, e:
-            print e
+        except RuntimeError as e:
+            print(e)
             continue
         else:
             os.waitpid(pid, 0)
@@ -165,8 +165,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except (Exception, KeyboardInterrupt), e:
+    except (Exception, KeyboardInterrupt) as e:
         if type(e) == KeyboardInterrupt:
-            print '\nAborted.'
+            print('\nAborted.')
         else:
-            print 'error:', e
+            print('error:', e)

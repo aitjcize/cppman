@@ -22,7 +22,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import re
 
 class Crawler(object):
@@ -41,7 +41,7 @@ class Crawler(object):
         '''
         Crawl a new page.
         '''
-        data = urllib.urlopen(url).read()
+        data = urllib.request.urlopen(url).read()
 
         # Remove sidebar
         try:
@@ -53,8 +53,8 @@ class Crawler(object):
         links = list(set(links))
 
         for link in links:
-            real_url = urllib.urlopen(self.url_base + link).geturl()
-            real_url = urllib.unquote(real_url)
+            real_url = urllib.request.urlopen(self.url_base + link).geturl()
+            real_url = urllib.parse.unquote(real_url)
 
             if real_url in self.visited or not real_url.startswith(
                 'http://www.cplusplus.com/reference/'):
