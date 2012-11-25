@@ -4,4 +4,7 @@ cppman, the man page browser/fetcher generates C++ manual pages from cplusplus.c
 
 Arch Linux users can install it from AUR.
 
-Forked on Nov 25, 2012 to port to python3
+* manpages-cpp is renamed to cppman since September 19, 2012
+
+Forked on November 25th, 2012
+Now using python3

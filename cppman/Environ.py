@@ -28,7 +28,7 @@ import sys
 
 from os.path import expanduser, abspath, normpath, dirname, exists, join
 
-import Config
+from . import Config
 
 HOME = expanduser('~')
 

@@ -31,11 +31,11 @@ import shutil
 import sqlite3
 import subprocess
 import sys
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
-import Environ
-import Formatter
-from Crawler import Crawler
+from . import Environ
+from . import Formatter
+from .Crawler import Crawler
 
 class cppman(Crawler):
     """Manage cpp man pages, indexes"""
@@ -130,8 +130,8 @@ class cppman(Crawler):
     def insert_index(self, url):
         """callback to insert index"""
         if url not in self.blacklist:
-            print "Indexing '%s' ..." % url
-            name = self.extract_name(urllib.urlopen(url).read())
+            print("Indexing '%s' ..." % url)
+            name = self.extract_name(urllib.request.urlopen(url).read())
             if url in self.std:
                 name = 'std::' + name
             elif url in self.stl:
@@ -139,17 +139,17 @@ class cppman(Crawler):
             self.db_cursor.execute('INSERT INTO CPPMAN (name, url) VALUES '
                                    '("%s", "%s")' % (name, url))
         else:
-            print "Skipping blacklisted page '%s' ..." % url
+            print("Skipping blacklisted page '%s' ..." % url)
 
     def cache_all(self):
         """Cache all available man pages from cplusplus.com"""
-        print 'By defualt, cppman fetch pages on the fly if coressponding '\
+        print('By defualt, cppman fetch pages on the fly if coressponding '\
             'page is not found in the cache. The "cache-all" option is only '\
-            'useful if you want to view man pages offline.'
-        print 'Caching all contents from cplusplus.com will take about 20 '\
-            'minutes, do you want to continue [Y/n]?',
+            'useful if you want to view man pages offline.')
+        print('Caching all contents from cplusplus.com will take about 20 '\
+            'minutes, do you want to continue [Y/n]?', end=' ')
 
-        respond = raw_input()
+        respond = input()
         if respond.lower() not in ['y', 'ye', 'yes']:
             raise KeyboardInterrupt
 
@@ -170,23 +170,23 @@ class cppman(Crawler):
 
         for name, url in data:
             try:
-                print 'Caching %s ...' % name
+                print('Caching %s ...' % name)
                 self.cache_man_page(url, name)
-            except Exception, e:
-                print 'Error caching %s ...', name
+            except Exception as e:
+                print('Error caching %s ...', name)
                 self.failure_count += 1
             else:
                 self.success_count += 1
         conn.close()
 
-        print '\n%d manual pages cahced successfully.' % self.success_count
-        print '%d manual pages failed to cache.' % self.failure_count
-        print '\nrunning mandb...'
+        print('\n%d manual pages cahced successfully.' % self.success_count)
+        print('%d manual pages failed to cache.' % self.failure_count)
+        print('\nrunning mandb...')
         self.update_mandb(False)
 
     def cache_man_page(self, url, name=None):
         """callback to cache new man page"""
-        data = urllib.urlopen(url).read()
+        data = urllib.request.urlopen(url).read()
         groff_text = Formatter.cplusplus2groff(data)
         if not name: name = self.extract_name(data)
 
@@ -266,9 +266,9 @@ class cppman(Crawler):
         if selected:
             for name, url in selected:
                 if os.isatty(sys.stdout.fileno()):
-                    print name.replace(pattern, '\033[1;31m%s\033[0m' % pattern)
+                    print(name.replace(pattern, '\033[1;31m%s\033[0m' % pattern))
                 else:
-                    print name
+                    print(name)
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
