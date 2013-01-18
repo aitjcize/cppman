@@ -184,7 +184,7 @@ def cplusplus2groff(data):
         data = data.replace(table, tbl)
 
     # Escape column which starts with dot
-    data = re.sub(r'T{\n(\..*?)\nT}', r'T{\n\m \1\nT}', data, flags=re.S)
+    data = re.sub(r'T{\n(\..*?)\nT}', r'T{\n\E \1\nT}', data, flags=re.S)
 
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
