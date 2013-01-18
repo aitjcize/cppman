@@ -112,6 +112,8 @@ rps = [
         (r'<div id="CH_bb">.*$',
          r'\n.SE\n.SH REFERENCE\n'
          r'cplusplus.com, 2000-2010 - All rights reserved.', re.S),
+        # C++ version tag
+        (r'<div title="(C\+\+..)">', r'.sp 2\n\1\n', 0),
         # 'br' tag
         (r'<br>', r'\n.br\n', 0),
         (r'\n.br\n.br\n', r'\n.sp\n', 0),
