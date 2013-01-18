@@ -89,8 +89,8 @@ rps = [
         (r'<table class="boxed">\s*<tr><td>(.+?)</td><td>(.+?)</td><td>(.+?)'
          r'</td></tr>((.|\n)+?)</table>',
          r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n', 0),
-        (r'<tr><td>(.+?)</td><td>(.+?)</td><td>(.+?)</td></tr>',
-         r'\1|T{\n\2\nT}|T{\n\3\nT}\n', 0),
+        (r'<tr.*?><td>(.+?)</td><td>(.*?)</td><td>(.*?)</td></tr>',
+         r'T{\n\1\nT}|T{\n\2\nT}|T{\n\3\nT}\n', re.S),
         # Two-column table
         (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th></tr>'
          r'((.|\n)+?)</table>',
@@ -98,8 +98,8 @@ rps = [
         (r'<table class="boxed">\s*<tr><td>(.+?)</td><td>(.+?)</td></tr>'
          r'((.|\n)+?)</table>',
          r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n', 0),
-        (r'<tr><td>(.+?)</td><td>(.+?)</td></tr>',
-         r'\1|T{\n\2\nT}\n', re.S),
+        (r'<tr><td>(.+?)</td><td>(.*?)</td></tr>',
+         r'T{\n\1\nT}|T{\n\2\nT}\n', re.S),
         # Single-column table
         (r'<table class="boxed"><tr><th>(.+?)</th></tr>(.+?)</table>',
          r'\n.TS\nallbox;\nc\nl .\n\1\n\2\n.TE\n.sp\n', 0),
