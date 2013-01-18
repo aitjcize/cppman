@@ -2,6 +2,16 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 2.2.0 (January 19th, 2013):
+	
+	Bug fixed:
+	* Fix formatting due to the change of cplusplus.com
+	* Fix syntax highlighting in vim
+
+	Features added:
+	* Reimplement table converter, now support unlimited column table
+	  generation
+
 cppman 0.2.0 (September 19th, 2012):
 
 	Bug fixed:
