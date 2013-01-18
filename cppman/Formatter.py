@@ -82,15 +82,6 @@ rps = [
         (r'<dl class="links"><dt>.*?<b>(.*?)</b>.*?</dt><dd>(.*?)'
          r'<span class="typ">(.*?)</span></dd></dl>',
          r'\n.IP "\1(3)"\n\2 \3\n', 0),
-        # Three-column table
-        (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)'
-         r'</th></tr>((.|\n)+?)</table>',
-         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n', 0),
-        (r'<table class="boxed">\s*<tr><td>(.+?)</td><td>(.+?)</td><td>(.+?)'
-         r'</td></tr>((.|\n)+?)</table>',
-         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n', 0),
-        (r'<tr.*?><td>(.+?)</td><td>(.*?)</td><td>(.*?)</td></tr>',
-         r'T{\n\1\nT}|T{\n\2\nT}|T{\n\3\nT}\n', re.S),
         # Two-column table
         (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th></tr>'
          r'((.|\n)+?)</table>',
@@ -100,6 +91,15 @@ rps = [
          r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n', 0),
         (r'<tr><td>(.+?)</td><td>(.*?)</td></tr>',
          r'T{\n\1\nT}|T{\n\2\nT}\n', re.S),
+        # Three-column table
+        (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)'
+         r'</th></tr>((.|\n)+?)</table>',
+         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n', 0),
+        (r'<table class="boxed">\s*<tr><td>(.+?)</td><td>(.+?)</td><td>(.+?)'
+         r'</td></tr>((.|\n)+?)</table>',
+         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n', 0),
+        (r'<tr.*?><td>(.+?)</td><td>(.*?)</td><td>(.*?)</td></tr>',
+         r'T{\n\1\nT}|T{\n\2\nT}|T{\n\3\nT}\n', re.S),
         # Single-column table
         (r'<table class="boxed"><tr><th>(.+?)</th></tr>(.+?)</table>',
          r'\n.TS\nallbox;\nc\nl .\n\1\n\2\n.TE\n.sp\n', 0),
