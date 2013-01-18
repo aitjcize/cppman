@@ -269,11 +269,11 @@ def get_width():
 
 def test():
     """Simple Text"""
-    #name = raw_input('What manual page do you want? ')
-    #ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    #print cplusplus2man(ifs.read()),
-    with open('test.txt') as ifs:
-        print cplusplus2man(ifs.read()),
+    name = raw_input('What manual page do you want? ')
+    ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
+    print cplusplus2man(ifs.read()),
+    #with open('test.txt') as ifs:
+    #    print cplusplus2man(ifs.read()),
 
 if __name__ == '__main__':
     test()

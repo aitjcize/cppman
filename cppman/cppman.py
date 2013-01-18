@@ -276,5 +276,5 @@ class cppman(Crawler):
         """Update mandb."""
         if not Environ.config.UpdateManPath:
             return
-        cmd = 'mandb%s' % (' -q' if quiet else '')
+        cmd = 'mandb %s' % (' -q' if quiet else '')
         handle = subprocess.Popen(cmd, shell=True).wait()
