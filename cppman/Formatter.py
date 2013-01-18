@@ -82,29 +82,25 @@ rps = [
         (r'<dl class="links"><dt>.*?<b>(.*?)</b>.*?</dt><dd>(.*?)'
          r'<span class="typ">(.*?)</span></dd></dl>',
          r'\n.IP "\1(3)"\n\2 \3\n', 0),
+        # Snippet
+        ## Remove table
+        (r'<table class="snippet">', r'', 0),
+        ## Remove line numbers
+        (r'<td class="rownum">.+?</td>', r'', re.S),
+        ## remove td
+        (r'<td class="source">(.+?)</td>', r'\1', re.S),
+        (r'<td class="output">(.+?)</td>', r'\1', re.S),
         # Table
         (r'<table.*?>', r'.TS\nallbox tab(|);\n', 0),
         (r'</table>', r'\n.TE\n.sp\n', 0),
-        ## Three column
-        #(r'<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)</th></tr>',
-        # r'c c c\nl l l.\n\1|\2|\3\n', 0),
-        ### Two column
-        #(r'<tr><th>(.+?)</th><th>(.+?)</th></tr>',
-        # r'c c\nl l .\n\1|\2\n', 0),
-        ### Single column
-        #(r'<tr><th>(.+?)</th></tr>', r'c\nl.\n\1\n', 0),
-
         ## Table head column
         (r'<tr.*?><th.*?>(.*?)</th>', r'TH{\n\1\nTH}', 0),
-        (r'<th>(.*?)</th>', r'|TH{\n\1\nTH}', 0),
-
+        (r'<th colspan="(.+?)">(.*?)</th>', r'|TH{S\1\n\2\nTH}', 0),
+        (r'<th.*?>(.*?)</th>', r'|TH{\n\1\nTH}', 0),
         ## Table body column
         (r'<tr.*?><td.*?>((.|\n)*?)</td>', r'T{\n\1\nT}', 0),
         (r'<td.*?>((.|\n)*?)</td>', r'|T{\n\1\nT}', 0),
         (r'</tr>', r'\n', 0),
-
-        # Remove snippet line numbers
-        (r'<td class="rownum">.+</td>', r'', 0),
         # Footer
         (r'<div id="CH_bb">.*$',
          r'\n.SE\n.SH REFERENCE\n'
@@ -151,19 +147,41 @@ def cplusplus2groff(data):
     for rp in rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
+    # Process table header
+    # Header is like text block, but use TH instead of T
+    # 'TH{SX' : X is the colspan of that column
     for table in re.findall(r'\n\.TS(.+?)\.TE', data, re.S):
-        ths = re.findall(r'(TH{.*?TH}(?:\|TH{.*?TH})+)', table, re.S)
-        if len(ths) == 1:
-            th = ths[0]
-            n_cols = th.count('TH') / 2
-            if n_cols == 2:
-                content = 'c c\nl lx.\n'
-            elif n_cols == 3:
-                content = 'c c c\nl lx l.\n'
-            else:
-                content = 'c ' * n_cols + '\n' + 'l ' * n_cols + '.\n'
-            t = table.replace(th, content + th.replace('TH', 'T'))
-            data = data.replace(table, t)
+        tbl = table
+        content = ''
+        n_cols = 0
+        for th in re.findall(r'(TH{.*?TH}(?:\|TH{.*?TH})+)', table, re.S):
+            n_cols = 0
+            for col in th.split('|'):
+                try:
+                    colspan = re.match(r'TH{S([0-9]+?)', col).group(1)
+                except AttributeError:
+                    content += 'c '
+                    n_cols += 1
+                else:
+                    content += 'c ' + 's ' * (int(colspan) - 1)
+                    n_cols += int(colspan)
+            content += '\n'
+
+        if n_cols == 2:
+            content += 'l lx'
+        elif n_cols == 3:
+            content += 'l lx l'
+        else:
+            content += 'l ' * n_cols
+
+        content += '.\n'
+
+        # Insert format header
+        tbl = tbl.replace('allbox tab(|);\n', 'allbox tab(|);\n%s' % content)
+        # Recover TH{SX -> T{
+        tbl = re.sub('TH{S[0-9]+?', 'T{', tbl).replace('TH', 'T')
+
+        data = data.replace(table, tbl)
 
     # Escape column which starts with dot
     data = re.sub(r'T{\n(\..*?)\nT}', r'T{\n\m \1\nT}', data, flags=re.S)
@@ -251,11 +269,11 @@ def get_width():
 
 def test():
     """Simple Text"""
-    name = raw_input('What manual page do you want? ')
-    ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    print cplusplus2man(ifs.read()),
-    #with open('test.txt') as ifs:
-    #    print cplusplus2man(ifs.read()),
+    #name = raw_input('What manual page do you want? ')
+    #ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
+    #print cplusplus2man(ifs.read()),
+    with open('test.txt') as ifs:
+        print cplusplus2man(ifs.read()),
 
 if __name__ == '__main__':
     test()
