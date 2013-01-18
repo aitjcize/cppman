@@ -82,30 +82,27 @@ rps = [
         (r'<dl class="links"><dt>.*?<b>(.*?)</b>.*?</dt><dd>(.*?)'
          r'<span class="typ">(.*?)</span></dd></dl>',
          r'\n.IP "\1(3)"\n\2 \3\n', 0),
-        # Three-column table
-        (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)'
-         r'</th></tr>((.|\n)+?)</table>',
-         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n', 0),
-        (r'<table class="boxed">\s*<tr><td>(.+?)</td><td>(.+?)</td><td>(.+?)'
-         r'</td></tr>((.|\n)+?)</table>',
-         r'\n.TS\nallbox tab(|);\nc c\nl lx l .\n\1|\2|\3\n\4\n.TE\n.sp\n', 0),
-        (r'<tr.*?><td>(.+?)</td><td>(.*?)</td><td>(.*?)</td></tr>',
-         r'T{\n\1\nT}|T{\n\2\nT}|T{\n\3\nT}\n', re.S),
-        # Two-column table
-        (r'<table class="boxed">\s*<tr><th>(.+?)</th><th>(.+?)</th></tr>'
-         r'((.|\n)+?)</table>',
-         r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n', 0),
-        (r'<table class="boxed">\s*<tr><td>(.+?)</td><td>(.+?)</td></tr>'
-         r'((.|\n)+?)</table>',
-         r'\n.TS\nallbox tab(|);\nc c\nl lx .\n\1|\2\n\3\n.TE\n.sp\n', 0),
-        (r'<tr><td>(.+?)</td><td>(.*?)</td></tr>',
-         r'T{\n\1\nT}|T{\n\2\nT}\n', re.S),
-        # Single-column table
-        (r'<table class="boxed"><tr><th>(.+?)</th></tr>(.+?)</table>',
-         r'\n.TS\nallbox;\nc\nl .\n\1\n\2\n.TE\n.sp\n', 0),
-        (r'<table class="boxed"><tr><td>(.+?)</td></tr>(.+?)</table>',
-         r'\n.TS\nallbox;\nc\nl .\n\1\n\2\n.TE\n.sp\n', 0),
-        (r'<tr><td>(.+?)</td></tr>', r'\nT{\1\nT}\n.sp\n', 0),
+        # Table
+        (r'<table.*?>', r'.TS\nallbox tab(|);\n', 0),
+        (r'</table>', r'\n.TE\n.sp\n', 0),
+        ## Three column
+        #(r'<tr><th>(.+?)</th><th>(.+?)</th><th>(.+?)</th></tr>',
+        # r'c c c\nl l l.\n\1|\2|\3\n', 0),
+        ### Two column
+        #(r'<tr><th>(.+?)</th><th>(.+?)</th></tr>',
+        # r'c c\nl l .\n\1|\2\n', 0),
+        ### Single column
+        #(r'<tr><th>(.+?)</th></tr>', r'c\nl.\n\1\n', 0),
+
+        ## Table head column
+        (r'<tr.*?><th.*?>(.*?)</th>', r'TH{\n\1\nTH}', 0),
+        (r'<th>(.*?)</th>', r'|TH{\n\1\nTH}', 0),
+
+        ## Table body column
+        (r'<tr.*?><td.*?>((.|\n)*?)</td>', r'T{\n\1\nT}', 0),
+        (r'<td.*?>((.|\n)*?)</td>', r'|T{\n\1\nT}', 0),
+        (r'</tr>', r'\n', 0),
+
         # Remove snippet line numbers
         (r'<td class="rownum">.+</td>', r'', 0),
         # Footer
@@ -153,6 +150,23 @@ def cplusplus2groff(data):
     # Replace all
     for rp in rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
+
+    for table in re.findall(r'\n\.TS(.+?)\.TE', data, re.S):
+        ths = re.findall(r'(TH{.*?TH}(?:\|TH{.*?TH})+)', table, re.S)
+        if len(ths) == 1:
+            th = ths[0]
+            n_cols = th.count('TH') / 2
+            if n_cols == 2:
+                content = 'c c\nl lx.\n'
+            elif n_cols == 3:
+                content = 'c c c\nl lx l.\n'
+            else:
+                content = 'c ' * n_cols + '\n' + 'l ' * n_cols + '.\n'
+            t = table.replace(th, content + th.replace('TH', 'T'))
+            data = data.replace(table, t)
+
+    # Escape column which starts with dot
+    data = re.sub(r'T{\n(\..*?)\nT}', r'T{\n\m \1\nT}', data, flags=re.S)
 
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
