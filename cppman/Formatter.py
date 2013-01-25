@@ -106,7 +106,7 @@ rps = [
          r'\n.SE\n.SH REFERENCE\n'
          r'cplusplus.com, 2000-2010 - All rights reserved.', re.S),
         # C++ version tag
-        (r'<div title="(C\+\+..)">', r'.sp 2\n\1\n', 0),
+        (r'<div title="(C\+\+..)".*?>', r'.sp\n\1\n', 0),
         # 'br' tag
         (r'<br>', r'\n.br\n', 0),
         (r'\n.br\n.br\n', r'\n.sp\n', 0),
@@ -154,16 +154,34 @@ def cplusplus2groff(data):
         tbl = table
         content = ''
         n_cols = 0
-        for th in re.findall(r'(TH{.*?TH}(?:\|TH{.*?TH})+)', table, re.S):
+        # Two condition:
+        # -------      -------
+        # h h h h  or  h r r r
+        # r r r r      h r r r
+        # -------      -------
+        #
+        # In the first case, we would want the header to be centered; while in
+        # the second case we want the header to be left aligned
+        ths_c1 = re.findall(r'(TH{.*?TH}(?:\|TH{.*?TH})+)', table, re.S)
+        ths_c2 = re.findall(r'(TH{.*?TH}(?:\|T{.*?T})+)', table, re.S)
+
+        if ths_c1:
+            align_char = 'c '
+            ths = ths_c1
+        else:
+            align_char = 'l '
+            ths = ths_c2
+
+        for th in ths:
             n_cols = 0
             for col in th.split('|'):
                 try:
                     colspan = re.match(r'TH{S([0-9]+?)', col).group(1)
                 except AttributeError:
-                    content += 'c '
+                    content += align_char
                     n_cols += 1
                 else:
-                    content += 'c ' + 's ' * (int(colspan) - 1)
+                    content += align_char + 's ' * (int(colspan) - 1)
                     n_cols += int(colspan)
             content += '\n'
 
@@ -174,17 +192,22 @@ def cplusplus2groff(data):
         else:
             content += 'l ' * n_cols
 
-        content += '.\n'
+        if content:
+            content += '.\n'
 
         # Insert format header
         tbl = tbl.replace('allbox tab(|);\n', 'allbox tab(|);\n%s' % content)
         # Recover TH{SX -> T{
         tbl = re.sub('TH{S[0-9]+?', 'T{', tbl).replace('TH', 'T')
 
-        data = data.replace(table, tbl)
+        # Remove invalid macros in table
+        for macro in ['br', 'nf', 'fi', '..', r'B']:
+            tbl = re.sub(r'\n\.%s([ \n])' % macro, r'\n', tbl)
 
-    # Escape column which starts with dot
-    data = re.sub(r'T{\n(\..*?)\nT}', r'T{\n\E \1\nT}', data, flags=re.S)
+        # Escape column with '.' as prefix
+        tbl = re.sub(r'T{\n(\..*?)\nT}', r'T{\n\E \1\nT}', tbl, flags=re.S)
+
+        data = data.replace(table, tbl)
 
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
@@ -226,14 +249,6 @@ def cplusplus2groff(data):
                 contents = re.sub(r'\n\.IP "(.+)"', r'\n\.IP "%s::\1"'
                                   % inherit, content)
                 data = data.replace(content, contents)
-
-    # Remove invalid markings in tables
-    for st in re.findall(r'\.TS(.+?)\.TE', data, re.S):
-        sts = re.sub(r'\n\...\n', r'\n', st)
-        sts = re.sub(r'\n\.B (.+?)\n', r'\1', sts)
-        sts = re.sub(r'\n\.', r'\n\\.', sts)
-        index = data.index(st)
-        data = data[:index] + sts + data[index + len(st):]
 
     # Remove pseudo macro '.SE'
     data = data.replace('\n.SE', '')
