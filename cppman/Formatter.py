@@ -79,9 +79,15 @@ rps = [
         # Subsections
         (r'<b>(.+?)</b>:<br>', r'.SS \1\n', 0),
         # Member functions / See Also table
-        (r'<dl class="links"><dt>.*?<b>(.*?)</b>.*?</dt><dd>(.*?)'
+        ## Without C++11 tag
+        (r'<dl class="links"><dt>.*?<b>([^ ]+?)</b>.*?</dt><dd>(.*?)'
          r'<span class="typ">(.*?)</span></dd></dl>',
          r'\n.IP "\1(3)"\n\2 \3\n', 0),
+        ## With C++11 tag
+        (r'<dl class="links"><dt>.*?<b>([^ ]+?) <b class="C_cpp11" '
+         r'title="(.+?)">\W*</b>.*?</dt><dd>(.*?)'
+         r'<span class="typ">(.*?)</span></dd></dl>',
+         r'\n.IP "\1(3) [\2]"\n\3 \4\n', 0),
         # Snippet
         ## Remove table
         (r'<table class="snippet">', r'', 0),
@@ -288,7 +294,7 @@ def test():
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
     print cplusplus2man(ifs.read()),
     #with open('test.txt') as ifs:
-    #    print cplusplus2man(ifs.read()),
+    #    print cplusplus2groff(ifs.read()),
 
 if __name__ == '__main__':
     test()
