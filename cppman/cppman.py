@@ -127,11 +127,11 @@ class cppman(Crawler):
         finally:
             self.db_conn.close()
 
-    def insert_index(self, url):
+    def insert_index(self, url, content):
         """callback to insert index"""
         if url not in self.blacklist:
             print "Indexing '%s' ..." % url
-            name = self.extract_name(urllib.urlopen(url).read())
+            name = self.extract_name(content)
             if url in self.std:
                 name = 'std::' + name
             elif url in self.stl:

@@ -22,47 +22,62 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import urllib
 import re
+from urllib import urlopen, unquote
+from time import sleep
 
 class Crawler(object):
     '''
     A Crawler that crawls through cplusplus.com
     '''
     def __init__(self):
-        self.origin = 'http://www.cplusplus.com/reference/'
+        self.origin = '/reference/'
         self.url_base = 'http://www.cplusplus.com'
         self.visited = []
 
     def crawl(self, callback):
         self.crawl_page(self.origin, callback)
 
-    def crawl_page(self, url, callback):
+    def crawl_page(self, base_url, callback):
         '''
         Crawl a new page.
         '''
-        data = urllib.urlopen(url).read()
+        self.visited = []
+        self.targets = [base_url]
 
-        # Remove sidebar
-        try:
-            data = data[data.index('<div class="doctop"><h1>'):]
-        except ValueError: pass
 
-        # Make unique list
-        links = re.findall('<a\s+href\s*=\s*"(/.*?)"', data, re.DOTALL)
-        links = list(set(links))
+        while self.targets:
+            while True:
+                try:
+                    url = self.targets.pop()
+                    real_url = unquote(urlopen(self.url_base + url).geturl())
 
-        for link in links:
-            real_url = urllib.urlopen(self.url_base + link).geturl()
-            real_url = urllib.unquote(real_url)
+                    if real_url in self.visited:
+                        break
 
-            if real_url in self.visited or not real_url.startswith(
-                'http://www.cplusplus.com/reference/'):
-                continue
+                    if not real_url.startswith(self.url_base + self.origin):
+                        break
 
-            self.visited.append(real_url)
+                    data = urlopen(real_url).read()
+                    callback(real_url, data)
 
-            # Run callback
-            callback(real_url)
+                    self.visited.append(url)
+                    self.visited.append(real_url)
 
-            self.crawl_page(self.url_base + link, callback)
+                    # Remove sidebar
+                    try:
+                        data = data[data.index('<div class="doctop"><h1>'):]
+                    except ValueError: pass
+
+                    # Make unique list
+                    links = re.findall('<a\s+href\s*=\s*"(/.*?)"', data, re.S)
+                    links = list(set(links))
+
+                    for link in links:
+                        if not (link in self.visited or link in self.targets):
+                            self.targets.append(link)
+                except Exception as e:
+                    print '%s, retrying' % str(e)
+                    self.targets.append(url)
+                else:
+                    break
