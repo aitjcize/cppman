@@ -23,8 +23,10 @@
 #
 
 import re
-from urllib import urlopen, unquote
+
+from threading import Thread, Lock
 from time import sleep
+from urllib import urlopen, unquote
 
 class Crawler(object):
     '''
@@ -34,50 +36,99 @@ class Crawler(object):
         self.origin = '/reference/'
         self.url_base = 'http://www.cplusplus.com'
         self.visited = []
+        self.targets = set()
+        self.processes = []
+        self.concurrency = 0
+        self.results = set()
 
-    def crawl(self, callback):
-        self.crawl_page(self.origin, callback)
+        self.targets_lock = Lock()
+        self.visited_lock = Lock()
+        self.concurrency_lock = Lock()
 
-    def crawl_page(self, base_url, callback):
-        '''
-        Crawl a new page.
-        '''
-        self.visited = []
-        self.targets = [base_url]
+    def crawl(self, extract, insert):
+        self.targets.add(self.origin)
+        self.extract = extract
 
+        self.concurrency_lock.acquire()
+        self.spawn_new_worker()
+        self.concurrency_lock.release()
+
+        while self.processes:
+            p = self.processes.pop()
+            p.join()
+
+        for name, url in self.results:
+            insert(name, url)
+
+    def spawn_new_worker(self):
+        self.concurrency += 1
+        p = Thread(target=self.worker, args=(self.concurrency,))
+        self.processes.append(p)
+        p.start()
+
+    def worker(self, sid):
+        self.concurrency_lock.acquire()
+        print 'Thread started: %d' % sid
+        self.concurrency_lock.release()
 
         while self.targets:
-            while True:
+            try:
+                self.targets_lock.acquire()
+                url = self.targets.pop()
+                self.targets_lock.release()
+                real_url = unquote(urlopen(self.url_base + url).geturl())
+
+                if not real_url.startswith(self.url_base + self.origin):
+                    continue
+
+                self.visited_lock.acquire()
+                if real_url in self.visited:
+                    self.visited_lock.release()
+                    continue
+                self.visited_lock.release()
+
+                data = urlopen(real_url).read()
+                result = self.extract(real_url, data)
+                if result:
+                    self.results.add(result)
+
+                self.visited_lock.acquire()
+                self.visited.append(url)
+                self.visited.append(real_url)
+                self.visited_lock.release()
+
+                # Remove sidebar
                 try:
-                    url = self.targets.pop()
-                    real_url = unquote(urlopen(self.url_base + url).geturl())
+                    data = data[data.index('<div class="doctop"><h1>'):]
+                except ValueError: pass
 
-                    if real_url in self.visited:
-                        break
+                # Make unique list
+                links = re.findall('<a\s+href\s*=\s*"(/.*?)"', data, re.S)
+                links = list(set(links))
 
-                    if not real_url.startswith(self.url_base + self.origin):
-                        break
+                self.visited_lock.acquire()
+                self.targets_lock.acquire()
+                for link in links:
+                    if not link in self.visited:
+                        self.targets.add(link)
+                self.targets_lock.release()
+                self.visited_lock.release()
 
-                    data = urlopen(real_url).read()
-                    callback(real_url, data)
+                self.concurrency_lock.acquire()
+                if self.concurrency < 16:
+                    self.spawn_new_worker()
+                self.concurrency_lock.release()
+            except IndexError as e:
+                print e
+                break
+            except Exception as e:
+                print '%s, retrying' % str(e)
+                self.targets_lock.acquire()
+                self.targets.add(url)
+                self.targets_lock.release()
+            else:
+                continue
 
-                    self.visited.append(url)
-                    self.visited.append(real_url)
-
-                    # Remove sidebar
-                    try:
-                        data = data[data.index('<div class="doctop"><h1>'):]
-                    except ValueError: pass
-
-                    # Make unique list
-                    links = re.findall('<a\s+href\s*=\s*"(/.*?)"', data, re.S)
-                    links = list(set(links))
-
-                    for link in links:
-                        if not (link in self.visited or link in self.targets):
-                            self.targets.append(link)
-                except Exception as e:
-                    print '%s, retrying' % str(e)
-                    self.targets.append(url)
-                else:
-                    break
+        self.concurrency_lock.acquire()
+        self.concurrency -= 1
+        self.concurrency_lock.release()

@@ -52,36 +52,6 @@ class cppman(Crawler):
             'http://www.cplusplus.com/reference/string/swap/'
         ]
 
-        # They are headers, set name to std::name else conflict with other
-        # classes/templates
-        self.std = [
-            'http://www.cplusplus.com/reference/std/limits/',
-            'http://www.cplusplus.com/reference/std/new/',
-            'http://www.cplusplus.com/reference/std/typeinfo/',
-            'http://www.cplusplus.com/reference/std/stdexcept/',
-            'http://www.cplusplus.com/reference/std/utility/',
-            'http://www.cplusplus.com/reference/std/functional/',
-            'http://www.cplusplus.com/reference/std/locale/'
-        ]
-        self.stl = [
-            'http://www.cplusplus.com/reference/stl/bitset/',
-            'http://www.cplusplus.com/reference/stl/deque/',
-            'http://www.cplusplus.com/reference/stl/list/',
-            'http://www.cplusplus.com/reference/stl/map/',
-            'http://www.cplusplus.com/reference/stl/multimap/',
-            'http://www.cplusplus.com/reference/stl/multiset/',
-            'http://www.cplusplus.com/reference/stl/priority_queue/',
-            'http://www.cplusplus.com/reference/stl/queue/',
-            'http://www.cplusplus.com/reference/stl/set/',
-            'http://www.cplusplus.com/reference/stl/stack/',
-            'http://www.cplusplus.com/reference/stl/vector/',
-            'http://www.cplusplus.com/reference/std/iterator/',
-            'http://www.cplusplus.com/reference/algorithm/',
-            'http://www.cplusplus.com/reference/std/complex/',
-            'http://www.cplusplus.com/reference/std/valarray/',
-            'http://www.cplusplus.com/reference/std/numeric/'
-        ]
-
     def extract_name(self, data):
         """Extract man page name from cplusplus web page."""
         name = re.search('<h1>(.+?)</h1>', data).group(1)
@@ -100,7 +70,8 @@ class cppman(Crawler):
         self.db_cursor.execute('CREATE TABLE CPPMAN (name VARCHAR(255), '
                                'url VARCHAR(255))')
         try:
-            self.crawl(self.insert_index)
+            self.crawl(self.extract_data, self.insert_index)
+            self.db_conn.commit()
 
             # Rename dumplicate entries
             dumplicates = self.db_cursor.execute('SELECT name, COUNT(name) '
@@ -114,8 +85,13 @@ class cppman(Crawler):
                                               % name).fetchall()
                 for n, u in dump:
                     if u not in self.name_exceptions:
-                        new_name = re.search('/([^/]+)/%s/$' % n, u).group(1)\
-                                                                + '::' + n
+                        n2 = n[5:] if n.startswith('std::') else n
+                        try:
+                            group = re.search('/([^/]+)/%s/$' % n2, u).group(1)
+                        except Exception:
+                            group = re.search('/([^/]+)/[^/]+/$', u).group(1)
+
+                        new_name = '%s (%s)' % (n, group)
                         self.db_cursor.execute('UPDATE CPPMAN '
                                                'SET name="%s", url="%s" '
                                                'WHERE url="%s"' %
@@ -127,19 +103,21 @@ class cppman(Crawler):
         finally:
             self.db_conn.close()
 
-    def insert_index(self, url, content):
+    def extract_data(self, url, content):
         """callback to insert index"""
         if url not in self.blacklist:
             print "Indexing '%s' ..." % url
             name = self.extract_name(content)
-            if url in self.std:
-                name = 'std::' + name
-            elif url in self.stl:
-                name = 'stl::' + name
-            self.db_cursor.execute('INSERT INTO CPPMAN (name, url) VALUES '
-                                   '("%s", "%s")' % (name, url))
+
+            return name, url
         else:
             print "Skipping blacklisted page '%s' ..." % url
+            return None
+
+    def insert_index(self, name, url):
+        """callback to insert index"""
+        self.db_cursor.execute('INSERT INTO CPPMAN (name, url) VALUES '
+                               '("%s", "%s")' % (name, url))
 
     def cache_all(self):
         """Cache all available man pages from cplusplus.com"""
@@ -226,18 +204,11 @@ class cppman(Crawler):
                 page_name, url = cursor.execute('SELECT name,url FROM CPPMAN'
                                 ' WHERE name="std::%s"' % pattern).fetchone()
             except TypeError:
-                # Try STL
                 try:
                     page_name, url = cursor.execute('SELECT name,url FROM '
-                        'CPPMAN WHERE name="stl::%s"' % pattern).fetchone()
+                        'CPPMAN WHERE name LIKE "%%%s%%"' % pattern).fetchone()
                 except TypeError:
-                    # Try ambiguous search
-                    try:
-                        page_name, url = cursor.execute('SELECT name,url FROM '
-                            'CPPMAN WHERE name LIKE "%%%s%%"' %
-                                                        pattern).fetchone()
-                    except TypeError:
-                        raise RuntimeError('No manual entry for ' + pattern)
+                    raise RuntimeError('No manual entry for ' + pattern)
         finally:
             conn.close()
 
