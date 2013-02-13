@@ -197,16 +197,18 @@ class cppman(Crawler):
         # Try direct match
         try:
             page_name, url = cursor.execute('SELECT name,url FROM CPPMAN WHERE'
-                                ' name="%s"' % pattern).fetchone()
+                    ' name="%s" ORDER BY LENGTH(name)' % pattern).fetchone()
         except TypeError:
             # Try standard library
             try:
                 page_name, url = cursor.execute('SELECT name,url FROM CPPMAN'
-                                ' WHERE name="std::%s"' % pattern).fetchone()
+                        ' WHERE name="std::%s" ORDER BY LENGTH(name)'
+                        % pattern).fetchone()
             except TypeError:
                 try:
                     page_name, url = cursor.execute('SELECT name,url FROM '
-                        'CPPMAN WHERE name LIKE "%%%s%%"' % pattern).fetchone()
+                        'CPPMAN WHERE name LIKE "%%%s%%" ORDER BY LENGTH(name)'
+                        % pattern).fetchone()
                 except TypeError:
                     raise RuntimeError('No manual entry for ' + pattern)
         finally:
@@ -232,8 +234,8 @@ class cppman(Crawler):
 
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
-        selected = cursor.execute('SELECT name,url FROM CPPMAN'
-                            ' WHERE name LIKE "%%%s%%"' % pattern).fetchall()
+        selected = cursor.execute('SELECT name,url FROM CPPMAN WHERE name '
+                'LIKE "%%%s%%" ORDER BY LENGTH(name)' % pattern).fetchall()
         if selected:
             for name, url in selected:
                 if os.isatty(sys.stdout.fileno()):
