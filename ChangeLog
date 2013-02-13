@@ -2,8 +2,15 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
-cppman 2.2.0 (January 19th, 2013):
-	
+cppman 0.2.3 (February 13th, 2013):
+
+	Features added:
+	* More C++11 support
+	* Update cplusplus.com index
+	* Faster crawler (30x improvement)
+
+cppman 0.2.2 (January 19th, 2013):
+
 	Bug fixed:
 	* Fix formatting due to the change of cplusplus.com
 	* Fix syntax highlighting in vim
