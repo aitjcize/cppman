@@ -212,7 +212,7 @@ def cplusplus2groff(data):
             tbl = re.sub(r'\n\.%s([ \n])' % macro, r'\n', tbl)
 
         # Escape column with '.' as prefix
-        tbl = re.sub(r'T{\n(\..*?)\nT}', r'T{\n\E \1\nT}', tbl, flags=re.S)
+        tbl = re.compile(r'T{\n(..*?)\nT}', re.S).sub(r'T{\n\E \1\nT}', tbl)
 
         data = data.replace(table, tbl)
 
