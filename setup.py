@@ -5,7 +5,7 @@ from distutils.core import setup
 _data_files = [
 	('lib/cppman', ['lib/index.db', 'lib/pager_vim.sh', 'lib/pager_less.sh',
                         'lib/cppman.vim']),
-        ('share/doc/cppman',  ['README', 'AUTHORS', 'COPYING', 'ChangeLog']),
+        ('share/doc/cppman',  ['README.md', 'AUTHORS', 'COPYING', 'ChangeLog']),
 	('share/man/man1', ['misc/cppman.1'])
 	]
 
