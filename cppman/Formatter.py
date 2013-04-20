@@ -73,8 +73,6 @@ rps = [
         # 'code' tag
         (r'<code>', r'\n.in +2n\n.sp\n', 0),
         (r'</code>', r'\n.in\n.sp\n', 0),
-        # 'samp' tag
-        (r'<samp>(.+?)</samp>', r'\n.nf\n\1\n.fi\n', re.S),
         # 'pre' tag
         (r'<pre\s*>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.S),
         # Subsections
