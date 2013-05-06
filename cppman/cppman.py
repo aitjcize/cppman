@@ -163,7 +163,6 @@ class cppman(Crawler):
 
         print '\n%d manual pages cached successfully.' % self.success_count
         print '%d manual pages failed to cache.' % self.failure_count
-        print '\nrunning mandb...'
         self.update_mandb(False)
 
     def cache_man_page(self, url, name=None):
@@ -255,5 +254,6 @@ class cppman(Crawler):
         """Update mandb."""
         if not Environ.config.UpdateManPath:
             return
+        print '\nrunning mandb...'
         cmd = 'mandb %s' % (' -q' if quiet else '')
         handle = subprocess.Popen(cmd, shell=True).wait()
