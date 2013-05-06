@@ -170,7 +170,8 @@ class cppman(Crawler):
         """callback to cache new man page"""
         data = urllib.urlopen(url).read()
         groff_text = Formatter.cplusplus2groff(data)
-        if not name: name = self.extract_name(data)
+        if not name:
+            name = self.extract_name(data).replace('/', '_')
 
         # Skip if already exists, override if forced flag is true
         outname = Environ.man_dir + name + '.3.gz'
@@ -218,6 +219,7 @@ class cppman(Crawler):
         finally:
             conn.close()
 
+        page_name = page_name.replace('/', '_')
         if page_name + '.3.gz' not in avail or self.forced:
             self.cache_man_page(url, page_name)
             self.update_mandb()
