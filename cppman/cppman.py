@@ -161,7 +161,7 @@ class cppman(Crawler):
                 self.success_count += 1
         conn.close()
 
-        print '\n%d manual pages cahced successfully.' % self.success_count
+        print '\n%d manual pages cached successfully.' % self.success_count
         print '%d manual pages failed to cache.' % self.failure_count
         print '\nrunning mandb...'
         self.update_mandb(False)
