@@ -41,6 +41,7 @@ class cppman(Crawler):
     """Manage cpp man pages, indexes"""
     def __init__(self, forced=False):
         Crawler.__init__(self)
+        self.results = set()
         self.forced = forced
         self.success_count = None
         self.failure_count = None
@@ -70,7 +71,11 @@ class cppman(Crawler):
         self.db_cursor.execute('CREATE TABLE CPPMAN (name VARCHAR(255), '
                                'url VARCHAR(255))')
         try:
-            self.crawl(self.extract_data, self.insert_index)
+            self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf)$')
+            self.set_follow_mode(Crawler.F_SAME_PATH)
+            self.crawl('http://www.cplusplus.com/reference/')
+            for name, url in self.results:
+                self.insert_index(name, url)
             self.db_conn.commit()
 
             # Rename dumplicate entries
@@ -103,15 +108,14 @@ class cppman(Crawler):
         finally:
             self.db_conn.close()
 
-    def extract_data(self, url, content):
+    def process_document(self, doc):
         """callback to insert index"""
-        if url not in self.blacklist:
-            print "Indexing '%s' ..." % url
-            name = self.extract_name(content)
-
-            return name, url
+        if doc.url not in self.blacklist:
+            print "Indexing '%s' ..." % doc.url
+            name = self.extract_name(doc.text)
+            self.results.add((name, doc.url))
         else:
-            print "Skipping blacklisted page '%s' ..." % url
+            print "Skipping blacklisted page '%s' ..." % doc.url
             return None
 
     def insert_index(self, name, url):
