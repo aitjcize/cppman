@@ -1,5 +1,5 @@
 # cppman
-A program that generates C++ manual pages from [cplusplus.com](http://cplusplus.com/)
+Manual page formatter that generates C++ manual pages from [cplusplus.com](http://cplusplus.com/)
 
 ## Features
 * Syntax highlighting support for sections and example source code.
