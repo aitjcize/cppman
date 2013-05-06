@@ -10,7 +10,7 @@ Manual page formatter that generates C++ manual pages from [cplusplus.com](http:
 1. Install from PyPI:  
 `pip install cppman`
 2. Arch Linux users can find it on AUR or using [Yaourt](https://wiki.archlinux.org/index.php/Yaourt):  
-`yaourt -S cppman`
+`yaourt -S cppman` or `yaourt -S cppman-git`
 3. Ubuntu/Debian PPA are no longer maintained. If you are interested in maintaining it, feel free to contact me.
 
 ## Bugs
