@@ -127,8 +127,8 @@ class cppman(Crawler):
         """Cache all available man pages from cplusplus.com"""
         print 'By defualt, cppman fetch pages on the fly if coressponding '\
             'page is not found in the cache. The "cache-all" option is only '\
-            'useful if you want to view man pages offline.'
-        print 'Caching all contents from cplusplus.com will take about 20 '\
+            'useful if you want to view man pages offline. ' \
+            'Caching all contents from cplusplus.com will serveral'\
             'minutes, do you want to continue [Y/n]?',
 
         respond = raw_input()
