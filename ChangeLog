@@ -2,6 +2,16 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.2.4 (June 05th, 2013):
+
+	Bug fixed:
+	* Fix some formatting issue
+	* Fix typos
+
+	Features added:
+	* New index crawler, much faster!
+	* Update index.db
+
 cppman 0.2.3 (February 13th, 2013):
 
 	Features added:
@@ -27,7 +37,7 @@ cppman 0.2.0 (September 19th, 2012):
 	Misc:
 	* Rename project from manpages-cpp to cppman
 
-cppman 0.1.9 (April 22th, 2012):
+cppman 0.1.9 (April 22nd, 2012):
 
 	Bug fixed:
 	* Fix formatting due to the change of cplusplus.com
@@ -52,7 +62,7 @@ cppman 0.1.6 (April 2nd, 2011):
 	Bug fixed:
 	* Fix formatting due to the change of cplusplus.com
 
-cppman 0.1.5 (January 31th, 2011):
+cppman 0.1.5 (January 31st, 2011):
 
 	Bug fixed:
 	* Backslashs in EXAMPLE section disapears
@@ -67,12 +77,12 @@ cppman 0.1.3 (September 26th, 2010):
 	Features added:
 	* Add BSD support (Issue #1)
 
-cppman 0.1.2 (September 21th, 2010):
+cppman 0.1.2 (September 21st, 2010):
 
 	Bugs fixed:
 	* Minor bug fix
 
-cppman 0.1.1 (September 11th, 2010):
+cppman 0.1.1 (September 11st, 2010):
 
 	Bugs fixed:
 	* Minor bug fix
@@ -80,6 +90,6 @@ cppman 0.1.1 (September 11th, 2010):
 	Features added:
 	* Enable mandb support
 
-cppman 0.1.0 (September 11th, 2010):
+cppman 0.1.0 (September 11st, 2010):
 
 	* Initial release
