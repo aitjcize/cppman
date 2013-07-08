@@ -23,12 +23,14 @@ set nonu
 set iskeyword+=:,=,~,[,],>,*
 set keywordprg=cppman
 map q :q<CR>
+
+syn on
 syn case ignore
 syn match  manReference       "[a-z_:+-\*][a-z_:+-~!\*<>]\+([1-9][a-z]\=)"
 syn match  manTitle	      "^\w.\+([0-9]\+[a-z]\=).*"
 syn match  manSectionHeading  "^[a-z][a-z_ \-]*[a-z]$"
 
-syntax include @cCode !runtime syntax/cpp.vim
+syn include @cCode !runtime syntax/cpp.vim
 syn match manCFuncDefinition  display "\<\h\w*\>\s*("me=e-1 contained
 syn region manSynopsis start="^SYNOPSIS" end="^[A-Z \t]\+$" keepend contains=manSectionHeading,@cCode,manCFuncDefinition
 syn region manSynopsis start="^EXAMPLE" end="^       [^ ]"he=s-1 keepend contains=manSectionHeading,@cCode,manCFuncDefinition
