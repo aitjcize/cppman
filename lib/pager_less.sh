@@ -26,4 +26,4 @@
 # settings
 # 
 
-cat "$1" | gunzip | groff -t -m man -Tascii -rLL=$2n -rLT=$2n | less
+cat "$1" | gunzip | groff -t -m man -Tascii -rLL=$2n -rLT=$2n 2> /dev/null | less

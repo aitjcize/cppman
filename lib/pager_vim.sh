@@ -26,4 +26,4 @@
 # settings
 # 
 
-cat "$1" | gunzip | groff -t -m man -Tascii -rLL=$2n -rLT=$2n | col -bx | vim -R -S $3 -
+cat "$1" | gunzip | groff -t -m man -Tascii -rLL=$2n -rLT=$2n 2> /dev/null | col -bx | vim -R -S $3 -
