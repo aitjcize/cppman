@@ -226,7 +226,7 @@ class cppman(Crawler):
         # Call viewer
         pid = os.fork()
         if pid == 0:
-            os.execl(Environ.pager, Environ.pager,
+            os.execl('/bin/sh', '/bin/sh', Environ.pager,
                      Environ.man_dir + page_name + '.3.gz',
                      str(Formatter.get_width()), Environ.pager_config)
         return pid
