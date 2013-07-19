@@ -26,4 +26,5 @@
 # settings
 # 
 
-cat "$1" | gunzip | groff -t -c -m man -Tascii -rLL=$2n -rLT=$2n 2> /dev/null | col -bx | vim -R -S $3 -
+escape=$(echo -e '\033')
+cat "$1" | gunzip | groff -t -c -m man -Tascii -rLL=$2n -rLT=$2n | sed "s/$escape\[[^m]*m//g" | vim -R -S $3 -
