@@ -2,6 +2,13 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.2.5 (July 28th, 2013):
+
+	Bug fixed:
+	* Extra color control characters on some distro
+	* Misc formatting bugs
+	* Redirect format error to /dev/null
+
 cppman 0.2.4 (June 05th, 2013):
 
 	Bug fixed:
