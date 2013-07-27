@@ -119,8 +119,6 @@ rps = [
         (r'<dt>(.+?)</dt>\s*<dd>(.+?)</dd>', r'.IP "\1"\n\2\n', re.S),
         # Bold
         (r'<strong>(.+?)</strong>', r'\n.B \1\n', 0),
-        # -
-        (r'-', r'\-', 0),
         # Remove row number in EXAMPLE
         (r'<td class="rownum">.*?</td>', r'', re.S),
         # Any other tags
@@ -131,6 +129,7 @@ rps = [
         (r'&gt;', r'>', 0),
         (r'&amp;', r'&', 0),
         (r'&nbsp;', r' ', 0),
+        (r'\\([^n])', r'\\\\\1', 0),
         #(u'\x0d([^)])', r'\n.br\n\1', 0),
         (u'\x0d', r'', 0),
         (r'>/">', r'', 0),
