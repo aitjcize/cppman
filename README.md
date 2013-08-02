@@ -1,6 +1,8 @@
 # cppman
 Manual page formatter that generates C++ manual pages from [cplusplus.com](http://cplusplus.com/)
 
+[![Build Status](https://travis-ci.org/aitjcize/cppman.png?branch=master)](https://travis-ci.org/aitjcize/cppman)
+
 ## Features
 * Syntax highlighting support for sections and example source code.
 * Usage/Interface simliar to the 'man' command
