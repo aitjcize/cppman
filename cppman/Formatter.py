@@ -287,6 +287,14 @@ def get_width():
     if width >= columns -2: width = columns -2
     return width
 
+def func_test():
+    """Test if there is major format changes in cplusplus.com"""
+    ifs = urllib.urlopen('http://www.cplusplus.com/printf')
+    result = cplusplus2groff(ifs.read())
+    assert '.SH NAME' in result
+    assert '.SH TYPE' in result
+    assert '.SH DESCRIPTION' in result
+
 def test():
     """Simple Text"""
     name = raw_input('What manual page do you want? ')
