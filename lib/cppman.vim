@@ -1,4 +1,4 @@
-" 
+" cppman.vim
 "
 " Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 " All Rights reserved.
@@ -17,20 +17,68 @@
 " along with this program; if not, write to the Free Software Foundation,
 " Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 "
+"
+" Vim syntax file
+" Language:	Man page
+" Maintainer:	SungHyun Nam <goweol@gmail.com>
+" Modified:	Wei-Ning Huang <aitjcize@gmail.com>
+" Previous Maintainer:	Gautam H. Mudunuri <gmudunur@informatica.com>
+" Version Info:
+" Last Change:	2008 Sep 17
 
-set ft=man
+" Additional highlighting by Johannes Tanzler <johannes.tanzler@aon.at>:
+"	* manSubHeading
+"	* manSynopsis (only for sections 2 and 3)
+
+" For version 5.x: Clear all syntax items
+" For version 6.x: Quit when a syntax file was already loaded
+
 set nonu
 set iskeyword+=:,=,~,[,],>,*
 set keywordprg=cppman
-map q :q<CR>
+map q :q!<CR>
 
-syn on
-syn case ignore
-syn match  manReference       "[A-Z_:+-\*][A-Z_:+-~!\*<>]\+([1-9][A-Z]\=)"
-syn match  manTitle           "^\w.\+([0-9]\+[A-Z]\=).*"
-syn match  manSectionHeading  "^[A-Z][A-Z_ \-]*[A-Z]$"
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
 
-syn include @cCode !runtime syntax/cpp.vim
-syn match manCFuncDefinition  display "\<\h\w*\>\s*("me=e-1 contained
-syn region manSynopsis start="^SYNOPSIS" end="^[A-Z \t]\+$" keepend contains=manSectionHeading,@cCode,manCFuncDefinition
-syn region manSynopsis start="^EXAMPLE" end="^       [^ ]"he=s-1 keepend contains=manSectionHeading,@cCode,manCFuncDefinition
+syntax on
+syntax case ignore
+syntax match  manReference       "[a-z_:+-\*][a-z_:+-~!\*<>]\+([1-9][a-z]\=)"
+syntax match  manTitle           "^\w.\+([0-9]\+[a-z]\=).*"
+syntax match  manSectionHeading  "^[a-z][a-z_ \-]*[a-z]$"
+syntax match  manSubHeading      "^\s\{3\}[a-z][a-z ]*[a-z]$"
+syntax match  manOptionDesc      "^\s*[+-][a-z0-9]\S*"
+syntax match  manLongOptionDesc  "^\s*--[a-z0-9-]\S*"
+
+syntax include @cppCode runtime! syntax/cpp.vim
+syntax match manCFuncDefinition  display "\<\h\w*\>\s*("me=e-1 contained
+
+syntax region manSynopsis start="^SYNOPSIS"hs=s+8 end="^\u\+\s*$"me=e-12 keepend contains=manSectionHeading,@cppCode,manCFuncDefinition
+syntax region manSynopsis start="^EXAMPLE"hs=s+7 end="^       [^ ]"he=s-1 keepend contains=manSectionHeading,@cppCode,manCFuncDefinition
+
+" Define the default highlighting.
+" For version 5.7 and earlier: only when not done already
+" For version 5.8 and later: only when an item doesn't have highlighting yet
+if version >= 508 || !exists("did_man_syn_inits")
+  if version < 508
+    let did_man_syn_inits = 1
+    command -nargs=+ HiLink hi link <args>
+  else
+    command -nargs=+ HiLink hi def link <args>
+  endif
+
+  HiLink manTitle	    Title
+  HiLink manSectionHeading  Statement
+  HiLink manOptionDesc	    Constant
+  HiLink manLongOptionDesc  Constant
+  HiLink manReference	    PreProc
+  HiLink manSubHeading      Function
+  HiLink manCFuncDefinition Function
+
+  delcommand HiLink
+endif
+
+let b:current_syntax = "man"
