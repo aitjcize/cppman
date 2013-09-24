@@ -29,13 +29,13 @@ import sys
 from os.path import expanduser, abspath, normpath, dirname, exists, join
 
 import Config
+from . import get_lib_path
 
 HOME = expanduser('~')
 
 man_dir = HOME + '/.local/share/man/man3/'
 config_dir = HOME + '/.config/cppman/'
 config_file = config_dir + 'cppman.cfg'
-cwd = os.getcwd()
 
 config = Config.Config(config_file)
 
@@ -43,36 +43,16 @@ try:
     os.makedirs(config_dir)
 except: pass
 
-cwd = cwd[:cwd.find('cppman') + len('cppman')]
+index_db_re = normpath(join(config_dir, 'index.db'))
 
-# If launched from source directory
-if exists(normpath(join(cwd, 'lib/index.db'))):
-    index_db = normpath(join(cwd, 'lib/index.db'))
-    index_db_re = index_db
+index_db = index_db_re if exists(index_db_re) else get_lib_path('lib/index.db')
 
-    pager_config = normpath(join(cwd, 'lib/cppman.vim'))
+pager_config = get_lib_path('lib/cppman.vim')
 
-    if config.pager == 'vim':
-        pager = normpath(join(cwd, 'lib/pager_vim.sh'))
-    else:
-        pager = normpath(join(cwd, 'lib/pager_less.sh'))
+if config.pager == 'vim':
+    pager = get_lib_path('lib/pager_vim.sh')
 else:
-    index_db_re = normpath(join(config_dir, 'index.db'))
-    if exists(normpath(join('/usr', 'lib/cppman/index.db'))):
-        prefix = '/usr'
-    else:
-        prefix = sys.prefix
-
-    index_db = normpath(join(prefix, 'lib/cppman/index.db'))
-    index_db = index_db_re if exists(index_db_re) else index_db
-
-    pager_config = normpath(join(prefix, 'lib/cppman/cppman.vim'))
-
-    if config.pager == 'vim':
-        pager = normpath(join(prefix, 'lib/cppman/pager_vim.sh'))
-    else:
-        pager = normpath(join(prefix, 'lib/cppman/pager_less.sh'))
-
+    pager = get_lib_path('lib/pager_less.sh')
 
 # Add ~/.local/share/man to $HOME/.manpath
 def mandb_changed():
