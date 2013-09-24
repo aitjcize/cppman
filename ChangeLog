@@ -2,6 +2,11 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.2.7 (September 25th, 2013):
+
+	Bug fixed:
+	* Fix prefix bug that still persist in 0.2.6 version
+
 cppman 0.2.6 (September 24th, 2013):
 
 	Bug fixed:
