@@ -2,6 +2,13 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.2.6 (September 24th, 2013):
+
+	Bug fixed:
+	* Fix prefix when install via easy_install or pip
+	* Fix formating bugs
+	* Add Travis CI test
+
 cppman 0.2.5 (July 28th, 2013):
 
 	Bug fixed:
