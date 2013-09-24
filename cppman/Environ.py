@@ -61,7 +61,7 @@ else:
     if exists(normpath(join('/usr', 'lib/cppman/index.db'))):
         prefix = '/usr'
     else:
-        prefix = '/usr/local'
+        prefix = sys.prefix
 
     index_db = normpath(join(prefix, 'lib/cppman/index.db'))
     index_db = index_db_re if exists(index_db_re) else index_db
