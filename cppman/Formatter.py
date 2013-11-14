@@ -31,8 +31,15 @@ import sys
 import termios
 import urllib
 
+from TableParser import parse_table
+
 # Format replacement RE list
 # The '.SE' pseudo macro is described in the function: cplusplus2groff
+pre_rps = [
+        # Snippet, ugly hack: we don't want to treat code listing as table
+        (r'<table class="snippet">', '', re.S),
+]
+
 rps = [
         # Header, Name
         (r'\s*<div id="I_type"[^>]*>(.*?)\s*</div>\s*'
@@ -88,25 +95,6 @@ rps = [
          r'title="(.+?)">\W*</b>.*?</dt><dd>(.*?)'
          r'<span class="typ">(.*?)</span></dd></dl>',
          r'\n.IP "\1(3) [\2]"\n\3 \4\n', 0),
-        # Snippet
-        ## Remove table
-        (r'<table class="snippet">', r'', 0),
-        ## Remove line numbers
-        (r'<td class="rownum">.+?</td>', r'', re.S),
-        ## remove td
-        (r'<td class="source">(.+?)</td>', r'\1', re.S),
-        (r'<td class="output">(.+?)</td>', r'\1', re.S),
-        # Table
-        (r'<table.*?>', r'.TS\nallbox tab(|);\n', 0),
-        (r'</table>', r'\n.TE\n.sp\n', 0),
-        ## Table head column
-        (r'<tr.*?><th.*?>(.*?)</th>', r'TH{\n\1\nTH}', 0),
-        (r'<th colspan="(.+?)">(.*?)</th>', r'|TH{S\1\n\2\nTH}', 0),
-        (r'<th.*?>(.*?)</th>', r'|TH{\n\1\nTH}', 0),
-        ## Table body column
-        (r'<tr.*?><td.*?>((.|\n)*?)</td>', r'T{\n\1\nT}', 0),
-        (r'<td.*?>((.|\n)*?)</td>', r'|T{\n\1\nT}', 0),
-        (r'</tr>', r'\n', 0),
         # Footer
         (r'<div id="CH_bb">.*$',
          r'\n.SE\n.SH REFERENCE\n'
@@ -130,7 +118,7 @@ rps = [
         (r'&gt;', r'>', 0),
         (r'&amp;', r'&', 0),
         (r'&nbsp;', r' ', 0),
-        (r'\\([^n])', r'\\\\\1', 0),
+        #(r'\\([^n])', r'\\\\\1', 0),
         #: vector::data SYNOPSIS section has \x0d separting two lines
         (u'\x0d([^)])', r'\n.br\n\1', 0),
         (u'\x0d', r'', 0),
@@ -151,70 +139,19 @@ def cplusplus2groff(data):
     except ValueError: pass
 
     # Replace all
-    for rp in rps:
+    for rp in pre_rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
-    # Process table header
-    # Header is like text block, but use TH instead of T
-    # 'TH{SX' : X is the colspan of that column
-    for table in re.findall(r'\n\.TS(.+?)\.TE', data, re.S):
-        tbl = table
-        content = ''
-        n_cols = 0
-        # Two condition:
-        # -------      -------
-        # h h h h  or  h r r r
-        # r r r r      h r r r
-        # -------      -------
-        #
-        # In the first case, we would want the header to be centered; while in
-        # the second case we want the header to be left aligned
-        ths_c1 = re.findall(r'(TH{.*?TH}(?:\|TH{.*?TH})+)', table, re.S)
-        ths_c2 = re.findall(r'(TH{.*?TH}(?:\|T{.*?T})+)', table, re.S)
 
-        if ths_c1:
-            align_char = 'c '
-            ths = ths_c1
-        else:
-            align_char = 'l '
-            ths = ths_c2
-
-        for th in ths:
-            n_cols = 0
-            for col in th.split('|'):
-                try:
-                    colspan = re.match(r'TH{S([0-9]+?)', col).group(1)
-                except AttributeError:
-                    content += align_char
-                    n_cols += 1
-                else:
-                    content += align_char + 's ' * (int(colspan) - 1)
-                    n_cols += int(colspan)
-            content += '\n'
-
-        if n_cols == 2:
-            content += 'l lx'
-        elif n_cols == 3:
-            content += 'l lx l'
-        else:
-            content += 'l ' * n_cols
-
-        if content:
-            content += '.\n'
-
-        # Insert format header
-        tbl = tbl.replace('allbox tab(|);\n', 'allbox tab(|);\n%s' % content)
-        # Recover TH{SX -> T{
-        tbl = re.sub('TH{S[0-9]+?', 'T{', tbl).replace('TH', 'T')
-
-        # Remove invalid macros in table
-        for macro in ['br', 'nf', 'fi', '..', r'B']:
-            tbl = re.sub(r'\n\.%s([ \n])' % macro, r'\n', tbl)
-
+    for table in re.findall(r'<table.*?>.*?</table>', data, re.S):
+        tbl = parse_table(table)
         # Escape column with '.' as prefix
         tbl = re.compile(r'T{\n(\..*?)\nT}', re.S).sub(r'T{\n\E \1\nT}', tbl)
-
         data = data.replace(table, tbl)
+
+    # Pre replace all
+    for rp in rps:
+        data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
