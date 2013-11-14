@@ -118,6 +118,7 @@ rps = [
         (r'&gt;', r'>', 0),
         (r'&amp;', r'&', 0),
         (r'&nbsp;', r' ', 0),
+        (r'\\([^\^n])', r'\\\\\1', 0),
         #(r'\\([^n])', r'\\\\\1', 0),
         #: vector::data SYNOPSIS section has \x0d separting two lines
         (u'\x0d([^)])', r'\n.br\n\1', 0),
