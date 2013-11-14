@@ -142,7 +142,6 @@ def cplusplus2groff(data):
     for rp in pre_rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
-
     for table in re.findall(r'<table.*?>.*?</table>', data, re.S):
         tbl = parse_table(table)
         # Escape column with '.' as prefix

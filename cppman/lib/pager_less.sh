@@ -2,7 +2,7 @@
 # 
 # pager_less.sh
 #
-# Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
+# Copyright (C) 2010 - 2013  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
 #
 # This file is part of cppman.
@@ -24,7 +24,7 @@
 
 # viewer.sh is a lauches vim as man page viewer and provides some convinient
 # settings
-# 
+#
 
 escape=$(echo -e '\033')
 cat "$1" | gunzip | groff -t -c -m man -Tascii -rLL=$2n -rLT=$2n 2> /dev/null | sed "s/$escape\[[^m]*m//g" | less

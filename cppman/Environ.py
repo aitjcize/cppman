@@ -54,6 +54,8 @@ if config.pager == 'vim':
 else:
     pager = get_lib_path('lib/pager_less.sh')
 
+renderer = get_lib_path('lib/render.sh')
+
 # Add ~/.local/share/man to $HOME/.manpath
 def mandb_changed():
     manpath_file = normpath(join(HOME, '.manpath'))

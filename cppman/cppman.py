@@ -223,12 +223,15 @@ class cppman(Crawler):
             self.cache_man_page(url, page_name)
             self.update_mandb()
 
+        pager = Environ.pager if sys.stdout.isatty() else Environ.renderer
+
         # Call viewer
         pid = os.fork()
         if pid == 0:
-            os.execl('/bin/sh', '/bin/sh', Environ.pager,
+            os.execl('/bin/sh', '/bin/sh', pager,
                      Environ.man_dir + page_name + '.3.gz',
-                     str(Formatter.get_width()), Environ.pager_config)
+                     str(Formatter.get_width()), Environ.pager_config,
+                     page_name)
         return pid
 
     def find(self, pattern):

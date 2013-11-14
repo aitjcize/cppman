@@ -81,4 +81,19 @@ if version >= 508 || !exists("did_man_syn_inits")
   delcommand HiLink
 endif
 
+let s:old_col = &co
+echo s:old_col
+
+function Rerender()
+  if &co != s:old_col
+    let s:old_col = &co
+    let save_cursor = getpos(".")
+    exec "%d"
+    exec "0r! cppman " . g:page_name
+    call setpos('.', save_cursor)
+  end
+endfunction
+
+autocmd VimResized * call Rerender()
+
 let b:current_syntax = "man"
