@@ -243,10 +243,13 @@ class cppman(Crawler):
         cursor = conn.cursor()
         selected = cursor.execute('SELECT name,url FROM CPPMAN WHERE name '
                 'LIKE "%%%s%%" ORDER BY LENGTH(name)' % pattern).fetchall()
+
+        pat = re.compile('(%s)' % pattern, re.I)
+
         if selected:
             for name, url in selected:
                 if os.isatty(sys.stdout.fileno()):
-                    print name.replace(pattern, '\033[1;31m%s\033[0m' % pattern)
+                    print pat.sub(r'\033[1;31m\1\033[0m', name)
                 else:
                     print name
         else:
