@@ -2,6 +2,19 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.3.0 (November 15th, 2013):
+
+	Bug fixed:
+	* Fix various formatting bug, issue #15, #17
+
+	Features added:
+	* Update search index (index.db).
+	* New DOM-based table parser, all table can be rendered correctly.
+	* Automatically re-render when window is resized.
+	* Better hyperlink support, implement our own page loader instead of
+	  using VIM's keyword program.
+	* We can now jump between hyperlinks with mouse double-click
+
 cppman 0.2.7 (September 25th, 2013):
 
 	Bug fixed:
@@ -31,7 +44,7 @@ cppman 0.2.4 (June 05th, 2013):
 	* New index crawler, much faster!
 	* Update index.db
 
-cppman 0.2.3 (February 13th, 2013):
+cppman 0.2.3 (February 13rd, 2013):
 
 	Features added:
 	* More C++11 support
