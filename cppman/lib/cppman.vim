@@ -84,16 +84,48 @@ endif
 let s:old_col = &co
 echo s:old_col
 
+function s:reload()
+  echo "Loading..."
+  exec "%d"
+  exec "0r! cppman '" . g:page_name . "'"
+endfunction
+
 function Rerender()
   if &co != s:old_col
     let s:old_col = &co
     let save_cursor = getpos(".")
-    exec "%d"
-    exec "0r! cppman " . g:page_name
+    call s:reload()
     call setpos('.', save_cursor)
   end
 endfunction
 
 autocmd VimResized * call Rerender()
+
+let g:stack = []
+
+function LoadNewPage()
+  " Save current page to stack
+  call add(g:stack, [g:page_name, getpos(".")])
+  let g:page_name = expand("<cword>")
+  set noro
+  call s:reload()
+  normal! gg
+  set ro
+endfunction
+
+function BackToPrevPage()
+  if len(g:stack) > 0
+    let context = g:stack[-1]
+    call remove(g:stack, -1)
+    let g:page_name = context[0]
+    call s:reload()
+    call setpos('.', context[1])
+  end
+endfunction
+
+map K :call LoadNewPage()<CR>
+map <CR> K
+map <C-]> K
+map <C-T> :call BackToPrevPage()<CR>
 
 let b:current_syntax = "man"
