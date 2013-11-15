@@ -8,6 +8,9 @@ Manual page formatter that generates C++ manual pages from [cplusplus.com](http:
 ## Features
 * Syntax highlighting support for sections and example source code.
 * Usage/Interface simliar to the 'man' command
+* Hyperlink between manpages
+ - Press `Ctrl-]` when cursor is on keyword to go forward and `Ctrl-T` to go backward.
+ - You can also double-click on keyword to go forward.
 * Frequently update to support [cplusplus.com](http://cplusplus.com/)
 
 ## Installation
