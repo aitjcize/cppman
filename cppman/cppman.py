@@ -47,7 +47,6 @@ class cppman(Crawler):
         self.failure_count = None
 
         self.blacklist = [
-            'http://www.cplusplus.com/reference/stl/'
         ]
         self.name_exceptions = [
             'http://www.cplusplus.com/reference/string/swap/'
