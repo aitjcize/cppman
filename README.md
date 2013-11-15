@@ -4,7 +4,6 @@ Manual page formatter that generates C++ manual pages from [cplusplus.com](http:
 [![Build Status](https://travis-ci.org/aitjcize/cppman.png?branch=master)](https://travis-ci.org/aitjcize/cppman)
 
 ![screenshot](https://raw.github.com/aitjcize/cppman/master/wiki/screenshot.png)
-![screenshot](https://raw.github.com/aitjcize/cppman/master/wiki/demo.gif)
 
 ## Features
 * Syntax highlighting support for sections and example source code.
@@ -13,6 +12,9 @@ Manual page formatter that generates C++ manual pages from [cplusplus.com](http:
  - Press `Ctrl-]` when cursor is on keyword to go forward and `Ctrl-T` to go backward.
  - You can also double-click on keyword to go forward.
 * Frequently update to support [cplusplus.com](http://cplusplus.com/)
+
+## Demo
+![screenshot](https://raw.github.com/aitjcize/cppman/master/wiki/demo.gif)
 
 ## Installation
 1. Install from PyPI:  
