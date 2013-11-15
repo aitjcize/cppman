@@ -81,6 +81,9 @@ if version >= 508 || !exists("did_man_syn_inits")
   delcommand HiLink
 endif
 
+""" Vim Viewer
+set mouse=a
+
 let s:old_col = &co
 echo s:old_col
 
@@ -126,6 +129,8 @@ endfunction
 map K :call LoadNewPage()<CR>
 map <CR> K
 map <C-]> K
+map <2-LeftMouse> K
+
 map <C-T> :call BackToPrevPage()<CR>
 
 let b:current_syntax = "man"
