@@ -83,6 +83,7 @@ endif
 
 """ Vim Viewer
 set mouse=a
+set colorcolumn=0
 
 let s:old_col = &co
 echo s:old_col
