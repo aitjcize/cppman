@@ -37,7 +37,8 @@ from TableParser import parse_table
 # The '.SE' pseudo macro is described in the function: cplusplus2groff
 pre_rps = [
         # Snippet, ugly hack: we don't want to treat code listing as table
-        (r'<table class="snippet">', '', re.S),
+        (r'<table class="snippet">(.*?)</table>',
+         r'\n.in +2n\n\1\n.in\n.sp\n', re.S),
 ]
 
 rps = [
@@ -50,6 +51,21 @@ rps = [
          r'\n.SH NAME\n\3 - \5\n'
          r'\n.SE\n.SH TYPE\n\1\n'
          r'\n.SE\n.SH SYNOPSIS\n#include \2\n.sp\n\4\n'
+         r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+        (r'\s*<div id="I_type"[^>]*>(.*?)\s*</div>\s*'
+         r'<div id="I_file"[^>]*>(.*?)</div>\s*'
+         r'<h1>(.*?)</h1>\s*'
+         r'<div id="I_description"[^>]*>(.*?)</div>',
+         r'.TH "\3" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
+         r'\n.SH NAME\n\3 - \4\n'
+         r'\n.SE\n.SH TYPE\n\1\n'
+         r'\n.SE\n.SH SYNOPSIS\n#include \2\n.sp\n'
+         r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+        (r'\s*<div id="I_type"[^>]*>(.*?)\s*</div>\s*<h1>(.*?)</h1>\s*'
+         r'<div id="I_description"[^>]*>(.*?)</div>',
+         r'.TH "\2" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
+         r'\n.SH NAME\n\2 - \3\n'
+         r'\n.SE\n.SH TYPE\n\1\n'
          r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
         (r'\s*<div id="I_type"[^>]*>(.*?)\s*</div>\s*<h1>(.*?)</h1>\s*'
          r'<div id="I_file"[^>]*>(.*?)</div>\s*<div id="I_description"[^>]*>'
@@ -78,9 +94,6 @@ rps = [
         (r'</ul>', r'\n.in\n', 0),
         # 'li' tag
         (r'<li>(.+?)</li>', r'* \1\n.sp\n', 0),
-        # 'code' tag
-        (r'<code>', r'\n.in +2n\n.sp\n', 0),
-        (r'</code>', r'\n.in\n.sp\n', 0),
         # 'pre' tag
         (r'<pre\s*>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.S),
         # Subsections
