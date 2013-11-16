@@ -133,5 +133,6 @@ map <C-]> K
 map <2-LeftMouse> K
 
 map <C-T> :call BackToPrevPage()<CR>
+map <RightMouse> <C-T>
 
 let b:current_syntax = "man"
