@@ -1,7 +1,7 @@
 include bin/*
 include cppman/*
 include misc/*
-include README.md
+include README.rst
 include AUTHORS
 include COPYING
 include ChangeLog
