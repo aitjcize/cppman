@@ -1,7 +1,7 @@
 # cppman
 Manual page formatter that generates C++ manual pages from [cplusplus.com](http://cplusplus.com/)
 
-[![Build Status](https://travis-ci.org/aitjcize/cppman.png?branch=master)](https://travis-ci.org/aitjcize/cppman)
+[![Build Status](https://travis-ci.org/aitjcize/cppman.png?branch=master)](https://travis-ci.org/aitjcize/cppman) [![Downloads](https://pypip.in/v/cppman/badge.png)](https://crate.io/package/cppman) [![Downloads](https://pypip.in/d/cppman/badge.png)](https://crate.io/package/cppman)
 
 ![screenshot](https://raw.github.com/aitjcize/cppman/master/wiki/screenshot.png)
 
@@ -17,9 +17,9 @@ Manual page formatter that generates C++ manual pages from [cplusplus.com](http:
 ![screenshot](https://raw.github.com/aitjcize/cppman/master/wiki/demo.gif)
 
 ## Installation
-1. Install from PyPI:  
+1. Install from PyPI:
 `pip install cppman`
-2. Arch Linux users can find it on AUR or using [Yaourt](https://wiki.archlinux.org/index.php/Yaourt):  
+2. Arch Linux users can find it on AUR or using [Yaourt](https://wiki.archlinux.org/index.php/Yaourt):
 `yaourt -S cppman` or `yaourt -S cppman-git`
 3. Ubuntu/Debian PPA are no longer maintained. If you are interested in maintaining it, feel free to contact me.
 
