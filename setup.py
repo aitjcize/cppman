@@ -5,13 +5,13 @@ from distutils.core import setup
 _package_data = ['lib/index.db', 'lib/pager_vim.sh', 'lib/pager_less.sh',
                  'lib/render.sh', 'lib/cppman.vim']
 _data_files = [
-        ('share/doc/cppman',  ['README.md', 'AUTHORS', 'COPYING', 'ChangeLog']),
+        ('share/doc/cppman', ['README.rst', 'AUTHORS', 'COPYING', 'ChangeLog']),
         ('share/man/man1', ['misc/cppman.1'])
         ]
 
 setup(
         name = 'cppman',
-        version = '0.3.0',
+        version = '0.3.1',
         description = 'C++ man pages generater that generates C++ man pages'
                       'from cplusplus.com',
         author = 'Wei-Ning Huang (AZ)',

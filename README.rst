@@ -13,12 +13,14 @@ Manual page formatter that generates C++ manual pages from `cplusplus.com <http:
 
 Features
 --------
-- Syntax highlighting support for sections and example source code.
-- Usage/Interface simliar to the 'man' command
-- Hyperlink between manpages
-  - Press ``Ctrl-]`` when cursor is on keyword to go forward and ``Ctrl-T`` to go backward.
-  - You can also double-click on keyword to go forward.
-- Frequently update to support `cplusplus.com <http://cplusplus.com/>`_.
+* Syntax highlighting support for sections and example source code.
+* Usage/Interface simliar to the 'man' command
+* Hyperlink between manpages
+
+  + Press ``Ctrl-]`` when cursor is on keyword to go forward and ``Ctrl-T`` to go backward.
+  + You can also double-click on keyword to go forward.
+
+* Frequently update to support `cplusplus.com <http://cplusplus.com/>`_.
 
 Demo
 ----
@@ -48,7 +50,7 @@ or install the git version
 
 Bugs
 ----
-- Please report bugs / mis-formatted pages to the github issure tracker.
+* Please report bugs / mis-formatted pages to the github issure tracker.
 
 Contributing
 ------------
@@ -60,7 +62,7 @@ Contributing
 
 Notes
 -----
-- manpages-cpp is renamed to cppman since September 19, 2012
+* manpages-cpp is renamed to cppman since September 19, 2012
 
 .. image:: https://cruel-carlota.pagodabox.com/d590c9d5f4c2a6dcbaea67a1286d7302
    :target: http://githalytics.com/aitjcize/cppman

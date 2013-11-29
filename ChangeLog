@@ -2,6 +2,16 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.3.1 (November 29th, 2013):
+
+	Bug fixed:
+	* Minor bug fixes
+	* Update manpage copyright year
+
+	Features added:
+	* Allow right click to go back to previous page
+	* Update README with RST format.
+
 cppman 0.3.0 (November 15th, 2013):
 
 	Bug fixed:
