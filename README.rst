@@ -7,7 +7,7 @@
 
 cppman
 ======
-Manual page formatter that generates C++ manual pages from `cplusplus.com <http://cplusplus.com/>`_.
+C++ 98/11 manual pages for Linux, with source from `cplusplus.com <http://cplusplus.com/>`_.
 
 .. image:: https://raw.github.com/aitjcize/cppman/master/wiki/screenshot.png
 
