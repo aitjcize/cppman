@@ -111,7 +111,7 @@ rps = [
         # Footer
         (r'<div id="CH_bb">.*$',
          r'\n.SE\n.SH REFERENCE\n'
-         r'cplusplus.com, 2000-2010 - All rights reserved.', re.S),
+         r'cplusplus.com, 2000-2013 - All rights reserved.', re.S),
         # C++ version tag
         (r'<div title="(C\+\+..)".*?>', r'.sp\n\1\n', 0),
         # 'br' tag
