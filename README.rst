@@ -66,3 +66,9 @@ Notes
 
 .. image:: https://cruel-carlota.pagodabox.com/d590c9d5f4c2a6dcbaea67a1286d7302
    :target: http://githalytics.com/aitjcize/cppman
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/aitjcize/cppman/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
