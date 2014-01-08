@@ -150,6 +150,9 @@ class Crawler(object):
 
     def spawn_new_worker(self):
         self.concurrency_lock.acquire()
+        if self.concurrency >= self.max_outstanding:
+            self.concurrency_lock.release()
+            return
         self.concurrency += 1
         t = Thread(target=self.worker, args=(self.concurrency,))
         t.daemon = True
@@ -172,7 +175,7 @@ class Crawler(object):
                 conn = httplib.HTTPConnection(host)
                 conn.request('GET', path)
                 res = conn.getresponse()
-                
+
                 if res.status == 301 or res.status == 302:
                     rlink = self.follow_link(url, res.getheader('location'))
                     self.add_target(rlink)
