@@ -6,9 +6,9 @@ cppman - C++ manual page viewer / fetcher
 .I OPTIONS...
 .B ] PAGE...
 .SH DESCRIPTION
-cppman generates C++ manual pages from cplusplus.com and provide a man-like interface to view man pages.
+cppman generates C++ manual pages from cplusplus.com and provide a man\-like interface to view man pages.
 .sp
-By default, cppman fetches man pages on demand, but by running the command 'cppman -c', all available manpages are cached, making offline browsing possible.
+By default, cppman fetches man pages on demand, but by running the command 'cppman \-c', all available manpages are cached, making offline browsing possible.
 .SS Browsing man pages
 cppman uses Vi Improved as a pager.
 .br
@@ -17,26 +17,26 @@ Press 'K' on an entry like 'vector::insert(3)' links you to the manual page of v
 .SS man compatibility
 cppman automatically adds '~/.local/share/man' to '~/.manpath', so the cached man pages can also be viewed with 'man' command. Note that to view uncached man pages, you still need to run 'cppman'.
 .SH OPTIONS
-.IP "-c, --cache-all"
+.IP "\-c, \-\-cache\-all"
 cache all available man pages from cplusplus.com to enable offline browsing
-.IP "-C, --clear-cache"
+.IP "\-C, \-\-clear\-cache"
 clear all cached files
-.IP "-f KEYWORD, --find-page=KEYWORD"
+.IP "\-f KEYWORD, \-\-find\-page=KEYWORD"
 find man page
-.IP "-o, --force-update"
-force cppman to update existing cache when '--cache-all' or browsing man pages that were already cached
-.IP "-m MANDB, --use-mandb=MANDB"
+.IP "\-o, \-\-force\-update"
+force cppman to update existing cache when '\-\-cache\-all' or browsing man pages that were already cached
+.IP "\-m MANDB, \-\-use\-mandb=MANDB"
 Accepts 'true' or 'false'. If true, cppman adds manpage path to mandb so that you can view C++ manpages with `man' command. The default value is 'false'.
-.IP "-p PAGER, --pager=PAGER"
+.IP "\-p PAGER, \-\-pager=PAGER"
 Select pager to use, accepts 'vim' or 'less'. The default value is 'vim'.
-.IP "-r, --rebuild-index"
+.IP "\-r, \-\-rebuild\-index"
 rebuild index database from cplusplus.com
-.IP "-v, --version"
+.IP "\-v, \-\-version"
 show version information
-.IP "-h, --help"
+.IP "\-h, \-\-help"
 show this help message and exit
 .SH NOTE
-All contents should be cached by the user, cppmandoes not contain any pre-cached contents.
+All contents should be cached by the user, cppmandoes not contain any pre\[hy]cached contents.
 .sp
 Do not distribute the cached man pages without the permision of cplusplus.com.
 .SH BUGS
@@ -50,4 +50,4 @@ mail://aitjcize@gmail.com.
 .sp
 Please include the page name in the bug report.
 .SH AUTHOR
-Wei-Ning Huang (AZ) <aitjcize@gmail.com>
+Wei\[hy]Ning Huang (AZ) <aitjcize@gmail.com>
