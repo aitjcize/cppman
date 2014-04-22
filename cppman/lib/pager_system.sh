@@ -26,5 +26,10 @@
 # settings
 #
 
+if [ -z "$PAGER" ]; then
+    echo '$PAGER variable not set' >&2
+    exit 1;
+fi
+
 escape=$(echo -e '\033')
 cat "$1" | gunzip | groff -t -c -m man -Tascii -rLL=$2n -rLT=$2n 2> /dev/null | sed "s/$escape\[[^m]*m//g" | $PAGER
