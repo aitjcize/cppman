@@ -27,8 +27,7 @@
 #
 
 if [ -z "$PAGER" ]; then
-    echo '$PAGER variable not set' >&2
-    exit 1;
+    PAGER=less
 fi
 
 escape=$(echo -e '\033')
