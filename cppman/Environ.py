@@ -51,8 +51,10 @@ pager_config = get_lib_path('lib/cppman.vim')
 
 if config.pager == 'vim':
     pager = get_lib_path('lib/pager_vim.sh')
-else:
+elif config.pager == 'less':
     pager = get_lib_path('lib/pager_less.sh')
+else:
+    pager = get_lib_path('lib/pager_system.sh')
 
 renderer = get_lib_path('lib/render.sh')
 
