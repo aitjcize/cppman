@@ -75,7 +75,7 @@ def main():
         make_option('-p', '--pager', action='store', dest='pager',
                     help="Select pager to use, accepts 'vim', 'less' or 'system'. "
                     "'system' uses $PAGER environment as pager. "
-                    "The default value is 'vim'."),
+                    "The default value is 'system'."),
         make_option('-r', '--rebuild-index', action='store_true',
                     dest='rebuild_index', default=False,
                     help='rebuild index database from cplusplus.com'),
