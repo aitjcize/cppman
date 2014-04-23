@@ -56,7 +56,7 @@ class Config(object):
         self._config = ConfigParser.RawConfigParser()
         self._config.add_section('Settings')
         self._config.set('Settings', 'UpdateManPath', 'false')
-        self._config.set('Settings', 'Pager', 'vim')
+        self._config.set('Settings', 'Pager', 'system')
 
         with open(self._configfile, 'w') as f:
             self._config.write(f)
