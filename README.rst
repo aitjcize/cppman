@@ -15,7 +15,7 @@ Features
 --------
 * Syntax highlighting support for sections and example source code.
 * Usage/Interface simliar to the 'man' command
-* Hyperlink between manpages
+* Hyperlink between manpages (only available when pager=vim)
 
   + Press ``Ctrl-]`` when cursor is on keyword to go forward and ``Ctrl-T`` to go backward.
   + You can also double-click on keyword to go forward.
@@ -24,6 +24,8 @@ Features
 
 Demo
 ----
+Using vim as pager
+
 .. image:: https://raw.github.com/aitjcize/cppman/master/wiki/demo.gif
 
 Installation
