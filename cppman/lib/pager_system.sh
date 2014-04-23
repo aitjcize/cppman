@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# pager_less.sh
+# pager_system.sh
 #
 # Copyright (C) 2010 - 2013  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -26,9 +26,7 @@
 # settings
 #
 
-if [ -z "$PAGER" ]; then
-    PAGER=less
-fi
+[ -z "$PAGER" ] && PAGER=less
 
 escape=$(echo -e '\033')
 cat "$1" | gunzip | groff -t -c -m man -Tascii -rLL=$2n -rLT=$2n 2> /dev/null | sed "s/$escape\[[^m]*m//g" | $PAGER
