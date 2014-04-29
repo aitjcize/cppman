@@ -48,7 +48,14 @@ or install the git version
 
     $ yaourt -S cppman-git
 
-3. Ubuntu/Debian PPA are no longer maintained. If you are interested in maintaining it, feel free to contact me.
+3. Ubuntu/Debian PPA
+
+.. code-block:: bash
+
+    $ sudo add-apt-repository ppa:cppman/cppman-daily
+    $ sudo apt-get install cppman
+
+Thanks @czchen for maintaining the package.
 
 Bugs
 ----
