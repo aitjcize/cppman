@@ -55,7 +55,7 @@ or install the git version
     $ sudo add-apt-repository ppa:cppman/cppman-daily
     $ sudo apt-get install cppman
 
-Thanks @czchen for maintaining the package.
+Thanks `czchen <https://github.com/czchen>`_ for maintaining the package.
 
 Bugs
 ----
