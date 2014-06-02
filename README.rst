@@ -53,6 +53,7 @@ or install the git version
 .. code-block:: bash
 
     $ sudo add-apt-repository ppa:cppman/cppman-daily
+    $ sudo apt-get update
     $ sudo apt-get install cppman
 
 Thanks `czchen <https://github.com/czchen>`_ for maintaining the package.
