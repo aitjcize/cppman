@@ -67,8 +67,14 @@ class cppman(Crawler):
         except: pass
         self.db_conn = sqlite3.connect(Environ.index_db_re)
         self.db_cursor = self.db_conn.cursor()
-        self.db_cursor.execute('CREATE TABLE CPPMAN (name VARCHAR(255), '
-                               'url VARCHAR(255))')
+        self.db_cursor.execute(
+            'CREATE TABLE CPPMAN ( '
+                'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+                'source VARCHAR(255), '
+                'name VARCHAR(255), '
+                'url VARCHAR(255) '
+            ')')
+
         try:
             self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf)$')
             self.set_follow_mode(Crawler.F_SAME_PATH)

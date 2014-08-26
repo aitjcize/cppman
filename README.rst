@@ -1,9 +1,9 @@
-.. image:: https://travis-ci.org/aitjcize/cppman.png?branch=master
+.. image:: http://img.shields.io/travis/aitjcize/cppman.svg
    :target: https://travis-ci.org/aitjcize/cppman
-.. image:: https://pypip.in/v/cppman/badge.png
+.. image:: http://img.shields.io/pypi/v/cppman.svg
    :target: https://pypi.python.org/pypi/cppman
-.. image:: https://pypip.in/d/cppman/badge.png
-   :target: https://crate.io/packages/cppman/
+.. image:: http://img.shields.io/pypi/dm/cppman.svg
+   :target: https://crate.io/packages/cppman
 
 cppman
 ======
