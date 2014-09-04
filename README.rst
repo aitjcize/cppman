@@ -73,6 +73,3 @@ Contributing
 Notes
 -----
 * manpages-cpp is renamed to cppman since September 19, 2012
-
-.. image:: https://cruel-carlota.pagodabox.com/d590c9d5f4c2a6dcbaea67a1286d7302
-   :target: http://githalytics.com/aitjcize/cppman
