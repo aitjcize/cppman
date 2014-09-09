@@ -34,6 +34,7 @@
 " For version 6.x: Quit when a syntax file was already loaded
 
 set nonu
+set norelativenumber
 set iskeyword+=:,=,~,[,],>,*
 set keywordprg=cppman
 map q :q!<CR>
