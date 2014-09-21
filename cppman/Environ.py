@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-# 
+#
 # Environ.py
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
