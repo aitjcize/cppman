@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-# 
+#
 # Config.py
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
@@ -39,13 +39,13 @@ class Config(object):
 
     def __getattr__(self, name):
         value = self._config.get('Settings', name)
-        return self.parseBool(value)
+        return self.parse_bool(value)
 
     def __setattr__(self, name, value):
         if not name.startswith('_'):
             self._config.set('Settings', name, value)
             self.store_config()
-        self.__dict__[name] = self.parseBool(value)
+        self.__dict__[name] = self.parse_bool(value)
 
     def set_default(self):
         """Set config to default."""
@@ -70,7 +70,7 @@ class Config(object):
         with open(self._configfile, 'w') as f:
             self._config.write(f)
 
-    def parseBool(self, val):
+    def parse_bool(self, val):
         if type(val) == str:
             if val.lower() == 'true':
                 return True
