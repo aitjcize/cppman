@@ -48,6 +48,7 @@ class Crawler(object):
         self.concurrency = 0
         self.max_outstanding = 16
         self.max_depth = 0
+        self.include_hashtag = False
 
         self.follow_mode = self.F_SAME_HOST
         self.content_type_filter = '(text/html)'
@@ -73,6 +74,9 @@ class Crawler(object):
 
     def set_max_depth(self, max_depth):
         self.max_depth = max_depth
+
+    def set_include_hashtag(self, include):
+        self.include_hashtag = include
 
     def process_document(self, doc):
         print 'GET', doc.status, doc.url
@@ -121,6 +125,9 @@ class Crawler(object):
         for f in self.url_filters:
             if re.search(f, link):
                 return None
+
+        if not self.include_hashtag:
+            link = re.sub(r'(%23|#).*$', '', link)
 
         rx = re.match('(https?://)([^/:]+)(:[0-9]+)?([^\?]*)(\?.*)?', url)
         url_proto = rx.group(1)
