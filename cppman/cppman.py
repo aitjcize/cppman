@@ -215,20 +215,20 @@ class cppman(Crawler):
         # Try direct match
         try:
             page_name, url = cursor.execute(
-                    'SELECT name,url FROM %s '
+                    'SELECT name,url FROM "%s" '
                     'WHERE name="%s" ORDER BY LENGTH(name)'
                     % (Environ.source, pattern)).fetchone()
         except TypeError:
             # Try standard library
             try:
                 page_name, url = cursor.execute(
-                        'SELECT name,url FROM %s '
+                        'SELECT name,url FROM "%s" '
                         'WHERE name="std::%s" ORDER BY LENGTH(name)'
                         % (Environ.source, pattern)).fetchone()
             except TypeError:
                 try:
                     page_name, url = cursor.execute(
-                            'SELECT name,url FROM %s'
+                            'SELECT name,url FROM "%s" '
                             'WHERE name LIKE "%%%s%%" ORDER BY LENGTH(name)'
                             % (Environ.source, pattern)).fetchone()
                 except TypeError:
@@ -260,7 +260,7 @@ class cppman(Crawler):
 
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
-        selected = cursor.execute('SELECT name,url FROM %s WHERE name '
+        selected = cursor.execute('SELECT * FROM "%s" WHERE name '
                 'LIKE "%%%s%%" ORDER BY LENGTH(name)'
                 % (Environ.source, pattern)).fetchall()
 
