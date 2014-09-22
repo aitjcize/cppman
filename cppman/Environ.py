@@ -26,7 +26,7 @@ import os
 import platform
 import sys
 
-from os.path import expanduser, abspath, normpath, dirname, exists, join
+from posixpath import expanduser, normpath, exists, join
 
 import Config
 from . import get_lib_path
@@ -56,33 +56,9 @@ elif config.pager == 'less':
 else:
     pager = get_lib_path('lib/pager_system.sh')
 
+source = config.Source
+if not source in config.SOURCES:
+    source = config.SOURCES[0]
+    config.Source = source
+
 renderer = get_lib_path('lib/render.sh')
-
-# Add ~/.local/share/man to $HOME/.manpath
-def mandb_changed():
-    manpath_file = normpath(join(HOME, '.manpath'))
-    manpath = '.local/share/man'
-    lines = []
-    try:
-        with open(manpath_file, 'r') as f:
-            lines = f.readlines()
-    except IOError:
-        if not config.UpdateManPath:
-            return
-
-    has_path = any([manpath in l for l in lines])
-
-    with open(manpath_file, 'w') as f:
-        if config.UpdateManPath:
-            if not has_path:
-                lines.append('MANDATORY_MANPATH\t%s\n' %
-                             normpath(join(HOME, manpath)))
-        else:
-            new_lines = []
-            for line in lines:
-                if manpath not in line:
-                    new_lines.append(line)
-            lines = new_lines
-
-        for line in lines:
-            f.write(line)

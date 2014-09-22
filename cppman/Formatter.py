@@ -23,14 +23,12 @@
 #
 
 import datetime
-import fcntl
 import re
-import struct
 import subprocess
 import sys
-import termios
 import urllib
 
+from Util import get_width
 from TableParser import parse_table
 
 # Format replacement RE list
@@ -227,16 +225,6 @@ def cplusplus2man(data):
     groff_text = cplusplus2groff(data)
     man_text = groff2man(groff_text)
     return man_text
-
-def get_width():
-    """Get terminal width"""
-    # Get terminal size
-    ws = struct.pack("HHHH", 0, 0, 0, 0)
-    ws = fcntl.ioctl(0, termios.TIOCGWINSZ, ws)
-    lines, columns, x, y = struct.unpack("HHHH", ws)
-    width = columns * 39 / 40
-    if width >= columns -2: width = columns -2
-    return width
 
 def func_test():
     """Test if there is major format changes in cplusplus.com"""

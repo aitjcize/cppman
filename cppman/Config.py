@@ -28,6 +28,9 @@ import os
 from os.path import dirname, exists
 
 class Config(object):
+    PAGERS = ['vim', 'less', 'system']
+    SOURCES = ['cppreference.com', 'cplusplus.com']
+
     def __init__(self, configfile):
         self._configfile = configfile
 
@@ -55,6 +58,7 @@ class Config(object):
 
         self._config = ConfigParser.RawConfigParser()
         self._config.add_section('Settings')
+        self._config.set('Settings', 'Source', 'cppreference.com')
         self._config.set('Settings', 'UpdateManPath', 'false')
         self._config.set('Settings', 'Pager', 'system')
 

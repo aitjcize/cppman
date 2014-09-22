@@ -24,7 +24,7 @@
 
 import gzip
 import os
-import os.path
+import posixpath
 import platform
 import re
 import shutil
@@ -53,8 +53,8 @@ class cppman(Crawler):
         ]
 
     def extract_name(self, data):
-        """Extract man page name from cplusplus web page."""
-        name = re.search('<h1>(.+?)</h1>', data).group(1)
+        """Extract man page name from web page."""
+        name = re.search('<h1[^>]*>(.+?)</h1>', data).group(1)
         name = re.sub(r'<([^>]+)>', r'', name)
         name = re.sub(r'&gt;', r'>', name)
         name = re.sub(r'&lt;', r'<', name)
@@ -67,25 +67,30 @@ class cppman(Crawler):
         except: pass
         self.db_conn = sqlite3.connect(Environ.index_db_re)
         self.db_cursor = self.db_conn.cursor()
-        self.db_cursor.execute('CREATE TABLE CPPMAN (name VARCHAR(255), '
-                               'url VARCHAR(255))')
+        self.db_cursor.execute('CREATE TABLE "cplusplus.com" '
+                               '(name VARCHAR(255), url VARCHAR(255))')
+        self.db_cursor.execute('CREATE TABLE "cppreference.com" '
+                               '(name VARCHAR(255), url VARCHAR(255))')
+
         try:
-            self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf)$')
+            self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf|svg)$')
             self.set_follow_mode(Crawler.F_SAME_PATH)
+
+            # cplusplus.com
             self.crawl('http://www.cplusplus.com/reference/')
             for name, url in self.results:
-                self.insert_index(name, url)
+                self.insert_index('cplusplus.com', name, url)
             self.db_conn.commit()
 
             # Rename dumplicate entries
             dumplicates = self.db_cursor.execute('SELECT name, COUNT(name) '
                                                  'AS NON '
-                                                 'FROM CPPMAN '
+                                                 'FROM "cplusplus.com" '
                                                  'GROUP BY NAME '
                                                  'HAVING (NON > 1)').fetchall()
             for name, num in dumplicates:
-                dump = self.db_cursor.execute('SELECT name, url FROM CPPMAN '
-                                              'WHERE name="%s"'
+                dump = self.db_cursor.execute('SELECT name, url FROM '
+                                              '"cplusplus.com" WHERE name="%s"'
                                               % name).fetchall()
                 for n, u in dump:
                     if u not in self.name_exceptions:
@@ -96,10 +101,18 @@ class cppman(Crawler):
                             group = re.search('/([^/]+)/[^/]+/$', u).group(1)
 
                         new_name = '%s (%s)' % (n, group)
-                        self.db_cursor.execute('UPDATE CPPMAN '
+                        self.db_cursor.execute('UPDATE "cplusplus.com" '
                                                'SET name="%s", url="%s" '
                                                'WHERE url="%s"' %
                                                (new_name, u, u))
+            self.db_conn.commit()
+
+            # cppreference.com
+            self.results = set()
+            self.crawl('http://en.cppreference.com/w/cpp', '/w/cpp')
+
+            for name, url in self.results:
+                self.insert_index('cppreference.com', name, url)
             self.db_conn.commit()
         except KeyboardInterrupt:
             os.remove(Environ.index_db_re)
@@ -117,10 +130,11 @@ class cppman(Crawler):
             print "Skipping blacklisted page '%s' ..." % doc.url
             return None
 
-    def insert_index(self, name, url):
+    def insert_index(self, table, name, url):
         """callback to insert index"""
-        self.db_cursor.execute('INSERT INTO CPPMAN (name, url) VALUES '
-                               '("%s", "%s")' % (name, url))
+        for n in name.split(','):
+            self.db_cursor.execute('INSERT INTO "%s" (name, url) VALUES '
+                                   '("%s", "%s")' % (table, n.strip(), url))
 
     def cache_all(self):
         """Cache all available man pages from cplusplus.com"""
@@ -141,39 +155,44 @@ class cppman(Crawler):
         self.success_count = 0
         self.failure_count = 0
 
-        if not os.path.exists(Environ.index_db):
+        if not posixpath.exists(Environ.index_db):
             raise RuntimeError("can't find index.db")
 
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
 
-        data = cursor.execute('SELECT name, url FROM CPPMAN').fetchall()
+        for source in config.SOURCES:
+            data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
-        for name, url in data:
-            try:
-                print 'Caching %s ...' % name
-                self.cache_man_page(url, name)
-            except Exception, e:
-                print 'Error caching %s ...', name
-                self.failure_count += 1
-            else:
-                self.success_count += 1
+            for name, url in data:
+                try:
+                    print 'Caching %s ...' % name
+                    self.cache_man_page(source, url, name)
+                except Exception, e:
+                    print 'Error caching %s ...', name
+                    self.failure_count += 1
+                else:
+                    self.success_count += 1
         conn.close()
 
         print '\n%d manual pages cached successfully.' % self.success_count
         print '%d manual pages failed to cache.' % self.failure_count
         self.update_mandb(False)
 
-    def cache_man_page(self, url, name=None):
+    def cache_man_page(self, source, url, name=None):
         """callback to cache new man page"""
+        try:
+            os.makedirs(posixpath.join(Environ.man_dir, source))
+        except: pass
+
         data = urllib.urlopen(url).read()
         groff_text = Formatter.cplusplus2groff(data)
         if not name:
             name = self.extract_name(data).replace('/', '_')
 
         # Skip if already exists, override if forced flag is true
-        outname = Environ.man_dir + name + '.3.gz'
-        if os.path.exists(outname) and not self.forced:
+        outname = posixpath.join(Environ.man_dir, source, + name + '.3.gz')
+        if posixpath.exists(outname) and not self.forced:
             return
         f = gzip.open(outname, 'w')
         f.write(groff_text)
@@ -185,13 +204,9 @@ class cppman(Crawler):
 
     def man(self, pattern):
         """Call viewer.sh to view man page"""
-        try:
-            os.makedirs(Environ.man_dir)
-        except: pass
-
         avail = os.listdir(Environ.man_dir)
 
-        if not os.path.exists(Environ.index_db):
+        if not posixpath.exists(Environ.index_db):
             raise RuntimeError("can't find index.db")
 
         conn = sqlite3.connect(Environ.index_db)
@@ -199,19 +214,23 @@ class cppman(Crawler):
 
         # Try direct match
         try:
-            page_name, url = cursor.execute('SELECT name,url FROM CPPMAN WHERE'
-                    ' name="%s" ORDER BY LENGTH(name)' % pattern).fetchone()
+            page_name, url = cursor.execute(
+                    'SELECT name,url FROM %s '
+                    'WHERE name="%s" ORDER BY LENGTH(name)'
+                    % (Environ.source, pattern)).fetchone()
         except TypeError:
             # Try standard library
             try:
-                page_name, url = cursor.execute('SELECT name,url FROM CPPMAN'
-                        ' WHERE name="std::%s" ORDER BY LENGTH(name)'
-                        % pattern).fetchone()
+                page_name, url = cursor.execute(
+                        'SELECT name,url FROM %s '
+                        'WHERE name="std::%s" ORDER BY LENGTH(name)'
+                        % (Environ.source, pattern)).fetchone()
             except TypeError:
                 try:
-                    page_name, url = cursor.execute('SELECT name,url FROM '
-                        'CPPMAN WHERE name LIKE "%%%s%%" ORDER BY LENGTH(name)'
-                        % pattern).fetchone()
+                    page_name, url = cursor.execute(
+                            'SELECT name,url FROM %s'
+                            'WHERE name LIKE "%%%s%%" ORDER BY LENGTH(name)'
+                            % (Environ.source, pattern)).fetchone()
                 except TypeError:
                     raise RuntimeError('No manual entry for ' + pattern)
         finally:
@@ -219,7 +238,7 @@ class cppman(Crawler):
 
         page_name = page_name.replace('/', '_')
         if page_name + '.3.gz' not in avail or self.forced:
-            self.cache_man_page(url, page_name)
+            self.cache_man_page(Environ.source, url, page_name)
             self.update_mandb()
 
         pager = Environ.pager if sys.stdout.isatty() else Environ.renderer
@@ -236,13 +255,14 @@ class cppman(Crawler):
     def find(self, pattern):
         """Find pages in database."""
 
-        if not os.path.exists(Environ.index_db):
+        if not posixpath.exists(Environ.index_db):
             raise RuntimeError("can't find index.db")
 
         conn = sqlite3.connect(Environ.index_db)
         cursor = conn.cursor()
-        selected = cursor.execute('SELECT name,url FROM CPPMAN WHERE name '
-                'LIKE "%%%s%%" ORDER BY LENGTH(name)' % pattern).fetchall()
+        selected = cursor.execute('SELECT name,url FROM %s WHERE name '
+                'LIKE "%%%s%%" ORDER BY LENGTH(name)'
+                % (Environ.source, pattern)).fetchall()
 
         pat = re.compile('(%s)' % pattern, re.I)
 

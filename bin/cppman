@@ -37,7 +37,8 @@ if program.startswith('./') or program.startswith('bin/'):
     sys.path.insert(0, LANUCH_DIR)
 
 from cppman.cppman import cppman
-from cppman.Environ import config, mandb_changed
+from cppman.Environ import config
+from cppman.Util import update_mandb_path
 
 program_name = sys.argv[0]
 program_version = '0.3.1'
@@ -53,10 +54,13 @@ Written by Wei-Ning Huang (AZ) <aitjcize@gmail.com>.\n' %
 
 def main():
     option_list = [
+        make_option('-s', '--source', action='store', dest='source',
+                    help="Select source, either 'cppreference.com' or "
+                         "'cplusplus.com'. Default is 'cppreference.com'."),
         make_option('-c', '--cache-all', action='store_true',
                     dest='cache_all', default=False,
-                    help='cache all available man pages from cplusplus.com '
-                           'to enable offline browsing'),
+                    help='cache all available man pages from cppreference.com '
+                         'and cplusplus.com o enable offline browsing'),
         make_option('-C', '--clear-cache', action='store_true',
                     dest='clear_cache', default=False,
                     help='clear all cached files'),
@@ -73,8 +77,8 @@ def main():
                     "manpage path to mandb so that you can view C++ manpages "
                     "with `man' command. The default value is 'false'."),
         make_option('-p', '--pager', action='store', dest='pager',
-                    help="Select pager to use, accepts 'vim', 'less' or 'system'. "
-                    "'system' uses $PAGER environment as pager. "
+                    help="Select pager to use, accepts 'vim', 'less' or "
+                    "'system'. 'system' uses $PAGER environment as pager. "
                     "The default value is 'system'."),
         make_option('-r', '--rebuild-index', action='store_true',
                     dest='rebuild_index', default=False,
@@ -106,16 +110,23 @@ def main():
         cm.find(options.keyword)
         sys.exit(0)
 
+    if options.source:
+        if not options.source in config.SOURCES:
+            raise Exception("invalid value `%s' for option `--source'" %
+                            options.source)
+        else:
+            config.Source = options.source
+            print "Source set to `%s'." % options.source
+            sys.exit(0)
+
     if options.pager:
-        if (options.pager == 'vim' or
-                options.pager == 'less' or
-                options.pager == 'system'):
+        if not options.pager in config.PAGERS:
+            raise Exception("invalid value `%s' for option `--pager'" %
+                            options.pager)
+        else:
             config.Pager = options.pager
             print "Pager set to `%s'." % options.pager
             sys.exit(0)
-        else:
-            raise Exception("invalid value `%s' for option `--pager'" %
-                            options.pager)
 
     if options.mandb:
         if options.mandb != 'true' and options.mandb != 'false':
@@ -124,7 +135,7 @@ def main():
         value = config.parseBool(options.mandb)
         if config.UpdateManPath ^ value:
             config.UpdateManPath = value
-            mandb_changed()
+            update_mandb_path()
         sys.exit(0)
 
     if options.rebuild_index:
