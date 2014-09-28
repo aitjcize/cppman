@@ -195,7 +195,7 @@ class Cppman(Crawler):
             name = self.extract_name(data).replace('/', '_')
 
         # Skip if already exists, override if forced flag is true
-        outname = os.path.join(environ.man_dir, source, name + '.3.gz')
+        outname = self.get_page_path(source, name)
         if os.path.exists(outname) and not self.forced:
             return
         f = gzip.open(outname, 'w')
@@ -208,7 +208,10 @@ class Cppman(Crawler):
 
     def man(self, pattern):
         """Call viewer.sh to view man page"""
-        avail = os.listdir(environ.man_dir)
+        try:
+            avail = os.listdir(os.path.join(environ.man_dir, environ.source))
+        except OSError:
+            avail = []
 
         if not os.path.exists(environ.index_db):
             raise RuntimeError("can't find index.db")
@@ -251,7 +254,7 @@ class Cppman(Crawler):
         pid = os.fork()
         if pid == 0:
             os.execl('/bin/sh', '/bin/sh', pager,
-                     environ.man_dir + page_name + '.3.gz',
+                     self.get_page_path(environ.source, page_name),
                      str(util.get_width()), environ.pager_config,
                      page_name)
         return pid
@@ -287,3 +290,6 @@ class Cppman(Crawler):
         print '\nrunning mandb...'
         cmd = 'mandb %s' % (' -q' if quiet else '')
         subprocess.Popen(cmd, shell=True).wait()
+
+    def get_page_path(self, source, name):
+        return os.path.join(environ.man_dir, source, name + '.3.gz')
