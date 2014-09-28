@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
-# Crawler.py
+# crawler.py
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -23,23 +23,26 @@
 #
 
 import httplib
+import os
 import re
 import sys
 
-from posixpath import join, dirname, normpath
 from threading import Thread, Lock
 from urllib import quote
+
 
 class Document(object):
     def __init__(self, res, url):
         self.url = url
-        self.query = '' if not '?' in url else url.split('?')[-1]
+        self.query = '' if '?' not in url else url.split('?')[-1]
         self.status = res.status
         self.text = res.read()
         self.headers = dict(res.getheaders())
 
+
 class Crawler(object):
     F_ANY, F_SAME_DOMAIN, F_SAME_HOST, F_SAME_PATH = range(4)
+
     def __init__(self):
         self.host = None
         self.visited = {}
@@ -80,7 +83,7 @@ class Crawler(object):
 
     def process_document(self, doc):
         print 'GET', doc.status, doc.url
-        #to do stuff with url depth use self._calc_depth(doc.url)
+        # to do stuff with url depth use self._calc_depth(doc.url)
 
     def crawl(self, url, path=None):
         self.root_url = url
@@ -89,7 +92,7 @@ class Crawler(object):
         self.proto = rx.group(1)
         self.host = rx.group(2)
         self.path = rx.group(3)
-        self.dir_path = dirname(self.path)
+        self.dir_path = os.path.dirname(self.path)
         self.query = rx.group(4)
 
         if path:
@@ -104,14 +107,14 @@ class Crawler(object):
                     t.join(1)
                     if not t.isAlive():
                         self.threads.remove(t)
-            except KeyboardInterrupt, e:
+            except KeyboardInterrupt:
                 sys.exit(1)
 
     def _url_domain(self, host):
         parts = host.split('.')
         if len(parts) <= 2:
             return host
-        elif re.match('^[0-9]+(?:\.[0-9]+){3}$', host): # IP
+        elif re.match('^[0-9]+(?:\.[0-9]+){3}$', host):  # IP
             return host
         else:
             return '.'.join(parts[1:])
@@ -134,19 +137,19 @@ class Crawler(object):
         url_host = rx.group(2)
         url_port = rx.group(3) if rx.group(3) else ''
         url_path = rx.group(4) if len(rx.group(4)) > 0 else '/'
-        url_dir_path = dirname(url_path)
+        url_dir_path = os.path.dirname(url_path)
 
         rx = re.match('((https?://)([^/:]+)(:[0-9]+)?)?([^\?]*)(\?.*)?', link)
-        link_full_url = rx.group(1) != None
+        link_full_url = rx.group(1) is not None
         link_proto = rx.group(2) if rx.group(2) else url_proto
         link_host = rx.group(3) if rx.group(3) else url_host
         link_port = rx.group(4) if rx.group(4) else url_port
         link_path = quote(rx.group(5), '/%') if rx.group(5) else url_path
         link_query = quote(rx.group(6), '?=&%') if rx.group(6) else ''
-        link_dir_path = dirname(link_path)
+        link_dir_path = os.path.dirname(link_path)
 
         if not link_full_url and not link.startswith('/'):
-            link_path = normpath(join(url_dir_path, link_path))
+            link_path = os.path.normpath(os.path.join(url_dir_path, link_path))
 
         link_url = link_proto + link_host + link_port + link_path + link_query
 
@@ -154,7 +157,7 @@ class Crawler(object):
             return link_url
         elif self.follow_mode == self.F_SAME_DOMAIN:
             return link_url if self._url_domain(self.host) == \
-                    self._url_domain(link_host) else None
+                self._url_domain(link_host) else None
         elif self.follow_mode == self.F_SAME_HOST:
             return link_url if self.host == link_host else None
         elif self.follow_mode == self.F_SAME_PATH:
@@ -166,8 +169,8 @@ class Crawler(object):
 
     def _calc_depth(self, url):
         # calculate url depth
-        return len(url.replace('https', 'http').replace(self.root_url, '')
-                .rstrip('/').split('/')) - 1
+        return len(url.replace('https', 'http').replace(
+            self.root_url, '').rstrip('/').split('/')) - 1
 
     def _add_target(self, target):
         if not target:
@@ -177,7 +180,7 @@ class Crawler(object):
             return
 
         self.targets_lock.acquire()
-        if self.visited.has_key(target):
+        if target in self.visited:
             self.targets_lock.release()
             return
         self.targets.add(target)
@@ -215,18 +218,19 @@ class Crawler(object):
 
                 # Check content type
                 try:
-                    if not re.search(self.content_type_filter,
+                    if not re.search(
+                        self.content_type_filter,
                             res.getheader('Content-Type')):
                         continue
-                except TypeError: # getheader result is None
+                except TypeError:  # getheader result is None
                     continue
 
                 doc = Document(res, url)
                 self.process_document(doc)
 
                 # Make unique list
-                links = re.findall('''href\s*=\s*['"]\s*([^'"]+)['"]''',
-                        doc.text, re.S)
+                links = re.findall(
+                    '''href\s*=\s*['"]\s*([^'"]+)['"]''', doc.text, re.S)
                 links = list(set(links))
 
                 for link in links:
@@ -235,11 +239,11 @@ class Crawler(object):
 
                 if self.concurrency < self.max_outstanding:
                     self._spawn_new_worker()
-            except KeyError as e:
+            except KeyError:
                 # Pop from an empty set
                 break
-            except (httplib.HTTPException, EnvironmentError) as e:
-                #print '%s, retrying' % str(e)
+            except (httplib.HTTPException, environmentError):
+                # print '%s, retrying' % str(e)
                 self.targets_lock.acquire()
                 self.targets.add(url)
                 self.targets_lock.release()

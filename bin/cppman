@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # cppman.py
 #
@@ -24,10 +24,9 @@
 #
 
 import os
-import os.path
-import subprocess
 import sys
 from optparse import OptionParser, make_option
+
 
 program = sys.argv[0]
 LANUCH_DIR = os.path.dirname(os.path.abspath(sys.path[0]))
@@ -36,21 +35,24 @@ LANUCH_DIR = os.path.dirname(os.path.abspath(sys.path[0]))
 if program.startswith('./') or program.startswith('bin/'):
     sys.path.insert(0, LANUCH_DIR)
 
-from cppman.cppman import cppman
-from cppman.Environ import config
-from cppman.Util import update_mandb_path
+from cppman.main import Cppman
+from cppman.environ import config
+from cppman.util import update_mandb_path
 
 program_name = sys.argv[0]
 program_version = '0.3.1'
 
+
 def version():
     sys.stderr.write(
-'%s Ver %s\n\
-Copyright (C) 2010 Wei-Ning Huang\n\
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\nThis is free software: you are free to change and redistribute it.\n\
-There is NO WARRANTY, to the extent permitted by law.\n\n\
-Written by Wei-Ning Huang (AZ) <aitjcize@gmail.com>.\n' %
-    (program_name, program_version))
+        """%s Ver %s
+Copyright (C) 2010 Wei-Ning Huang
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.\n
+Written by Wei-Ning Huang (AZ) <aitjcize@gmail.com>."""
+        % (program_name, program_version))
+
 
 def main():
     option_list = [
@@ -86,8 +88,9 @@ def main():
         make_option('-v', '--version', action='store_true', dest='version',
                     default=False, help='show version information')
     ]
-    parser = OptionParser(usage = 'Usage: cppman [OPTION...] PAGE...',
-                          option_list=option_list)
+
+    parser = OptionParser(
+        usage='Usage: cppman [OPTION...] PAGE...', option_list=option_list)
 
     options, args = parser.parse_args()
 
@@ -96,22 +99,22 @@ def main():
         sys.exit(0)
 
     if options.cache_all:
-        cm = cppman(options.force)
+        cm = Cppman(options.force)
         cm.cache_all()
         sys.exit(0)
 
     if options.clear_cache:
-        cm = cppman()
+        cm = Cppman()
         cm.clear_cache()
         sys.exit(0)
 
     if options.keyword:
-        cm = cppman()
+        cm = Cppman()
         cm.find(options.keyword)
         sys.exit(0)
 
     if options.source:
-        if not options.source in config.SOURCES:
+        if options.source not in config.SOURCES:
             raise Exception("invalid value `%s' for option `--source'" %
                             options.source)
         else:
@@ -120,7 +123,7 @@ def main():
             sys.exit(0)
 
     if options.pager:
-        if not options.pager in config.PAGERS:
+        if options.pager not in config.PAGERS:
             raise Exception("invalid value `%s' for option `--pager'" %
                             options.pager)
         else:
@@ -139,7 +142,7 @@ def main():
         sys.exit(0)
 
     if options.rebuild_index:
-        cm = cppman()
+        cm = Cppman()
         cm.rebuild_index()
         sys.exit(0)
 
@@ -147,7 +150,7 @@ def main():
         print >> sys.stderr, 'What manual page do you want?'
         sys.exit(1)
 
-    cm = cppman(options.force)
+    cm = Cppman(options.force)
     for i in args:
         if i != args[0]:
             print '--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '\

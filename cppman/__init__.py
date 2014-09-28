@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # __init__.py
 #
@@ -24,5 +24,6 @@ import os
 
 package_dir = os.path.dirname(__file__)
 
+
 def get_lib_path(filename):
-    return os.path.join(package_dir, filename)
+    return os.path.join(package_dir, 'lib', filename)

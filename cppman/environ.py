@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
-# Environ.py
+# environ.py
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -23,42 +23,40 @@
 #
 
 import os
-import platform
-import sys
 
-from posixpath import expanduser, normpath, exists, join
+from cppman import get_lib_path
+from cppman.config import Config
 
-import Config
-from . import get_lib_path
-
-HOME = expanduser('~')
+HOME = os.path.expanduser('~')
 
 man_dir = HOME + '/.local/share/man/man3/'
 config_dir = HOME + '/.config/cppman/'
 config_file = config_dir + 'cppman.cfg'
 
-config = Config.Config(config_file)
+config = Config(config_file)
 
 try:
     os.makedirs(config_dir)
-except: pass
+except:
+    pass
 
-index_db_re = normpath(join(config_dir, 'index.db'))
+index_db_re = os.path.normpath(os.path.join(config_dir, 'index.db'))
 
-index_db = index_db_re if exists(index_db_re) else get_lib_path('lib/index.db')
+index_db = index_db_re if os.path.exists(index_db_re) \
+    else get_lib_path('index.db')
 
-pager_config = get_lib_path('lib/cppman.vim')
+pager_config = get_lib_path('cppman.vim')
 
 if config.pager == 'vim':
-    pager = get_lib_path('lib/pager_vim.sh')
+    pager = get_lib_path('pager_vim.sh')
 elif config.pager == 'less':
-    pager = get_lib_path('lib/pager_less.sh')
+    pager = get_lib_path('pager_less.sh')
 else:
-    pager = get_lib_path('lib/pager_system.sh')
+    pager = get_lib_path('pager_system.sh')
 
 source = config.Source
-if not source in config.SOURCES:
+if source not in config.SOURCES:
     source = config.SOURCES[0]
     config.Source = source
 
-renderer = get_lib_path('lib/render.sh')
+renderer = get_lib_path('render.sh')
