@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
-# TableParser.py - format html from cplusplus.com to groff syntax
+# tableparser.py - format html from cplusplus.com to groff syntax
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -23,11 +23,12 @@
 #
 
 import re
-import sys
 import StringIO
+
 
 NODE = re.compile(r'<\s*([^/]\w*)\s?(.*?)>(.*?)<\s*/\1.*?>', re.S)
 ATTR = re.compile(r'\s*(\w+?)\s*=\s*([\'"])((?:\\.|(?!\2).)*)\2')
+
 
 class Node(object):
     def __init__(self, parent, name, attr_list, body):
@@ -61,37 +62,37 @@ class Node(object):
         format_str = ''
 
         if self.name in ['th', 'td']:
-            if self.attr.has_key('colspan'):
+            if 'colspan' in self.attr:
                 total += int(self.attr['colspan']) - 1
 
             extend = ((total == 3 and index == 1) or
-                      (total != 3 and total < 5 and index == total -1))
+                      (total != 3 and total < 5 and index == total - 1))
 
             if self.name == 'th':
                 format_str += 'c%s ' % ('x' if extend else '')
             else:
                 format_str += 'l%s ' % ('x' if extend else '')
 
-            if self.attr.has_key('colspan'):
+            if 'colspan' in self.attr:
                 for i in range(int(self.attr['colspan']) - 1):
                     format_str += 's '
 
-            if self.attr.has_key('rowspan'):
+            if 'rowspan' in self.attr:
                 rowspan[index] = int(self.attr['rowspan']) - 1
 
         if self.name == 'tr' and len(rowspan) > 0:
             total = len(rowspan) + len(self.children)
             ci = 0
             for i in range(total):
-                if rowspan.has_key(i):
+                if i in rowspan:
                     format_str += '^ '
                     if rowspan[i] == 1:
                         del rowspan[i]
                     else:
                         rowspan[i] -= 1
                 else:
-                    format_str += self.children[ci].scan_format(i,
-                            total, rowspan)
+                    format_str += self.children[ci].scan_format(
+                        i, total, rowspan)
                     ci += 1
         else:
             for i, c in enumerate(self.children):
@@ -111,7 +112,7 @@ class Node(object):
             fd.write(self.scan_format())
         elif self.name in ['th', 'td']:
             fd.write('T{\n%s' % self.text)
-            if self.attr.has_key('rowspan'):
+            if 'rowspan' in self.attr:
                 rowspan[index] = int(self.attr['rowspan']) - 1
         else:
             fd.write(self.text)
@@ -120,7 +121,7 @@ class Node(object):
             total = len(rowspan) + len(self.children)
             ci = 0
             for i in range(total):
-                if rowspan.has_key(i):
+                if i in rowspan:
                     fd.write('\^%s' % ('|' if i < total - 1 else ''))
                     if rowspan[i] == 1:
                         del rowspan[i]

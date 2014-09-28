@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
-# Util.py - Misc utilities
+# util.py - Misc utilities
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -23,17 +23,17 @@
 #
 
 import fcntl
+import os
 import struct
 import termios
 
-from posixpath import expanduser, normpath, join
+from cppman.environ import config
 
-from Environ import config
 
 def update_mandb_path():
     """Add ~/.local/share/man to $HOME/.manpath"""
-    HOME = expanduser('~')
-    manpath_file = normpath(join(HOME, '.manpath'))
+    HOME = os.path.expanduser('~')
+    manpath_file = os.path.normpath(os.path.join(HOME, '.manpath'))
     manpath = '.local/share/man'
     lines = []
     try:
@@ -49,7 +49,7 @@ def update_mandb_path():
         if config.UpdateManPath:
             if not has_path:
                 lines.append('MANDATORY_MANPATH\t%s\n' %
-                             normpath(join(HOME, manpath)))
+                             os.path.normpath(os.path.join(HOME, manpath)))
         else:
             new_lines = []
             for line in lines:
@@ -60,6 +60,7 @@ def update_mandb_path():
         for line in lines:
             f.write(line)
 
+
 def get_width():
     """Get terminal width"""
     # Get terminal size
@@ -67,5 +68,6 @@ def get_width():
     ws = fcntl.ioctl(0, termios.TIOCGWINSZ, ws)
     lines, columns, x, y = struct.unpack("HHHH", ws)
     width = columns * 39 / 40
-    if width >= columns -2: width = columns -2
+    if width >= columns - 2:
+        width = columns - 2
     return width

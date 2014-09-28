@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
-# Config.py
+# config.py
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -25,7 +25,6 @@
 import ConfigParser
 import os
 
-from os.path import dirname, exists
 
 class Config(object):
     PAGERS = ['vim', 'less', 'system']
@@ -34,7 +33,7 @@ class Config(object):
     def __init__(self, configfile):
         self._configfile = configfile
 
-        if not exists(configfile):
+        if not os.path.exists(configfile):
             self.set_default()
         else:
             self._config = ConfigParser.RawConfigParser()
@@ -53,8 +52,9 @@ class Config(object):
     def set_default(self):
         """Set config to default."""
         try:
-            os.makedirs(dirname(self._configfile))
-        except: pass
+            os.makedirs(os.path.dirname(self._configfile))
+        except:
+            pass
 
         self._config = ConfigParser.RawConfigParser()
         self._config.add_section('Settings')
@@ -68,8 +68,9 @@ class Config(object):
     def store_config(self):
         """Store config back to file."""
         try:
-            os.makedirs(dirname(self._configfile))
-        except: pass
+            os.makedirs(os.path.dirname(self._configfile))
+        except:
+            pass
 
         with open(self._configfile, 'w') as f:
             self._config.write(f)

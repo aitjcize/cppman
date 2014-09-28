@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
-# cppman.py
+# main.py
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -24,8 +24,6 @@
 
 import gzip
 import os
-import posixpath
-import platform
 import re
 import shutil
 import sqlite3
@@ -33,11 +31,13 @@ import subprocess
 import sys
 import urllib
 
-import Environ
-import Formatter
-from Crawler import Crawler
+from cppman import environ
+from cppman import formatter
+from cppman import util
+from cppman.crawler import Crawler
 
-class cppman(Crawler):
+
+class Cppman(Crawler):
     """Manage cpp man pages, indexes"""
     def __init__(self, forced=False):
         Crawler.__init__(self)
@@ -63,9 +63,11 @@ class cppman(Crawler):
     def rebuild_index(self):
         """Rebuild index database from cplusplus.com."""
         try:
-            os.remove(Environ.index_db_re)
-        except: pass
-        self.db_conn = sqlite3.connect(Environ.index_db_re)
+            os.remove(environ.index_db_re)
+        except:
+            pass
+
+        self.db_conn = sqlite3.connect(environ.index_db_re)
         self.db_cursor = self.db_conn.cursor()
         self.db_cursor.execute('CREATE TABLE "cplusplus.com" '
                                '(name VARCHAR(255), url VARCHAR(255))')
@@ -115,7 +117,7 @@ class cppman(Crawler):
                 self.insert_index('cppreference.com', name, url)
             self.db_conn.commit()
         except KeyboardInterrupt:
-            os.remove(Environ.index_db_re)
+            os.remove(environ.index_db_re)
             raise KeyboardInterrupt
         finally:
             self.db_conn.close()
@@ -149,26 +151,27 @@ class cppman(Crawler):
             raise KeyboardInterrupt
 
         try:
-            os.makedirs(Environ.man_dir)
-        except: pass
+            os.makedirs(environ.man_dir)
+        except:
+            pass
 
         self.success_count = 0
         self.failure_count = 0
 
-        if not posixpath.exists(Environ.index_db):
+        if not os.path.exists(environ.index_db):
             raise RuntimeError("can't find index.db")
 
-        conn = sqlite3.connect(Environ.index_db)
+        conn = sqlite3.connect(environ.index_db)
         cursor = conn.cursor()
 
-        for source in config.SOURCES:
+        for source in environ.config.SOURCES:
             data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
             for name, url in data:
                 try:
                     print 'Caching %s ...' % name
                     self.cache_man_page(source, url, name)
-                except Exception, e:
+                except Exception:
                     print 'Error caching %s ...', name
                     self.failure_count += 1
                 else:
@@ -182,17 +185,18 @@ class cppman(Crawler):
     def cache_man_page(self, source, url, name=None):
         """callback to cache new man page"""
         try:
-            os.makedirs(posixpath.join(Environ.man_dir, source))
-        except: pass
+            os.makedirs(os.path.join(environ.man_dir, source))
+        except:
+            pass
 
         data = urllib.urlopen(url).read()
-        groff_text = Formatter.cplusplus2groff(data)
+        groff_text = formatter.cplusplus2groff(data)
         if not name:
             name = self.extract_name(data).replace('/', '_')
 
         # Skip if already exists, override if forced flag is true
-        outname = posixpath.join(Environ.man_dir, source, + name + '.3.gz')
-        if posixpath.exists(outname) and not self.forced:
+        outname = os.path.join(environ.man_dir, source, name + '.3.gz')
+        if os.path.exists(outname) and not self.forced:
             return
         f = gzip.open(outname, 'w')
         f.write(groff_text)
@@ -200,37 +204,37 @@ class cppman(Crawler):
 
     def clear_cache(self):
         """Clear all cache in man3"""
-        shutil.rmtree(Environ.man_dir)
+        shutil.rmtree(environ.man_dir)
 
     def man(self, pattern):
         """Call viewer.sh to view man page"""
-        avail = os.listdir(Environ.man_dir)
+        avail = os.listdir(environ.man_dir)
 
-        if not posixpath.exists(Environ.index_db):
+        if not os.path.exists(environ.index_db):
             raise RuntimeError("can't find index.db")
 
-        conn = sqlite3.connect(Environ.index_db)
+        conn = sqlite3.connect(environ.index_db)
         cursor = conn.cursor()
 
         # Try direct match
         try:
             page_name, url = cursor.execute(
-                    'SELECT name,url FROM "%s" '
-                    'WHERE name="%s" ORDER BY LENGTH(name)'
-                    % (Environ.source, pattern)).fetchone()
+                'SELECT name,url FROM "%s" '
+                'WHERE name="%s" ORDER BY LENGTH(name)'
+                % (environ.source, pattern)).fetchone()
         except TypeError:
             # Try standard library
             try:
                 page_name, url = cursor.execute(
-                        'SELECT name,url FROM "%s" '
-                        'WHERE name="std::%s" ORDER BY LENGTH(name)'
-                        % (Environ.source, pattern)).fetchone()
+                    'SELECT name,url FROM "%s" '
+                    'WHERE name="std::%s" ORDER BY LENGTH(name)'
+                    % (environ.source, pattern)).fetchone()
             except TypeError:
                 try:
                     page_name, url = cursor.execute(
-                            'SELECT name,url FROM "%s" '
-                            'WHERE name LIKE "%%%s%%" ORDER BY LENGTH(name)'
-                            % (Environ.source, pattern)).fetchone()
+                        'SELECT name,url FROM "%s" '
+                        'WHERE name LIKE "%%%s%%" ORDER BY LENGTH(name)'
+                        % (environ.source, pattern)).fetchone()
                 except TypeError:
                     raise RuntimeError('No manual entry for ' + pattern)
         finally:
@@ -238,31 +242,32 @@ class cppman(Crawler):
 
         page_name = page_name.replace('/', '_')
         if page_name + '.3.gz' not in avail or self.forced:
-            self.cache_man_page(Environ.source, url, page_name)
+            self.cache_man_page(environ.source, url, page_name)
             self.update_mandb()
 
-        pager = Environ.pager if sys.stdout.isatty() else Environ.renderer
+        pager = environ.pager if sys.stdout.isatty() else environ.renderer
 
         # Call viewer
         pid = os.fork()
         if pid == 0:
             os.execl('/bin/sh', '/bin/sh', pager,
-                     Environ.man_dir + page_name + '.3.gz',
-                     str(Formatter.get_width()), Environ.pager_config,
+                     environ.man_dir + page_name + '.3.gz',
+                     str(util.get_width()), environ.pager_config,
                      page_name)
         return pid
 
     def find(self, pattern):
         """Find pages in database."""
 
-        if not posixpath.exists(Environ.index_db):
+        if not os.path.exists(environ.index_db):
             raise RuntimeError("can't find index.db")
 
-        conn = sqlite3.connect(Environ.index_db)
+        conn = sqlite3.connect(environ.index_db)
         cursor = conn.cursor()
-        selected = cursor.execute('SELECT * FROM "%s" WHERE name '
-                'LIKE "%%%s%%" ORDER BY LENGTH(name)'
-                % (Environ.source, pattern)).fetchall()
+        selected = cursor.execute(
+            'SELECT * FROM "%s" WHERE name '
+            'LIKE "%%%s%%" ORDER BY LENGTH(name)'
+            % (environ.source, pattern)).fetchall()
 
         pat = re.compile('(%s)' % pattern, re.I)
 
@@ -277,8 +282,8 @@ class cppman(Crawler):
 
     def update_mandb(self, quiet=True):
         """Update mandb."""
-        if not Environ.config.UpdateManPath:
+        if not environ.config.UpdateManPath:
             return
         print '\nrunning mandb...'
         cmd = 'mandb %s' % (' -q' if quiet else '')
-        handle = subprocess.Popen(cmd, shell=True).wait()
+        subprocess.Popen(cmd, shell=True).wait()
