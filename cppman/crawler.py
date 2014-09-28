@@ -242,7 +242,7 @@ class Crawler(object):
             except KeyError:
                 # Pop from an empty set
                 break
-            except (httplib.HTTPException, environmentError):
+            except (httplib.HTTPException, EnvironmentError):
                 # print '%s, retrying' % str(e)
                 self.targets_lock.acquire()
                 self.targets.add(url)
