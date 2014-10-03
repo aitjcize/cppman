@@ -64,7 +64,7 @@ rps = [
      lambda g: re.sub('<p/?>', '', g.group(1)), re.S),
     # Header, Name
     (r'<h1.*?>(.*?)</h1>',
-     r'.TH "{{name}}" 3 "%s" "cppreference.com" "C++ Programmer\'s Manual"\n'
+     r'\n.TH "{{name}}" 3 "%s" "cppreference.com" "C++ Programmer\'s Manual"\n'
      r'\n.SH "NAME"\n{{name}} {{shortdesc}}\n.SE\n' % datetime.date.today(),
      re.S),
     # Defined in header
@@ -77,9 +77,14 @@ rps = [
      r'(.*?)<tr class="t-dcl-sep">',
      r'\n.SH "SYNOPSIS"\n.nf\n\1\n.fi\n.SE\n'
      r'\n.SH "DESCRIPTION"\n', re.S),
+    # <unordered_map>
     (r'<div class="t-navbar"[^>]*>.*?' + NAV_BAR_END +
      r'(.*?)<table class="t-dsc-begin">',
      r'\n.SH "DESCRIPTION"\n\1\n', re.S),
+    # access specifiers
+    (r'<div class="t-navbar"[^>]*>.*?' + NAV_BAR_END +
+     r'(.*?)<h3',
+     r'\n.SH "DESCRIPTION"\n\1\n<h3', re.S),
     (r'<td>\s*\([0-9]+\)\s*</td>', r'', 0),
     # Section headers
     (r'<div class="t-inherited">.*?<h2>.*?Inherited from\s*(.*?)\s*</h2>',
@@ -158,6 +163,8 @@ rps = [
     (r'\\([^\^nE])', r'\\\\\1', 0),
     (r'>/">', r'', 0),
     (r'/">', r'', 0),
+    # Remove empty sections
+    (r'\n.SH (.+?)\n+.SE', r'', 0),
     # Remove empty lines
     (r'\n\s*\n+', r'\n', 0),
     (r'\n\n+', r'\n', 0),
@@ -167,10 +174,12 @@ rps = [
     (r'^\s+', r'', re.S),
     # Trailing white-spaces
     (r'\s+\n', r'\n', re.S),
-    # Remove extra whitespace and newline in .IP section
+    # Remove extra whitespace and newline in .IP/SH section
     (r'.(IP|SH) " *(.*?)\n?"', r'.\1 "\2"', 0),
-    # C++ version Tag
-    (r'\n\s*(\[(:?since|until) C\+\+\d+\])', r' \1', re.S)
+    # Remove extra whitespace before .IP bullet
+    (r'(.IP \\\\\[bu\] 3)\n\s*(.*?)\n', r'\1\n\2', 0),
+    # Remove extra '\n' before C++ version Tag (don't do it in table)
+    (r'(?<!T{)\n\s*(\[(:?since|until) C\+\+\d+\])', r' \1', re.S)
 ]
 
 
@@ -220,12 +229,12 @@ def html2groff(data, name):
     except ValueError:
         idx = None
 
-    def add_header_multi(name, g):
+    def add_header_multi(prefix, g):
         if ',' in g.group(1):
-            res = ', '.join(['%s::%s' % (name, x.strip())
+            res = ', '.join(['%s::%s' % (prefix, x.strip())
                             for x in g.group(1).split(',')])
         else:
-            res = '%s::%s' % (name, g.group(1))
+            res = '%s::%s' % (prefix, g.group(1))
 
         return '\n.IP "%s"' % res
 
@@ -233,6 +242,8 @@ def html2groff(data, name):
         class_name = name
         if class_name.startswith('std::'):
             normalized_class_name = class_name[len('std::'):]
+        else:
+            normalized_class_name = class_name
         class_member_content = data[:idx]
         secs = re.findall(r'\.SH "(.+?)"(.+?)\.SE', class_member_content, re.S)
 
@@ -275,9 +286,10 @@ def html2groff(data, name):
 
     # Replace all macros
     desc_re = re.search(r'.SH "DESCRIPTION"\n.*?([^\n\s].*?)\n', data)
-    if not desc_re:
-        shortdesc = ''
-    else:
+    shortdesc = ''
+
+    # not empty description
+    if desc_re and not desc_re.group(1).startswith('.SH'):
         shortdesc = '- ' + desc_re.group(1)
 
     def dereference(g):
