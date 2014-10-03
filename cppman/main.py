@@ -32,9 +32,9 @@ import sys
 import urllib
 
 from cppman import environ
-from cppman import formatter
 from cppman import util
 from cppman.crawler import Crawler
+from cppman.formatter import cplusplus
 
 
 class Cppman(Crawler):
@@ -190,7 +190,7 @@ class Cppman(Crawler):
             pass
 
         data = urllib.urlopen(url).read()
-        groff_text = formatter.cplusplus2groff(data, name)
+        groff_text = cplusplus.html2groff(data, name)
 
         # Skip if already exists, override if forced flag is true
         outname = self.get_page_path(source, name)
