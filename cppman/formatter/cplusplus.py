@@ -144,7 +144,7 @@ rps = [
 ]
 
 
-def cplusplus2groff(data, name):
+def html2groff(data, name):
     """Convert HTML text from cplusplus.com to Groff-formated text."""
     # Remove sidebar
     try:
@@ -212,25 +212,6 @@ def cplusplus2groff(data, name):
     data = data.replace('\n.SE', '')
 
     return data
-
-
-def groff2man(data):
-    """Read groff-formated text and output man pages."""
-    width = get_width()
-
-    cmd = 'groff -t -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)
-    handle = subprocess.Popen(
-        cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    man_text, stderr = handle.communicate(data)
-    return man_text
-
-
-def cplusplus2man(data):
-    """Convert HTML text from cplusplus.com to man pages."""
-    groff_text = cplusplus2groff(data)
-    man_text = groff2man(groff_text)
-    return man_text
 
 
 def func_test():

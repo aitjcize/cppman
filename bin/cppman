@@ -58,7 +58,7 @@ def main():
     option_list = [
         make_option('-s', '--source', action='store', dest='source',
                     help="Select source, either 'cppreference.com' or "
-                         "'cplusplus.com'. Default is 'cppreference.com'."),
+                         "'cplusplus.com'. Default is 'cplusplus.com'."),
         make_option('-c', '--cache-all', action='store_true',
                     dest='cache_all', default=False,
                     help='cache all available man pages from cppreference.com '

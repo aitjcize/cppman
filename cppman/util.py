@@ -28,6 +28,7 @@ import struct
 import termios
 
 from cppman.environ import config
+from cppman.formatter import cplusplus
 
 
 def update_mandb_path():
@@ -71,3 +72,22 @@ def get_width():
     if width >= columns - 2:
         width = columns - 2
     return width
+
+
+def groff2man(data):
+    """Read groff-formated text and output man pages."""
+    width = get_width()
+
+    cmd = 'groff -t -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)
+    handle = subprocess.Popen(
+        cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    man_text, stderr = handle.communicate(data)
+    return man_text
+
+
+def html2man(data, formatter=cplusplus.html2groff):
+    """Convert HTML text from cplusplus.com to man pages."""
+    groff_text = formatter(data)
+    man_text = groff2man(groff_text)
+    return man_text
