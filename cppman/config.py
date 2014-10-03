@@ -30,6 +30,12 @@ class Config(object):
     PAGERS = ['vim', 'less', 'system']
     SOURCES = ['cppreference.com', 'cplusplus.com']
 
+    DEFAULTS = {
+        'Source': 'cplusplus.com',
+        'UpdateManPath': 'false',
+        'Pager': 'system'
+    }
+
     def __init__(self, configfile):
         self._configfile = configfile
 
@@ -40,13 +46,19 @@ class Config(object):
             self._config.read(self._configfile)
 
     def __getattr__(self, name):
-        value = self._config.get('Settings', name)
+        try:
+            value = self._config.get('Settings', name)
+        except ConfigParser.NoOptionError:
+            value = self.DEFAULTS[name]
+            setattr(self, name, value)
+            self._config.read(self._configfile)
+
         return self.parse_bool(value)
 
     def __setattr__(self, name, value):
         if not name.startswith('_'):
             self._config.set('Settings', name, value)
-            self.store_config()
+            self.save()
         self.__dict__[name] = self.parse_bool(value)
 
     def set_default(self):
@@ -58,14 +70,14 @@ class Config(object):
 
         self._config = ConfigParser.RawConfigParser()
         self._config.add_section('Settings')
-        self._config.set('Settings', 'Source', 'cppreference.com')
-        self._config.set('Settings', 'UpdateManPath', 'false')
-        self._config.set('Settings', 'Pager', 'system')
+
+        for key, val in self.DEFAULTS.iteritems():
+            self._config.set('Settings', key, val)
 
         with open(self._configfile, 'w') as f:
             self._config.write(f)
 
-    def store_config(self):
+    def save(self):
         """Store config back to file."""
         try:
             os.makedirs(os.path.dirname(self._configfile))
