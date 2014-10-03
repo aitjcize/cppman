@@ -130,8 +130,12 @@ rps = [
     (r'<div title="(C\+\+..)"[^>]*>', r'.sp\n\1\n', 0),
     # Output
     (r'<p>Output:\n?</p>', r'\n.sp\nOutput:\n', re.S),
-    # 'br' tag
+    # Paragraph
     (r'<p>(.*?)</p>', r'\n\1\n.sp\n', re.S),
+    (r'<div class="t-li1">(.*?)</div>', r'\n\1\n.sp\n', re.S),
+    (r'<div class="t-li2">(.*?)</div>',
+     r'\n.RS\n\1\n.RE\n.sp\n', re.S),
+    # 'br' tag
     (r'<br>', r'\n.br\n', 0),
     (r'\n.br\n.br\n', r'\n.sp\n', 0),
     # 'dd' 'dt' tag
