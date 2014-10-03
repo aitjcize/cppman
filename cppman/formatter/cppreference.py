@@ -269,11 +269,11 @@ def html2groff(data, name):
 
 def func_test():
     """Test if there is major format changes in cplusplus.com"""
-    ifs = urllib.urlopen('http://www.cplusplus.com/printf')
-    result = html2groff(ifs.read())
-    assert '.SH NAME' in result
-    assert '.SH TYPE' in result
-    assert '.SH DESCRIPTION' in result
+    ifs = urllib.urlopen('http://en.cppreference.com/w/cpp/container/vector')
+    result = html2groff(ifs.read(), 'std::vector')
+    assert '.SH "NAME"' in result
+    assert '.SH "SYNOPSIS"' in result
+    assert '.SH "DESCRIPTION"' in result
 
 
 def test():

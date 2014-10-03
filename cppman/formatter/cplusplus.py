@@ -45,40 +45,40 @@ rps = [
      r'<h1>(.*?)</h1>\s*<div class="C_prototype"[^>]*>'
      r'(.*?)</div>\s*<div id="I_description"[^>]*>(.*?)</div>',
      r'.TH "\3" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-     r'\n.SH NAME\n\3 - \5\n'
-     r'\n.SE\n.SH TYPE\n\1\n'
-     r'\n.SE\n.SH SYNOPSIS\n#include \2\n.sp\n\4\n'
-     r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+     r'\n.SH "NAME"\n\3 - \5\n'
+     r'\n.SE\n.SH "TYPE"\n\1\n'
+     r'\n.SE\n.SH "SYNOPSIS"\n#include \2\n.sp\n\4\n'
+     r'\n.SE\n.SH "DESCRIPTION"\n' % datetime.date.today(), re.S),
     (r'\s*<div id="I_type"[^>]*>(.*?)\s*</div>\s*'
      r'<div id="I_file"[^>]*>(.*?)</div>\s*'
      r'<h1>(.*?)</h1>\s*'
      r'<div id="I_description"[^>]*>(.*?)</div>',
      r'.TH "\3" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-     r'\n.SH NAME\n\3 - \4\n'
-     r'\n.SE\n.SH TYPE\n\1\n'
-     r'\n.SE\n.SH SYNOPSIS\n#include \2\n.sp\n'
-     r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+     r'\n.SH "NAME"\n\3 - \4\n'
+     r'\n.SE\n.SH "TYPE"\n\1\n'
+     r'\n.SE\n.SH "SYNOPSIS"\n#include \2\n.sp\n'
+     r'\n.SE\n.SH "DESCRIPTION"\n' % datetime.date.today(), re.S),
     (r'\s*<div id="I_type"[^>]*>(.*?)\s*</div>\s*<h1>(.*?)</h1>\s*'
      r'<div id="I_description"[^>]*>(.*?)</div>',
      r'.TH "\2" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-     r'\n.SH NAME\n\2 - \3\n'
-     r'\n.SE\n.SH TYPE\n\1\n'
-     r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+     r'\n.SH "NAME"\n\2 - \3\n'
+     r'\n.SE\n.SH "TYPE"\n\1\n'
+     r'\n.SE\n.SH "DESCRIPTION"\n' % datetime.date.today(), re.S),
     (r'\s*<div id="I_type"[^>]*>(.*?)\s*</div>\s*<h1>(.*?)</h1>\s*'
      r'<div id="I_file"[^>]*>(.*?)</div>\s*<div id="I_description"[^>]*>'
      '(.*?)</div>',
      r'.TH "\2" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-     r'\n.SH NAME\n\2 - \4\n'
-     r'\n.SE\n.SH TYPE\n\1\n'
-     r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+     r'\n.SH "NAME"\n\2 - \4\n'
+     r'\n.SE\n.SH "TYPE"\n\1\n'
+     r'\n.SE\n.SH "DESCRIPTION"\n' % datetime.date.today(), re.S),
     (r'\s*<div id="I_type"[^>]*>(.*?)\s*</div>\s*<h1>(.*?)</h1>\s*'
      r'<div class="C_prototype"[^>]*>(.*?)</div>\s*'
      r'<div id="I_description"[^>]*>(.*?)</div>',
      r'.TH "\2" 3 "%s" "cplusplus.com" "C++ Programmer\'s Manual"\n'
-     r'\n.SH NAME\n\2 - \4\n'
-     r'\n.SE\n.SH TYPE\n\1\n'
-     r'\n.SE\n.SH SYNOPSIS\n\3\n'
-     r'\n.SE\n.SH DESCRIPTION\n' % datetime.date.today(), re.S),
+     r'\n.SH "NAME"\n\2 - \4\n'
+     r'\n.SE\n.SH "TYPE"\n\1\n'
+     r'\n.SE\n.SH "SYNOPSIS"\n\3\n'
+     r'\n.SE\n.SH "DESCRIPTION"\n' % datetime.date.today(), re.S),
     (r'<span class="C_ico cpp11warning".*?>', r' [C++11]', re.S),
     # Remove empty #include
     (r'#include \n.sp\n', r'', 0),
@@ -216,10 +216,10 @@ def html2groff(data, name):
 def func_test():
     """Test if there is major format changes in cplusplus.com"""
     ifs = urllib.urlopen('http://www.cplusplus.com/printf')
-    result = html2groff(ifs.read())
-    assert '.SH NAME' in result
-    assert '.SH TYPE' in result
-    assert '.SH DESCRIPTION' in result
+    result = html2groff(ifs.read(), 'printf')
+    assert '.SH "NAME"' in result
+    assert '.SH "TYPE"' in result
+    assert '.SH "DESCRIPTION"' in result
 
 
 def test():
