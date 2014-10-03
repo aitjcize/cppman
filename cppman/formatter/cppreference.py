@@ -144,7 +144,7 @@ rps = [
     (r'<br>', r'\n.br\n', 0),
     (r'\n.br\n.br\n', r'\n.sp\n', 0),
     # 'dd' 'dt' tag
-    (r'<dt>(.+?)</dt>\s*<dd>(.+?)</dd>', r'.IP "\1"\n\2\n', re.S),
+    (r'<dt>(.+?)</dt>\s*<dd>(.+?)</dd>', r'\n.IP "\1"\n\2\n', re.S),
     # Bold
     (r'<strong>(.+?)</strong>', r'\n.B \1\n', 0),
     # Any other tags
@@ -177,7 +177,7 @@ rps = [
     # Remove extra whitespace and newline in .IP/SH section
     (r'.(IP|SH) " *(.*?)\n?"', r'.\1 "\2"', 0),
     # Remove extra whitespace before .IP bullet
-    (r'(.IP \\\\\[bu\] 3)\n\s*(.*?)\n', r'\1\n\2', 0),
+    (r'(.IP \\\\\[bu\] 3)\n\s*(.*?)\n', r'\1\n\2\n', 0),
     # Remove extra '\n' before C++ version Tag (don't do it in table)
     (r'(?<!T{)\n\s*(\[(:?since|until) C\+\+\d+\])', r' \1', re.S)
 ]
