@@ -29,7 +29,7 @@ import urllib
 from functools import partial
 
 from cppman.util import html2man
-from cppman.tableparser import parse_table
+from cppman.formatter.tableparser import parse_table
 
 
 def member_table_def(g):
