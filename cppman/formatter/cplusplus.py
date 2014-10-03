@@ -79,7 +79,7 @@ rps = [
      r'\n.SE\n.SH "TYPE"\n\1\n'
      r'\n.SE\n.SH "SYNOPSIS"\n\3\n'
      r'\n.SE\n.SH "DESCRIPTION"\n' % datetime.date.today(), re.S),
-    (r'<span class="C_ico cpp11warning".*?>', r' [C++11]', re.S),
+    (r'<span class="C_ico cpp11warning"[^>]*>', r' [C++11]', re.S),
     # Remove empty #include
     (r'#include \n.sp\n', r'', 0),
     # Remove empty sections
@@ -92,7 +92,7 @@ rps = [
     # 'li' tag
     (r'<li>\s*(.+?)</li>', r'\n.IP \[bu] 3\n\1\n', re.S),
     # 'pre' tag
-    (r'<pre.*?>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.S),
+    (r'<pre[^>]*>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.S),
     # Subsections
     (r'<b>(.+?)</b>:<br>', r'.SS \1\n', 0),
     # Member functions / See Also table
@@ -110,7 +110,7 @@ rps = [
      r'\n.SE\n.SH "REFERENCE"\n'
      r'cplusplus.com, 2000-2014 - All rights reserved.', re.S),
     # C++ version tag
-    (r'<div title="(C\+\+..)".*?>', r'.sp\n\1\n', 0),
+    (r'<div title="(C\+\+..)"[^>]*>', r'.sp\n\1\n', 0),
     # 'br' tag
     (r'<br>', r'\n.br\n', 0),
     (r'\n.br\n.br\n', r'\n.sp\n', 0),
