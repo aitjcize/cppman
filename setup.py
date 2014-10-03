@@ -25,7 +25,7 @@ setup(
         author_email = 'aitjcize@gmail.com',
         url = 'http://github.com/Aitjcize/cppman',
         license = 'GPL',
-        packages = ['cppman'],
+        packages = ['cppman', 'cppman.formatter'],
         package_data = {'cppman': _package_data},
         data_files = _data_files,
         scripts = ['bin/cppman']
