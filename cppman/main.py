@@ -139,12 +139,12 @@ class Cppman(Crawler):
                                    '("%s", "%s")' % (table, n.strip(), url))
 
     def cache_all(self):
-        """Cache all available man pages from cplusplus.com"""
-        print 'By defualt, cppman fetch pages on the fly if coressponding '\
+        """Cache all available man pages"""
+        print 'By defualt, cppman fetch pages on-the-fly if coressponding '\
             'page is not found in the cache. The "cache-all" option is only '\
             'useful if you want to view man pages offline. ' \
-            'Caching all contents from cplusplus.com will serveral'\
-            'minutes, do you want to continue [Y/n]?',
+            'Caching all contents will take serveral minutes, ' \
+            'do you want to continue [Y/n]?',
 
         respond = raw_input()
         if respond.lower() not in ['y', 'ye', 'yes']:
@@ -165,6 +165,7 @@ class Cppman(Crawler):
         cursor = conn.cursor()
 
         for source in environ.config.SOURCES:
+            print 'Caching mange pages from %s ...' % source
             data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
             for name, url in data:
