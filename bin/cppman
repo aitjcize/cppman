@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
-# 
+# -*- coding: utf-8 -*-
+#
 # cppman.py
 #
 # Copyright (C) 2010 -  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
@@ -24,10 +24,9 @@
 #
 
 import os
-import os.path
-import subprocess
 import sys
 from optparse import OptionParser, make_option
+
 
 program = sys.argv[0]
 LANUCH_DIR = os.path.dirname(os.path.abspath(sys.path[0]))
@@ -36,27 +35,34 @@ LANUCH_DIR = os.path.dirname(os.path.abspath(sys.path[0]))
 if program.startswith('./') or program.startswith('bin/'):
     sys.path.insert(0, LANUCH_DIR)
 
-from cppman.cppman import cppman
-from cppman.Environ import config, mandb_changed
+from cppman.main import Cppman
+from cppman.environ import config
+from cppman.util import update_mandb_path
 
 program_name = sys.argv[0]
 program_version = '0.3.1'
 
+
 def version():
     sys.stderr.write(
-'%s Ver %s\n\
-Copyright (C) 2010 Wei-Ning Huang\n\
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\nThis is free software: you are free to change and redistribute it.\n\
-There is NO WARRANTY, to the extent permitted by law.\n\n\
-Written by Wei-Ning Huang (AZ) <aitjcize@gmail.com>.\n' %
-    (program_name, program_version))
+        """%s Ver %s
+Copyright (C) 2010 Wei-Ning Huang
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.\n
+Written by Wei-Ning Huang (AZ) <aitjcize@gmail.com>."""
+        % (program_name, program_version))
+
 
 def main():
     option_list = [
+        make_option('-s', '--source', action='store', dest='source',
+                    help="Select source, either 'cppreference.com' or "
+                         "'cplusplus.com'. Default is 'cplusplus.com'."),
         make_option('-c', '--cache-all', action='store_true',
                     dest='cache_all', default=False,
-                    help='cache all available man pages from cplusplus.com '
-                           'to enable offline browsing'),
+                    help='cache all available man pages from cppreference.com '
+                         'and cplusplus.com o enable offline browsing'),
         make_option('-C', '--clear-cache', action='store_true',
                     dest='clear_cache', default=False,
                     help='clear all cached files'),
@@ -73,8 +79,8 @@ def main():
                     "manpage path to mandb so that you can view C++ manpages "
                     "with `man' command. The default value is 'false'."),
         make_option('-p', '--pager', action='store', dest='pager',
-                    help="Select pager to use, accepts 'vim', 'less' or 'system'. "
-                    "'system' uses $PAGER environment as pager. "
+                    help="Select pager to use, accepts 'vim', 'less' or "
+                    "'system'. 'system' uses $PAGER environment as pager. "
                     "The default value is 'system'."),
         make_option('-r', '--rebuild-index', action='store_true',
                     dest='rebuild_index', default=False,
@@ -82,8 +88,9 @@ def main():
         make_option('-v', '--version', action='store_true', dest='version',
                     default=False, help='show version information')
     ]
-    parser = OptionParser(usage = 'Usage: cppman [OPTION...] PAGE...',
-                          option_list=option_list)
+
+    parser = OptionParser(
+        usage='Usage: cppman [OPTION...] PAGE...', option_list=option_list)
 
     options, args = parser.parse_args()
 
@@ -92,30 +99,37 @@ def main():
         sys.exit(0)
 
     if options.cache_all:
-        cm = cppman(options.force)
+        cm = Cppman(options.force)
         cm.cache_all()
         sys.exit(0)
 
     if options.clear_cache:
-        cm = cppman()
+        cm = Cppman()
         cm.clear_cache()
         sys.exit(0)
 
     if options.keyword:
-        cm = cppman()
+        cm = Cppman()
         cm.find(options.keyword)
         sys.exit(0)
 
+    if options.source:
+        if options.source not in config.SOURCES:
+            raise Exception("invalid value `%s' for option `--source'" %
+                            options.source)
+        else:
+            config.Source = options.source
+            print "Source set to `%s'." % options.source
+            sys.exit(0)
+
     if options.pager:
-        if (options.pager == 'vim' or
-                options.pager == 'less' or
-                options.pager == 'system'):
+        if options.pager not in config.PAGERS:
+            raise Exception("invalid value `%s' for option `--pager'" %
+                            options.pager)
+        else:
             config.Pager = options.pager
             print "Pager set to `%s'." % options.pager
             sys.exit(0)
-        else:
-            raise Exception("invalid value `%s' for option `--pager'" %
-                            options.pager)
 
     if options.mandb:
         if options.mandb != 'true' and options.mandb != 'false':
@@ -124,11 +138,11 @@ def main():
         value = config.parseBool(options.mandb)
         if config.UpdateManPath ^ value:
             config.UpdateManPath = value
-            mandb_changed()
+            update_mandb_path()
         sys.exit(0)
 
     if options.rebuild_index:
-        cm = cppman()
+        cm = Cppman()
         cm.rebuild_index()
         sys.exit(0)
 
@@ -136,7 +150,7 @@ def main():
         print >> sys.stderr, 'What manual page do you want?'
         sys.exit(1)
 
-    cm = cppman(options.force)
+    cm = Cppman(options.force)
     for i in args:
         if i != args[0]:
             print '--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '\

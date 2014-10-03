@@ -5,6 +5,7 @@ import os
 import os.path
 sys.path.insert(0, os.path.normpath(os.getcwd()))
 
-from cppman import Formatter
+from cppman.formatter import cplusplus, cppreference
 
-Formatter.func_test()
+cplusplus.func_test()
+cppreference.func_test()

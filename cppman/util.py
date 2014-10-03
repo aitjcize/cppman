@@ -1,6 +1,6 @@
-#-*- coding: utf-8 -*-
-# 
-# Environ.py
+# -*- coding: utf-8 -*-
+#
+# util.py - Misc utilities
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
@@ -22,45 +22,19 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+import fcntl
 import os
-import platform
-import sys
+import struct
+import termios
+import subprocess
 
-from os.path import expanduser, abspath, normpath, dirname, exists, join
+from cppman.environ import config
 
-import Config
-from . import get_lib_path
 
-HOME = expanduser('~')
-
-man_dir = HOME + '/.local/share/man/man3/'
-config_dir = HOME + '/.config/cppman/'
-config_file = config_dir + 'cppman.cfg'
-
-config = Config.Config(config_file)
-
-try:
-    os.makedirs(config_dir)
-except: pass
-
-index_db_re = normpath(join(config_dir, 'index.db'))
-
-index_db = index_db_re if exists(index_db_re) else get_lib_path('lib/index.db')
-
-pager_config = get_lib_path('lib/cppman.vim')
-
-if config.pager == 'vim':
-    pager = get_lib_path('lib/pager_vim.sh')
-elif config.pager == 'less':
-    pager = get_lib_path('lib/pager_less.sh')
-else:
-    pager = get_lib_path('lib/pager_system.sh')
-
-renderer = get_lib_path('lib/render.sh')
-
-# Add ~/.local/share/man to $HOME/.manpath
-def mandb_changed():
-    manpath_file = normpath(join(HOME, '.manpath'))
+def update_mandb_path():
+    """Add ~/.local/share/man to $HOME/.manpath"""
+    HOME = os.path.expanduser('~')
+    manpath_file = os.path.normpath(os.path.join(HOME, '.manpath'))
     manpath = '.local/share/man'
     lines = []
     try:
@@ -76,7 +50,7 @@ def mandb_changed():
         if config.UpdateManPath:
             if not has_path:
                 lines.append('MANDATORY_MANPATH\t%s\n' %
-                             normpath(join(HOME, manpath)))
+                             os.path.normpath(os.path.join(HOME, manpath)))
         else:
             new_lines = []
             for line in lines:
@@ -86,3 +60,34 @@ def mandb_changed():
 
         for line in lines:
             f.write(line)
+
+
+def get_width():
+    """Get terminal width"""
+    # Get terminal size
+    ws = struct.pack("HHHH", 0, 0, 0, 0)
+    ws = fcntl.ioctl(0, termios.TIOCGWINSZ, ws)
+    lines, columns, x, y = struct.unpack("HHHH", ws)
+    width = columns * 39 / 40
+    if width >= columns - 2:
+        width = columns - 2
+    return width
+
+
+def groff2man(data):
+    """Read groff-formated text and output man pages."""
+    width = get_width()
+
+    cmd = 'groff -t -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)
+    handle = subprocess.Popen(
+        cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    man_text, stderr = handle.communicate(data)
+    return man_text
+
+
+def html2man(data, formatter):
+    """Convert HTML text from cplusplus.com to man pages."""
+    groff_text = formatter(data)
+    man_text = groff2man(groff_text)
+    return man_text
