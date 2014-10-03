@@ -221,7 +221,7 @@ def html2groff(data, name):
             res = ', '.join(['%s::%s' % (name, x.strip())
                             for x in g.group(1).split(',')])
         else:
-            res = g.group(1)
+            res = '%s::%s' % (name, g.group(1))
 
         return '\n.IP "%s"' % res
 
@@ -238,7 +238,7 @@ def html2groff(data, name):
                'NON-MEMBER' not in sec and \
                'INHERITED' not in sec and \
                sec != 'MEMBER TYPES':
-                content2 = re.sub(r'\n\.IP "([^:].+)"',
+                content2 = re.sub(r'\n\.IP "([^:]+?)"',
                                   partial(add_header_multi, class_name),
                                   content)
                 # Replace (constructor) (destructor)
