@@ -88,12 +88,12 @@ rps = [
     # Section headers
     (r'.*<h3>(.+?)</h3>', r'\n.SE\n.SH "\1"\n', 0),
     # 'ul' tag
-    (r'<ul>', r'\n.in +2n\n.sp\n', 0),
-    (r'</ul>', r'\n.in\n', 0),
+    (r'<ul>', r'\n.RS 2\n', 0),
+    (r'</ul>', r'\n.RE\n.sp\n', 0),
     # 'li' tag
-    (r'<li>(.+?)</li>', r'* \1\n.sp\n', 0),
+    (r'<li>\s*(.+?)</li>', r'\n.IP \[bu] 3\n\1\n', re.S),
     # 'pre' tag
-    (r'<pre\s*>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.S),
+    (r'<pre.*?>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.S),
     # Subsections
     (r'<b>(.+?)</b>:<br>', r'.SS \1\n', 0),
     # Member functions / See Also table
@@ -108,7 +108,7 @@ rps = [
      r'\n.IP "\1(3) [\2]"\n\3 \4\n', 0),
     # Footer
     (r'<div id="CH_bb">.*$',
-     r'\n.SE\n.SH REFERENCE\n'
+     r'\n.SE\n.SH "REFERENCE"\n'
      r'cplusplus.com, 2000-2014 - All rights reserved.', re.S),
     # C++ version tag
     (r'<div title="(C\+\+..)".*?>', r'.sp\n\1\n', 0),
@@ -127,6 +127,7 @@ rps = [
     # Misc
     (r'&lt;', r'<', 0),
     (r'&gt;', r'>', 0),
+    (r'&quot;', r'"', 0),
     (r'&amp;', r'&', 0),
     (r'&nbsp;', r' ', 0),
     (r'\\([^\^nE])', r'\\\\\1', 0),
@@ -143,7 +144,7 @@ rps = [
 ]
 
 
-def cplusplus2groff(data):
+def cplusplus2groff(data, name):
     """Convert HTML text from cplusplus.com to Groff-formated text."""
     # Remove sidebar
     try:
@@ -191,21 +192,21 @@ def cplusplus2groff(data):
             # Member functions
             if 'MEMBER' in sec and 'INHERITED' not in sec and\
                sec != 'MEMBER TYPES':
-                contents = re.sub(r'\n\.IP "([^:]+?)"', r'\n\.IP "%s::\1"'
+                content2 = re.sub(r'\n\.IP "([^:]+?)"', r'\n.IP "%s::\1"'
                                   % class_name, content)
                 # Replace (constructor) (destructor)
-                contents = re.sub(r'\(constructor\)', r'%s' % class_name,
-                                  contents)
-                contents = re.sub(r'\(destructor\)', r'~%s' % class_name,
-                                  contents)
-                data = data.replace(content, contents)
+                content2 = re.sub(r'\(constructor\)', r'%s' % class_name,
+                                  content2)
+                content2 = re.sub(r'\(destructor\)', r'~%s' % class_name,
+                                  content2)
+                data = data.replace(content, content2)
             # Inherited member functions
             elif 'MEMBER' in sec and 'INHERITED' in sec:
                 inherit = re.search(r'.+?INHERITED FROM (.+)',
                                     sec).group(1).lower()
-                contents = re.sub(r'\n\.IP "(.+)"', r'\n\.IP "%s::\1"'
+                content2 = re.sub(r'\n\.IP "(.+)"', r'\n.IP "%s::\1"'
                                   % inherit, content)
-                data = data.replace(content, contents)
+                data = data.replace(content, content2)
 
     # Remove pseudo macro '.SE'
     data = data.replace('\n.SE', '')

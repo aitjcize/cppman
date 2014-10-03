@@ -182,7 +182,7 @@ class Cppman(Crawler):
         print '%d manual pages failed to cache.' % self.failure_count
         self.update_mandb(False)
 
-    def cache_man_page(self, source, url, name=None):
+    def cache_man_page(self, source, url, name):
         """callback to cache new man page"""
         try:
             os.makedirs(os.path.join(environ.man_dir, source))
@@ -190,9 +190,7 @@ class Cppman(Crawler):
             pass
 
         data = urllib.urlopen(url).read()
-        groff_text = formatter.cplusplus2groff(data)
-        if not name:
-            name = self.extract_name(data).replace('/', '_')
+        groff_text = formatter.cplusplus2groff(data, name)
 
         # Skip if already exists, override if forced flag is true
         outname = self.get_page_path(source, name)
