@@ -210,6 +210,8 @@ def html2groff(data, name):
 
     if idx:
         class_name = name
+        if class_name.startswith('std::'):
+            normalized_class_name = class_name[len('std::'):]
         class_member_content = data[:idx]
         secs = re.findall(r'\.SH "(.+?)"(.+?)\.SE', class_member_content, re.S)
 
@@ -222,10 +224,10 @@ def html2groff(data, name):
                 content2 = re.sub(r'\n\.IP "([^:]+?)"', r'\n.IP "%s::\1"'
                                   % class_name, content)
                 # Replace (constructor) (destructor)
-                content2 = re.sub(r'\(constructor\)', r'%s' % class_name,
-                                  content2)
-                content2 = re.sub(r'\(destructor\)', r'~%s' % class_name,
-                                  content2)
+                content2 = re.sub(r'\(constructor\)', r'%s' %
+                                  normalized_class_name, content2)
+                content2 = re.sub(r'\(destructor\)', r'~%s' %
+                                  normalized_class_name, content2)
                 data = data.replace(content, content2)
 
     blocks = re.findall(r'\.IBEGIN\s*(.+?)\s*\n(.+?)\.IEND', data, re.S)
