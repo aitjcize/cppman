@@ -33,7 +33,7 @@ class Config(object):
     DEFAULTS = {
         'Source': 'cplusplus.com',
         'UpdateManPath': 'false',
-        'Pager': 'system'
+        'Pager': 'vim'
     }
 
     def __init__(self, configfile):
