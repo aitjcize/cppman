@@ -38,18 +38,21 @@ def member_table_def(g):
 
 
 def member_type_function(g):
-    cpp11tag = '[C++11]'
     head = re.sub(r'<.*?>', '', g.group(1)).strip()
     tail = ''
-    if head.endswith(cpp11tag):
-        tail = ' ' + cpp11tag
-        head = head[:head.index(cpp11tag)]
+    cppvertag = re.search('^(.*)(\[(?:(?:since|until) )?C\+\+\d+\])$', head)
+    if cppvertag:
+        head = cppvertag.group(1).strip()
+        tail = ' ' + cppvertag.group(2)
 
     if ',' in head:
         head = ', '.join([x.strip() + '(3)' for x in head.split(',')])
     else:
-        head = g.group(1) + '(3)'
+        head = head.strip() + '(3)'
     return '\n.IP "%s"\n%s\n' % (head + tail, g.group(2))
+
+
+NAV_BAR_END = '<div class="t-navbar-sep">&#160;</div></div>'
 
 # Format replacement RE list
 # The '.SE' pseudo macro is described in the function: html2groff
@@ -63,13 +66,16 @@ rps = [
      r'\n.SH "NAME"\n{{name}} {{shortdesc}}\n.SE\n' % datetime.date.today(),
      re.S),
     # Defined in header
-    (r'<div class="t-navbar".*?>.*?<table class="t-dcl-begin">.*?'
+    (r'<div class="t-navbar"[^>]*>.*?' + NAV_BAR_END +
+     r'(.*?)<table class="t-dsc-begin">',
+     r'\n.SH "DESCRIPTION"\n\1\n', re.S),
+    (r'<div class="t-navbar"[^>]*>.*?' + NAV_BAR_END + r'.*?'
      r'Defined in header <code>(.*?)</code>(.*?)<tr class="t-dcl-sep">',
      r'\n.SH "SYNOPSIS"\n#include \1\n.sp\n'
      r'.nf\n\2\n.fi\n.SE\n'
      r'\n.SH "DESCRIPTION"\n', re.S),
-    (r'<div class="t-navbar".*?>.*?<table class="t-dcl-begin">(.*?)'
-     r'<tr class="t-dcl-sep">',
+    (r'<div class="t-navbar"[^>]*>.*?' + NAV_BAR_END +
+     r'(.*?)<tr class="t-dcl-sep">',
      r'\n.SH "SYNOPSIS"\n.nf\n\1\n.fi\n.SE\n'
      r'\n.SH "DESCRIPTION"\n', re.S),
     (r'<td>\s*\([0-9]+\)\s*</td>', r'', 0),
@@ -80,19 +86,15 @@ rps = [
     (r'<span class="edit.*?">.*?</span> ?', r'', re.S),
     (r'<div id="siteSub">.*?</div>', r'', 0),
     (r'<div id="contentSub">.*?</div>', r'', 0),
-    (r'<table id="toc".*?>.*?</table>', r'', re.S),
-    (r'<h2.*?>.*?</h2>', r'', re.S),
+    (r'<table id="toc"[^>]*>.*?</table>', r'', re.S),
+    (r'<h2[^>]*>.*?</h2>', r'', re.S),
     (r'<div class="coliru-btn coliru-btn-run-init">.*?</div>', r'', re.S),
     (r'<tr class="t-dsc-hitem">.*?</tr>', r'', re.S),
     # C++11/14
     (r'\(((?:since|until) C\+\+\d+)\)', r' [\1]', re.S),
     (r'\((C\+\+\d+)\)', r' [\1]', re.S),
-    # Escape
-    (r'^#', r'\#', 0),
-    (r'&#160;', ' ', 0),
-    (r'&#(\d+);', lambda g: unichr(int(g.group(1))), 0),
     # Subsections
-    (r'<h5.*?>\s*(.*)</h5>', r'\n.SS "\1"\n', 0),
+    (r'<h5[^>]*>\s*(.*)</h5>', r'\n.SS "\1"\n', 0),
     # Group t-lines
     (r'<span></span>', r'', re.S),
     (r'<span class="t-lines">(?:<span>.+?</span>)+</span>',
@@ -102,28 +104,28 @@ rps = [
      r'<td>((?:(?!</td>).)*?)<table[^>]*>((?:(?!</table>).)*?)</table>'
      r'(?:(?!</td>).)*?</td>\s*?</tr>',
      member_table_def, re.S),
+    # Section headers
+    (r'.*<h3>(.+?)</h3>', r'\n.SE\n.SH "\1"\n', 0),
     # Member type & function
-    (r'<tr class="t-dsc">.*?<td>\s*(.*?)\n?</td>.*?<td>\s*(.*?)</td>.*?</tr>',
+    (r'<tr class="t-dsc">\n?<td>\s*(.*?)\n?</td>.*?<td>\s*(.*?)</td>.*?</tr>',
      member_type_function, re.S),
     # Parameters
     (r'<tr class="t-par">.*?<td>\s*(.*?)\n?</td>.*?<td>.*?</td>.*?'
      r'<td>\s*(.*?)</td>.*?</tr>',
      r'\n.IP "\1"\n\2\n', re.S),
-    # Section headers
-    (r'.*<h3>(.+?)</h3>', r'\n.SE\n.SH "\1"\n', 0),
     # 'ul' tag
     (r'<ul>', r'\n.RS 2\n', 0),
     (r'</ul>', r'\n.RE\n.sp\n', 0),
     # 'li' tag
     (r'<li>\s*(.+?)</li>', r'\n.IP \[bu] 3\n\1\n', re.S),
     # 'pre' tag
-    (r'<pre.*?>(.+?)</pre\s*>', r'\n.in +2n\n.nf\n\1\n.fi\n.in\n', re.S),
+    (r'<pre[^>]*>(.+?)</pre\s*>', r'\n.in +2n\n.nf\n\1\n.fi\n.in\n', re.S),
     # Footer
     (r'<div class="printfooter">',
      r'\n.SE\n.IEND\n.SH "REFERENCE"\n'
      r'cppreference.com, 2014 - All rights reserved.', re.S),
     # C++ version tag
-    (r'<div title="(C\+\+..)".*?>', r'.sp\n\1\n', 0),
+    (r'<div title="(C\+\+..)"[^>]*>', r'.sp\n\1\n', 0),
     # Output
     (r'<p>Output:\n?</p>', r'\n.sp\nOutput:\n', re.S),
     # 'br' tag
@@ -137,6 +139,10 @@ rps = [
     # Any other tags
     (r'<script[^>]*>[^<]*</script>', r'', 0),
     (r'<.*?>', r'', re.S),
+    # Escape
+    (r'^#', r'\#', 0),
+    (r'&#160;', ' ', 0),
+    (r'&#(\d+);', lambda g: unichr(int(g.group(1))), 0),
     # Misc
     (r'&lt;', r'<', 0),
     (r'&gt;', r'>', 0),
@@ -176,7 +182,7 @@ def html2groff(data, name):
                   '', data)
 
     for table in re.findall(
-            r'<table class="(?:wikitable|dsctable)".*?>.*?</table>',
+            r'<table class="(?:wikitable|dsctable)"[^>]*>.*?</table>',
             data, re.S):
         tbl = parse_table(table)
         # Escape column with '.' as prefix
