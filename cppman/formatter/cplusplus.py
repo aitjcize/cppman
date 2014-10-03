@@ -24,15 +24,14 @@
 
 import datetime
 import re
-import subprocess
 import urllib
 
-from cppman.util import get_width
+from cppman.util import html2man
 from cppman.tableparser import parse_table
 
 
 # Format replacement RE list
-# The '.SE' pseudo macro is described in the function: cplusplus2groff
+# The '.SE' pseudo macro is described in the function: html2groff
 pre_rps = [
     # Snippet, ugly hack: we don't want to treat code listing as table
     (r'<table class="snippet">(.*?)</table>',
@@ -217,7 +216,7 @@ def html2groff(data, name):
 def func_test():
     """Test if there is major format changes in cplusplus.com"""
     ifs = urllib.urlopen('http://www.cplusplus.com/printf')
-    result = cplusplus2groff(ifs.read())
+    result = html2groff(ifs.read())
     assert '.SH NAME' in result
     assert '.SH TYPE' in result
     assert '.SH DESCRIPTION' in result
@@ -227,9 +226,9 @@ def test():
     """Simple Text"""
     name = raw_input('What manual page do you want? ')
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    print cplusplus2man(ifs.read()),
+    print html2man(ifs.read()),
     # with open('test.txt') as ifs:
-    #    print cplusplus2groff(ifs.read()),
+    #    print html2groff(ifs.read()),
 
 if __name__ == '__main__':
     test()
