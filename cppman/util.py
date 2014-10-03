@@ -26,9 +26,9 @@ import fcntl
 import os
 import struct
 import termios
+import subprocess
 
 from cppman.environ import config
-from cppman.formatter import cplusplus
 
 
 def update_mandb_path():
@@ -86,7 +86,7 @@ def groff2man(data):
     return man_text
 
 
-def html2man(data, formatter=cplusplus.html2groff):
+def html2man(data, formatter):
     """Convert HTML text from cplusplus.com to man pages."""
     groff_text = formatter(data)
     man_text = groff2man(groff_text)

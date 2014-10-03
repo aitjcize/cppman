@@ -23,6 +23,7 @@
 #
 
 import gzip
+import importlib
 import os
 import re
 import shutil
@@ -34,7 +35,6 @@ import urllib
 from cppman import environ
 from cppman import util
 from cppman.crawler import Crawler
-from cppman.formatter import cplusplus
 
 
 class Cppman(Crawler):
@@ -190,7 +190,9 @@ class Cppman(Crawler):
             pass
 
         data = urllib.urlopen(url).read()
-        groff_text = cplusplus.html2groff(data, name)
+        formatter = importlib.import_module('.' + source[:-4],
+                                            'cppman.formatter')
+        groff_text = formatter.html2groff(data, name)
 
         # Skip if already exists, override if forced flag is true
         outname = self.get_page_path(source, name)
