@@ -7,18 +7,23 @@
 
 cppman
 ======
-C++ 98/11 manual pages for Linux, with source from `cplusplus.com <http://cplusplus.com/>`_.
+C++ 98/11/14 manual pages for Linux, with source from `cplusplus.com <http://cplusplus.com/>`_ and `cppreference.com <http://cppreference.com/>`_.
 
 .. image:: https://raw.github.com/aitjcize/cppman/master/wiki/screenshot.png
 
 Features
 --------
+* Supports two backends (switch it with ``cppman -s``):
+
+  + `cplusplus.com <http://cplusplus.com/>`_
+  + `cppreference.com <http://cppreference.com/>`_
+
 * Syntax highlighting support for sections and example source code.
 * Usage/Interface simliar to the 'man' command
 * Hyperlink between manpages (only available when pager=vim)
 
   + Press ``Ctrl-]`` when cursor is on keyword to go forward and ``Ctrl-T`` to go backward.
-  + You can also double-click on keyword to go forward.
+  + You can also double-click on keyword to go forward and right-click to go backward.
 
 * Frequently update to support `cplusplus.com <http://cplusplus.com/>`_.
 
