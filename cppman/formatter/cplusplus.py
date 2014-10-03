@@ -139,7 +139,7 @@ rps = [
     (r'\n\s*\n+', r'\n', 0),
     (r'\n\n+', r'\n', 0),
     # Preserve \n" in EXAMPLE
-    (r'\\n"', r'\en"', 0),
+    (r'\\n', r'\en', 0),
 ]
 
 
