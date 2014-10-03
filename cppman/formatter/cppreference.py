@@ -68,9 +68,6 @@ rps = [
      r'\n.SH "NAME"\n{{name}} {{shortdesc}}\n.SE\n' % datetime.date.today(),
      re.S),
     # Defined in header
-    (r'<div class="t-navbar"[^>]*>.*?' + NAV_BAR_END +
-     r'(.*?)<table class="t-dsc-begin">',
-     r'\n.SH "DESCRIPTION"\n\1\n', re.S),
     (r'<div class="t-navbar"[^>]*>.*?' + NAV_BAR_END + r'.*?'
      r'Defined in header <code>(.*?)</code>(.*?)<tr class="t-dcl-sep">',
      r'\n.SH "SYNOPSIS"\n#include \1\n.sp\n'
@@ -80,6 +77,9 @@ rps = [
      r'(.*?)<tr class="t-dcl-sep">',
      r'\n.SH "SYNOPSIS"\n.nf\n\1\n.fi\n.SE\n'
      r'\n.SH "DESCRIPTION"\n', re.S),
+    (r'<div class="t-navbar"[^>]*>.*?' + NAV_BAR_END +
+     r'(.*?)<table class="t-dsc-begin">',
+     r'\n.SH "DESCRIPTION"\n\1\n', re.S),
     (r'<td>\s*\([0-9]+\)\s*</td>', r'', 0),
     # Section headers
     (r'<div class="t-inherited">.*?<h2>.*?Inherited from\s*(.*?)\s*</h2>',
