@@ -173,7 +173,7 @@ class Cppman(Crawler):
                     print 'Caching %s ...' % name
                     self.cache_man_page(source, url, name)
                 except Exception:
-                    print 'Error caching %s ...', name
+                    print 'Error caching %s ...' % name
                     self.failure_count += 1
                 else:
                     self.success_count += 1
