@@ -168,7 +168,7 @@ rps = [
     # Trailing white-spaces
     (r'\s+\n', r'\n', re.S),
     # Remove extra whitespace and newline in .IP section
-    (r'.IP " *(.*?)\n?"', r'.IP "\1"', 0),
+    (r'.(IP|SH) " *(.*?)\n?"', r'.\1 "\2"', 0),
     # C++ version Tag
     (r'\n\s*(\[(:?since|until) C\+\+\d+\])', r' \1', re.S)
 ]
