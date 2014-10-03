@@ -1,5 +1,6 @@
 include bin/*
 include cppman/*
+include cppman/formatter/*
 include misc/*
 include README.rst
 include AUTHORS
