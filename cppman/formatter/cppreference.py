@@ -26,6 +26,8 @@ import datetime
 import re
 import urllib
 
+from functools import partial
+
 from cppman.util import html2man
 from cppman.tableparser import parse_table
 
@@ -214,6 +216,15 @@ def html2groff(data, name):
     except ValueError:
         idx = None
 
+    def add_header_multi(name, g):
+        if ',' in g.group(1):
+            res = ', '.join(['%s::%s' % (name, x.strip())
+                            for x in g.group(1).split(',')])
+        else:
+            res = g.group(1)
+
+        return '\n.IP "%s"' % res
+
     if idx:
         class_name = name
         if class_name.startswith('std::'):
@@ -227,8 +238,9 @@ def html2groff(data, name):
                'NON-MEMBER' not in sec and \
                'INHERITED' not in sec and \
                sec != 'MEMBER TYPES':
-                content2 = re.sub(r'\n\.IP "([^:]+?)"', r'\n.IP "%s::\1"'
-                                  % class_name, content)
+                content2 = re.sub(r'\n\.IP "([^:].+)"',
+                                  partial(add_header_multi, class_name),
+                                  content)
                 # Replace (constructor) (destructor)
                 content2 = re.sub(r'\(constructor\)', r'%s' %
                                   normalized_class_name, content2)
@@ -249,8 +261,9 @@ def html2groff(data, name):
             # Inherited member functions
             if 'MEMBER' in sec and \
                sec != 'MEMBER TYPES':
-                content2 = re.sub(r'\n\.IP "(.+)"', r'\n.IP "%s::\1"'
-                                  % inherited_class, content)
+                content2 = re.sub(r'\n\.IP "(.+)"',
+                                  partial(add_header_multi, inherited_class),
+                                  content)
                 data = data.replace(content, content2)
 
     # Remove uneeded pseudo macro
