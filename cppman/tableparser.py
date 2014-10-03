@@ -58,15 +58,22 @@ class Node(object):
         for c in self.children:
             c.traverse(depth + 2)
 
-    def scan_format(self, index=0, total=0, rowspan={}):
+    def get_row_width(self):
+        total = 0
+        assert self.name == 'tr'
+        for c in self.children:
+            if 'colspan' in c.attr:
+                total += int(c.attr['colspan'])
+            else:
+                total += 1
+        return total
+
+    def scan_format(self, index=0, width=0, rowspan={}):
         format_str = ''
 
         if self.name in ['th', 'td']:
-            if 'colspan' in self.attr:
-                total += int(self.attr['colspan']) - 1
-
-            extend = ((total == 3 and index == 1) or
-                      (total != 3 and total < 5 and index == total - 1))
+            extend = ((width == 3 and index == 1) or
+                      (width != 3 and width < 5 and index == width - 1))
 
             if self.name == 'th':
                 format_str += 'c%s ' % ('x' if extend else '')
@@ -77,13 +84,12 @@ class Node(object):
                 for i in range(int(self.attr['colspan']) - 1):
                     format_str += 's '
 
-            if 'rowspan' in self.attr:
+            if 'rowspan' in self.attr and int(self.attr['rowspan']) > 1:
                 rowspan[index] = int(self.attr['rowspan']) - 1
 
         if self.name == 'tr' and len(rowspan) > 0:
-            total = len(rowspan) + len(self.children)
             ci = 0
-            for i in range(total):
+            for i in range(width):
                 if i in rowspan:
                     format_str += '^ '
                     if rowspan[i] == 1:
@@ -92,11 +98,14 @@ class Node(object):
                         rowspan[i] -= 1
                 else:
                     format_str += self.children[ci].scan_format(
-                        i, total, rowspan)
+                        i, width, rowspan)
                     ci += 1
         else:
+            if self.children and self.children[0].name == 'tr':
+                width = self.children[0].get_row_width()
+
             for i, c in enumerate(self.children):
-                format_str += c.scan_format(i, len(self.children), rowspan)
+                format_str += c.scan_format(i, width, rowspan)
 
         if self.name == 'table':
             format_str += '.\n'
@@ -112,7 +121,7 @@ class Node(object):
             fd.write(self.scan_format())
         elif self.name in ['th', 'td']:
             fd.write('T{\n%s' % self.text)
-            if 'rowspan' in self.attr:
+            if 'rowspan' in self.attr and int(self.attr['rowspan']) > 1:
                 rowspan[index] = int(self.attr['rowspan']) - 1
         else:
             fd.write(self.text)
