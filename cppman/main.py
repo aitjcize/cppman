@@ -144,7 +144,7 @@ class Cppman(Crawler):
             'page is not found in the cache. The "cache-all" option is only '\
             'useful if you want to view man pages offline. ' \
             'Caching all contents will take serveral minutes, ' \
-            'do you want to continue [Y/n]?',
+            'do you want to continue [y/N]?',
 
         respond = raw_input()
         if respond.lower() not in ['y', 'ye', 'yes']:
