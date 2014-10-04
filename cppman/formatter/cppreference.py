@@ -208,6 +208,10 @@ def html2groff(data, name):
     for rp in rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
+    # Remove non prinatable characters
+    data = re.sub('[%s]' % re.escape(''.join(map(unichr, range(127, 256)))),
+                  '', data)
+
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
         data = data.replace(st, st.upper())
