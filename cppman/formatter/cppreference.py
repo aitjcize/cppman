@@ -24,6 +24,7 @@
 
 import datetime
 import re
+import string
 import urllib
 
 from functools import partial
@@ -193,8 +194,7 @@ def html2groff(data, name):
         pass
 
     # Remove non prinatable characters
-    data = re.sub('[%s]' % re.escape(''.join(map(unichr, range(127, 256)))),
-                  '', data)
+    data = filter(lambda x: x in string.printable, data)
 
     for table in re.findall(
             r'<table class="(?:wikitable|dsctable)"[^>]*>.*?</table>',
@@ -209,8 +209,7 @@ def html2groff(data, name):
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
     # Remove non prinatable characters
-    data = re.sub('[%s]' % re.escape(''.join(map(unichr, range(127, 256)))),
-                  '', data)
+    data = filter(lambda x: x in string.printable, data)
 
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
