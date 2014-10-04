@@ -181,9 +181,9 @@ def html2groff(data, name):
     # To fix this, '.SE' is used to mark the end of the section so the next
     # '.SH' can be find by re.findall
 
-    page_type = re.search(r'\n\.SH TYPE\n(.+?)\n', data)
+    page_type = re.search(r'\n\.SH "TYPE"\n(.+?)\n', data)
     if page_type and 'class' in page_type.group(1):
-        class_name = re.search(r'\n\.SH NAME\n(?:.*::)?(.+?) ', data).group(1)
+        class_name = re.search(r'\n\.SH "NAME"\n(?:.*::)?(.+?) ', data).group(1)
 
         secs = re.findall(r'\n\.SH "(.+?)"(.+?)\.SE', data, re.S)
 
