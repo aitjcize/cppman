@@ -134,9 +134,19 @@ class Cppman(Crawler):
 
     def insert_index(self, table, name, url):
         """callback to insert index"""
-        for n in name.split(','):
-            self.db_cursor.execute('INSERT INTO "%s" (name, url) VALUES '
-                                   '("%s", "%s")' % (table, n.strip(), url))
+        names = name.split(',')
+
+        if len(names) > 1:
+            m = re.match(r'^\s*(.*?::(?:operator)?)([^:]*)\s*$', names[0])
+            if m:
+                prefix = m.group(1)
+                names[0] = m.group(2)
+                names = [prefix + n for n in names]
+
+        for n in names:
+            self.db_cursor.execute(
+                'INSERT INTO "%s" (name, url) VALUES ("%s", "%s")' %
+                (table, n.strip(), url))
 
     def cache_all(self):
         """Cache all available man pages"""
