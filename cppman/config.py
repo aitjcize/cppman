@@ -28,7 +28,7 @@ import os
 
 class Config(object):
     PAGERS = ['vim', 'less', 'system']
-    SOURCES = ['cppreference.com', 'cplusplus.com']
+    SOURCES = ['cplusplus.com', 'cppreference.com']
 
     DEFAULTS = {
         'Source': 'cplusplus.com',
