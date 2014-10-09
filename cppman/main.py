@@ -179,10 +179,18 @@ class Cppman(Crawler):
             data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
             for name, url in data:
-                try:
-                    print 'Caching %s ...' % name
-                    self.cache_man_page(source, url, name)
-                except Exception:
+                retries = 3
+                print 'Caching %s ...' % name
+                while retries > 0:
+                    try:
+                        self.cache_man_page(source, url, name)
+                    except Exception:
+                        print 'Retrying ...'
+                        retries -= 1
+                    else:
+                        break
+
+                if retries == 0:
                     print 'Error caching %s ...' % name
                     self.failure_count += 1
                 else:
