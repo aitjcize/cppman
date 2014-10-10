@@ -8,7 +8,7 @@ cppman - C++ manual page viewer / fetcher
 .SH DESCRIPTION
 cppman generates C++ manual pages from cplusplus.com and provide a man\-like interface to view man pages.
 .sp
-By default, cppman fetches man pages on demand, but by running the command 'cppman \-c', all available manpages are cached, making offline browsing possible.
+By default, cppman fetches man pages on-the-fly, by running the command 'cppman \-c', all available manpages are cached, making offline browsing possible. This is also required if you want to use the system 'man' command.
 .SS Browsing man pages
 cppman uses Vi Improved as a pager.
 .br
@@ -17,6 +17,8 @@ Press 'K' on an entry like 'vector::insert(3)' links you to the manual page of v
 .SS man compatibility
 cppman automatically adds '~/.local/share/man' to '~/.manpath', so the cached man pages can also be viewed with 'man' command. Note that to view uncached man pages, you still need to run 'cppman'.
 .SH OPTIONS
+.IP "\-s SOURCE, \-\-source=SOURCE"
+Select source, either 'cppreference.com' or 'cplusplus.com'. Default is 'cplusplus.com'.
 .IP "\-c, \-\-cache\-all"
 cache all available man pages from cplusplus.com to enable offline browsing
 .IP "\-C, \-\-clear\-cache"
