@@ -265,7 +265,6 @@ class Cppman(Crawler):
         page_name = page_name.replace('/', '_')
         if page_name + '.3.gz' not in avail or self.forced:
             self.cache_man_page(environ.source, url, page_name)
-            self.update_mandb()
 
         pager = environ.pager if sys.stdout.isatty() else environ.renderer
 
