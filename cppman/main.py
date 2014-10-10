@@ -205,7 +205,7 @@ class Cppman(Crawler):
         """callback to cache new man page"""
         try:
             os.makedirs(os.path.join(environ.man_dir, source))
-        except:
+        except OSError:
             pass
 
         data = urllib.urlopen(url).read()
