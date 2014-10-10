@@ -63,6 +63,11 @@ or install the git version
 
 Thanks `czchen <https://github.com/czchen>`_ for maintaining the package.
 
+FAQ
+---
+* Q: Can I use the system ``man`` command instead of ``cppman``?
+* A: Yes, just execute ``cppman -m true`` and all cached man pages are exposed to the system ``man`` command.  Note: You may want to download all available man pages with ``cppman -c``.
+
 Bugs
 ----
 * Please report bugs / mis-formatted pages to the github issure tracker.
