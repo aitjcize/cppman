@@ -37,7 +37,7 @@ if program.startswith('./') or program.startswith('bin/'):
 
 from cppman.main import Cppman
 from cppman.environ import config
-from cppman.util import update_mandb_path
+from cppman.util import update_mandb_path, update_man3_link
 
 program_name = sys.argv[0]
 program_version = '0.3.1'
@@ -119,6 +119,8 @@ def main():
                             options.source)
         else:
             config.Source = options.source
+            if config.UpdateManPath:
+                update_man3_link()
             print "Source set to `%s'." % options.source
             sys.exit(0)
 
@@ -135,10 +137,12 @@ def main():
         if options.mandb != 'true' and options.mandb != 'false':
             raise Exception("invalid value `%s' for option `--use-mandb'" %
                             options.mandb)
-        value = config.parseBool(options.mandb)
+        value = config.parse_bool(options.mandb)
         if config.UpdateManPath ^ value:
             config.UpdateManPath = value
+        if config.UpdateManPath:
             update_mandb_path()
+            update_man3_link()
         sys.exit(0)
 
     if options.rebuild_index:

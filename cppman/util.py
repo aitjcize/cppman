@@ -28,7 +28,7 @@ import struct
 import termios
 import subprocess
 
-from cppman.environ import config
+from cppman import environ
 
 
 def update_mandb_path():
@@ -41,13 +41,13 @@ def update_mandb_path():
         with open(manpath_file, 'r') as f:
             lines = f.readlines()
     except IOError:
-        if not config.UpdateManPath:
+        if not environ.config.UpdateManPath:
             return
 
     has_path = any([manpath in l for l in lines])
 
     with open(manpath_file, 'w') as f:
-        if config.UpdateManPath:
+        if environ.config.UpdateManPath:
             if not has_path:
                 lines.append('MANDATORY_MANPATH\t%s\n' %
                              os.path.normpath(os.path.join(HOME, manpath)))
@@ -58,8 +58,23 @@ def update_mandb_path():
                     new_lines.append(line)
             lines = new_lines
 
-        for line in lines:
-            f.write(line)
+        f.writelines(lines)
+
+
+def update_man3_link():
+    man3_path = os.path.join(environ.man_dir, 'man3')
+
+    if os.path.lexists(man3_path):
+        if os.path.islink(man3_path):
+            if os.readlink(man3_path) == environ.config.Source:
+                return
+            else:
+                os.unlink(man3_path)
+        else:
+            raise RuntimeError("Can't create link since `%s' already exists",
+                               man3_path)
+
+    os.symlink(environ.config.Source, man3_path)
 
 
 def get_width():

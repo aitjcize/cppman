@@ -29,7 +29,7 @@ from cppman.config import Config
 
 HOME = os.path.expanduser('~')
 
-man_dir = HOME + '/.local/share/man/man3/'
+man_dir = HOME + '/.local/share/man/'
 config_dir = HOME + '/.config/cppman/'
 config_file = config_dir + 'cppman.cfg'
 
