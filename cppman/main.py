@@ -150,10 +150,10 @@ class Cppman(Crawler):
 
     def cache_all(self):
         """Cache all available man pages"""
-        print 'By defualt, cppman fetch pages on-the-fly if coressponding '\
+        print 'By default, cppman fetch pages on-the-fly if corresponding '\
             'page is not found in the cache. The "cache-all" option is only '\
             'useful if you want to view man pages offline. ' \
-            'Caching all contents will take serveral minutes, ' \
+            'Caching all contents will take several minutes, ' \
             'do you want to continue [y/N]?',
 
         respond = raw_input()
