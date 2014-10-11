@@ -19,7 +19,7 @@ Features
   + `cppreference.com <http://cppreference.com/>`_
 
 * Syntax highlighting support for sections and example source code.
-* Usage/Interface simliar to the 'man' command
+* Usage/Interface similar to the 'man' command
 * Hyperlink between manpages (only available when pager=vim)
 
   + Press ``Ctrl-]`` when cursor is on keyword to go forward and ``Ctrl-T`` to go backward.
@@ -70,7 +70,7 @@ FAQ
 
 Bugs
 ----
-* Please report bugs / mis-formatted pages to the github issure tracker.
+* Please report bugs / mis-formatted pages to the github issue tracker.
 
 Contributing
 ------------
