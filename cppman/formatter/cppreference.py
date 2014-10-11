@@ -176,8 +176,8 @@ rps = [
     (r'^\s+', r'', re.S),
     # Trailing white-spaces
     (r'\s+\n', r'\n', re.S),
-    # Remove extra whitespace and newline in .IP/SH section
-    (r'.(IP|SH) " *(.*?)\n?"', r'.\1 "\2"', 0),
+    # Remove extra whitespace and newline in .SH/SS/IP section
+    (r'.(SH|SS|IP) "\s*(.*?)\s*\n?"', r'.\1 "\2"', 0),
     # Remove extra whitespace before .IP bullet
     (r'(.IP \\\\\[bu\] 3)\n\s*(.*?)\n', r'\1\n\2\n', 0),
     # Remove extra '\n' before C++ version Tag (don't do it in table)
