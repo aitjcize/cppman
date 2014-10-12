@@ -27,4 +27,4 @@
 #
 
 escape=$(echo -e '\033')
-zcat "$1" | groff -t -c -m man -Tutf8 -rLL=$2n -rLT=$2n 2> /dev/null | sed "s/$escape\[[^m]*m//g" | col -x -b
+gunzip -c "$1" | groff -t -c -m man -Tutf8 -rLL=$2n -rLT=$2n 2> /dev/null | sed "s/$escape\[[^m]*m//g" | col -x -b
