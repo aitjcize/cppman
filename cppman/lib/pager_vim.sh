@@ -29,4 +29,10 @@
 [ -n "`echo $LC_ALL | sed 's/-//g' | grep -i utf8`" ] && dev=utf8 || dev=ascii
 
 escape=$(echo -e '\033')
-gunzip -c "$1" | groff -t -c -m man -T$dev -rLL=$2n -rLT=$2n 2> /dev/null | sed "s/$escape\[[^m]*m//g" | col -x -b | vim -R -c "let g:page_name=\"$4\"" -S $3 -
+vim=$(which vim)
+
+if [ $? -eq 0 ]; then
+  gunzip -c "$1" | groff -t -c -m man -T$dev -rLL=$2n -rLT=$2n 2> /dev/null | sed "s/$escape\[[^m]*m//g" | col -x -b | vim -R -c "let g:page_name=\"$4\"" -S $3 -
+else
+  gunzip -c "$1" | groff -t -c -m man -T$dev -rLL=$2n -rLT=$2n 2> /dev/null | less
+fi
