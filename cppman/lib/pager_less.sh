@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 
+#
 # pager_less.sh
 #
 # Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
