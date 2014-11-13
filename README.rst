@@ -53,15 +53,11 @@ or install the git version
 
     $ yaourt -S cppman-git
 
-3. Ubuntu/Debian PPA
+3. Debian / Ubuntu: cppman is available in Debian sid/unstable and Ubuntu vivid.
 
 .. code-block:: bash
 
-    $ sudo add-apt-repository ppa:cppman/cppman-daily
-    $ sudo apt-get update
     $ sudo apt-get install cppman
-
-Thanks `czchen <https://github.com/czchen>`_ for maintaining the package.
 
 FAQ
 ---
