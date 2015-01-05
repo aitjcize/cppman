@@ -1,8 +1,8 @@
-.. image:: http://img.shields.io/travis/aitjcize/cppman.svg
+.. image:: http://img.shields.io/travis/aitjcize/cppman.svg?style=flat
    :target: https://travis-ci.org/aitjcize/cppman
-.. image:: http://img.shields.io/pypi/v/cppman.svg
+.. image:: http://img.shields.io/pypi/v/cppman.svg?style=flat
    :target: https://pypi.python.org/pypi/cppman
-.. image:: http://img.shields.io/pypi/dm/cppman.svg
+.. image:: http://img.shields.io/pypi/dm/cppman.svg?style=flat
    :target: https://crate.io/packages/cppman
 
 cppman
