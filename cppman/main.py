@@ -174,27 +174,27 @@ class Cppman(Crawler):
         conn = sqlite3.connect(environ.index_db)
         cursor = conn.cursor()
 
-        for source in environ.config.SOURCES:
-            print 'Caching mange pages from %s ...' % source
-            data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
+        source = environ.config.source
+        print 'Caching mange pages from %s ...' % source
+        data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
-            for name, url in data:
-                retries = 3
-                print 'Caching %s ...' % name
-                while retries > 0:
-                    try:
-                        self.cache_man_page(source, url, name)
-                    except Exception:
-                        print 'Retrying ...'
-                        retries -= 1
-                    else:
-                        break
-
-                if retries == 0:
-                    print 'Error caching %s ...' % name
-                    self.failure_count += 1
+        for name, url in data:
+            retries = 3
+            print 'Caching %s ...' % name
+            while retries > 0:
+                try:
+                    self.cache_man_page(source, url, name)
+                except Exception:
+                    print 'Retrying ...'
+                    retries -= 1
                 else:
-                    self.success_count += 1
+                    break
+
+            if retries == 0:
+                print 'Error caching %s ...' % name
+                self.failure_count += 1
+            else:
+                self.success_count += 1
         conn.close()
 
         print '\n%d manual pages cached successfully.' % self.success_count
