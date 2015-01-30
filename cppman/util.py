@@ -71,7 +71,7 @@ def update_man3_link():
             else:
                 os.unlink(man3_path)
         else:
-            raise RuntimeError("Can't create link since `%s' already exists",
+            raise RuntimeError("Can't create link since `%s' already exists" %
                                man3_path)
 
     os.symlink(environ.config.Source, man3_path)
