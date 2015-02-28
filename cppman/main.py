@@ -203,6 +203,11 @@ class Cppman(Crawler):
 
     def cache_man_page(self, source, url, name):
         """callback to cache new man page"""
+        # Skip if already exists, override if forced flag is true
+        outname = self.get_page_path(source, name)
+        if os.path.exists(outname) and not self.forced:
+            return
+
         try:
             os.makedirs(os.path.join(environ.man_dir, source))
         except OSError:
@@ -213,13 +218,8 @@ class Cppman(Crawler):
                                             'cppman.formatter')
         groff_text = formatter.html2groff(data, name)
 
-        # Skip if already exists, override if forced flag is true
-        outname = self.get_page_path(source, name)
-        if os.path.exists(outname) and not self.forced:
-            return
-        f = gzip.open(outname, 'w')
-        f.write(groff_text)
-        f.close()
+        with gzip.open(outname, 'w') as f:
+            f.write(groff_text)
 
     def clear_cache(self):
         """Clear all cache in man3"""
@@ -263,7 +263,7 @@ class Cppman(Crawler):
             conn.close()
 
         page_name = page_name.replace('/', '_')
-        if page_name + '.3.gz' not in avail or self.forced:
+        if self.forced or page_name + '.3.gz' not in avail:
             self.cache_man_page(environ.source, url, page_name)
 
         pager = environ.pager if sys.stdout.isatty() else environ.renderer
