@@ -22,6 +22,8 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+from __future__ import print_function
+
 import re
 import StringIO
 
@@ -53,7 +55,7 @@ class Node(object):
         return NODE.sub(self.strip_tags, html)
 
     def traverse(self, depth=0):
-        print '%s%s: %s' % (' ' * depth, self.name, self.text)
+        print('%s%s: %s' % (' ' * depth, self.name, self.text))
 
         for c in self.children:
             c.traverse(depth + 2)

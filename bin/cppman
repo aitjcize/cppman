@@ -23,6 +23,8 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+from __future__ import print_function
+
 import os
 import sys
 from optparse import OptionParser, make_option
@@ -121,7 +123,7 @@ def main():
             config.Source = options.source
             if config.UpdateManPath:
                 update_man3_link()
-            print "Source set to `%s'." % options.source
+            print("Source set to `%s'." % options.source)
             sys.exit(0)
 
     if options.pager:
@@ -130,7 +132,7 @@ def main():
                             options.pager)
         else:
             config.Pager = options.pager
-            print "Pager set to `%s'." % options.pager
+            print("Pager set to `%s'." % options.pager)
             sys.exit(0)
 
     if options.mandb:
@@ -151,14 +153,14 @@ def main():
         sys.exit(0)
 
     if len(args) == 0:
-        print >> sys.stderr, 'What manual page do you want?'
+        sys.stderr.write('What manual page do you want?\n')
         sys.exit(1)
 
     cm = Cppman(options.force)
     for i in args:
         if i != args[0]:
-            print '--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '\
-                  '| quit (Ctrl-C) ]' % i
+            print('--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '
+                  '| quit (Ctrl-C) ]' % i)
             # For some reason, if only one layer of try...except is used
             # pressing CTRL-D CTRL-C, the second CTRL-C didn't catch by the
             # try..except clause. As a workaround, I add another layer to catch
@@ -170,15 +172,15 @@ def main():
                 except EOFError:
                     continue
                 except KeyboardInterrupt:
-                    print '\n'
+                    print('\n')
                     break
             except KeyboardInterrupt:
-                print '\n'
+                print('\n')
                 break
         try:
             pid = cm.man(i)
-        except RuntimeError, e:
-            print e
+        except RuntimeError as e:
+            print(e)
             continue
         else:
             os.waitpid(pid, 0)
@@ -186,8 +188,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except (Exception, KeyboardInterrupt), e:
+    except (Exception, KeyboardInterrupt) as e:
         if type(e) == KeyboardInterrupt:
-            print '\nAborted.'
+            print('\nAborted.')
         else:
-            print 'error:', e
+            print('error:', e)

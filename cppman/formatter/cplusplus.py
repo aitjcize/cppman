@@ -226,7 +226,7 @@ def test():
     """Simple Text"""
     name = raw_input('What manual page do you want? ')
     ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    print html2man(ifs.read()),
+    #print html2man(ifs.read()),
     # with open('test.txt') as ifs:
     #    print html2groff(ifs.read()),
 
