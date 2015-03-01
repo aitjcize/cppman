@@ -27,5 +27,11 @@ setup(
         packages = ['cppman', 'cppman.formatter'],
         package_data = {'cppman': _package_data},
         data_files = _data_files,
-        scripts = ['bin/cppman']
+        scripts = ['bin/cppman'],
+        classifiers = [
+            'Programming Language :: Python :: 2.6',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 2 :: Only',
+            'Topic :: Software Development :: Documentation',
+        ],
 )
