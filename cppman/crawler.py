@@ -22,6 +22,8 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+from __future__ import print_function
+
 import httplib
 import os
 import re
@@ -82,7 +84,7 @@ class Crawler(object):
         self.include_hashtag = include
 
     def process_document(self, doc):
-        print 'GET', doc.status, doc.url
+        print('GET', doc.status, doc.url)
         # to do stuff with url depth use self._calc_depth(doc.url)
 
     def crawl(self, url, path=None):
@@ -243,7 +245,7 @@ class Crawler(object):
                 # Pop from an empty set
                 break
             except (httplib.HTTPException, EnvironmentError):
-                # print '%s, retrying' % str(e)
+                # print('%s, retrying' % str(e))
                 self.targets_lock.acquire()
                 self.targets.add(url)
                 self.targets_lock.release()

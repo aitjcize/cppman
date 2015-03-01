@@ -318,7 +318,7 @@ def func_test():
 def test():
     """Simple Text"""
     ifs = urllib.urlopen('http://en.cppreference.com/w/cpp/container/vector')
-    print html2man(ifs.read()),
+    #print html2man(ifs.read()),
     #with open('test3.html') as ifs:
     #    print html2groff(ifs.read(), 'std::vector'),
     #    print groff2man(html2groff(ifs.read(), 'std::vector')),

@@ -22,6 +22,8 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+from __future__ import print_function
+
 import gzip
 import importlib
 import os
@@ -125,11 +127,11 @@ class Cppman(Crawler):
     def process_document(self, doc):
         """callback to insert index"""
         if doc.url not in self.blacklist:
-            print "Indexing '%s' ..." % doc.url
+            print("Indexing '%s' ..." % doc.url)
             name = self.extract_name(doc.text)
             self.results.add((name, doc.url))
         else:
-            print "Skipping blacklisted page '%s' ..." % doc.url
+            print("Skipping blacklisted page '%s' ..." % doc.url)
             return None
 
     def insert_index(self, table, name, url):
@@ -150,11 +152,11 @@ class Cppman(Crawler):
 
     def cache_all(self):
         """Cache all available man pages"""
-        print 'By default, cppman fetch pages on-the-fly if corresponding '\
-            'page is not found in the cache. The "cache-all" option is only '\
-            'useful if you want to view man pages offline. ' \
-            'Caching all contents will take several minutes, ' \
-            'do you want to continue [y/N]?',
+        print('By default, cppman fetch pages on-the-fly if corresponding '
+              'page is not found in the cache. The "cache-all" option is only '
+              'useful if you want to view man pages offline. '
+              'Caching all contents will take several minutes, '
+              'do you want to continue [y/N]?')
 
         respond = raw_input()
         if respond.lower() not in ['y', 'ye', 'yes']:
@@ -175,30 +177,30 @@ class Cppman(Crawler):
         cursor = conn.cursor()
 
         source = environ.config.source
-        print 'Caching mange pages from %s ...' % source
+        print('Caching mange pages from %s ...' % source)
         data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
         for name, url in data:
             retries = 3
-            print 'Caching %s ...' % name
+            print('Caching %s ...' % name)
             while retries > 0:
                 try:
                     self.cache_man_page(source, url, name)
                 except Exception:
-                    print 'Retrying ...'
+                    print('Retrying ...')
                     retries -= 1
                 else:
                     break
 
             if retries == 0:
-                print 'Error caching %s ...' % name
+                print('Error caching %s ...' % name)
                 self.failure_count += 1
             else:
                 self.success_count += 1
         conn.close()
 
-        print '\n%d manual pages cached successfully.' % self.success_count
-        print '%d manual pages failed to cache.' % self.failure_count
+        print('\n%d manual pages cached successfully.' % self.success_count)
+        print('%d manual pages failed to cache.' % self.failure_count)
         self.update_mandb(False)
 
     def cache_man_page(self, source, url, name):
@@ -295,9 +297,9 @@ class Cppman(Crawler):
         if selected:
             for name, url in selected:
                 if os.isatty(sys.stdout.fileno()):
-                    print pat.sub(r'\033[1;31m\1\033[0m', name)
+                    print(pat.sub(r'\033[1;31m\1\033[0m', name))
                 else:
-                    print name
+                    print(name)
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
@@ -305,7 +307,7 @@ class Cppman(Crawler):
         """Update mandb."""
         if not environ.config.UpdateManPath:
             return
-        print '\nrunning mandb...'
+        print('\nrunning mandb...')
         cmd = 'mandb %s' % (' -q' if quiet else '')
         subprocess.Popen(cmd, shell=True).wait()
 
