@@ -253,10 +253,10 @@ def html2groff(data, name):
 
         for sec, content in secs:
             # Member functions
-            if 'MEMBER' in sec and \
-               'NON-MEMBER' not in sec and \
-               'INHERITED' not in sec and \
-               sec != 'MEMBER TYPES':
+            if ('MEMBER' in sec and
+                'NON-MEMBER' not in sec and
+                'INHERITED' not in sec and
+                 sec != 'MEMBER TYPES'):
                 content2 = re.sub(r'\n\.IP "([^:]+?)"',
                                   partial(add_header_multi, class_name),
                                   content)
