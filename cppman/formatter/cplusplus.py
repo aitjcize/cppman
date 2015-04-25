@@ -26,7 +26,7 @@ import datetime
 import re
 import urllib
 
-from cppman.util import html2man
+from cppman.util import html2man, fixupHTML
 from cppman.formatter.tableparser import parse_table
 
 
@@ -216,7 +216,7 @@ def html2groff(data, name):
 def func_test():
     """Test if there is major format changes in cplusplus.com"""
     ifs = urllib.urlopen('http://www.cplusplus.com/printf')
-    result = html2groff(ifs.read(), 'printf')
+    result = html2groff(fixupHTML(ifs.read()), 'printf')
     assert '.SH "NAME"' in result
     assert '.SH "TYPE"' in result
     assert '.SH "DESCRIPTION"' in result
@@ -224,11 +224,10 @@ def func_test():
 
 def test():
     """Simple Text"""
-    name = raw_input('What manual page do you want? ')
-    ifs = urllib.urlopen('http://www.cplusplus.com/' + name)
-    #print html2man(ifs.read()),
-    # with open('test.txt') as ifs:
-    #    print html2groff(ifs.read()),
+    ifs = urllib.urlopen('http://www.cplusplus.com/vector')
+    print html2groff(fixupHTML(ifs.read()), 'std::vector'),
+    # with open('test.html') as ifs:
+    #    print html2groff(fixupHTML(ifs.read()), 'std::vector'),
 
 if __name__ == '__main__':
     test()
