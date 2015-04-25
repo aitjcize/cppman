@@ -189,8 +189,10 @@ def html2groff(data, name):
 
         for sec, content in secs:
             # Member functions
-            if 'MEMBER' in sec and 'INHERITED' not in sec and\
-               sec != 'MEMBER TYPES':
+            if ('MEMBER' in sec and
+                'NON-MEMBER' not in sec and
+                'INHERITED' not in sec and
+                sec != 'MEMBER TYPES'):
                 content2 = re.sub(r'\n\.IP "([^:]+?)"', r'\n.IP "%s::\1"'
                                   % class_name, content)
                 # Replace (constructor) (destructor)
