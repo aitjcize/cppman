@@ -28,6 +28,7 @@ setup(
         package_data = {'cppman': _package_data},
         data_files = _data_files,
         scripts = ['bin/cppman'],
+        install_requires=['beautifulsoup4'],
         classifiers = [
             'Programming Language :: Python :: 2.6',
             'Programming Language :: Python :: 2.7',

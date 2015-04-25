@@ -30,6 +30,8 @@ import subprocess
 
 from cppman import environ
 
+import bs4
+
 
 def update_mandb_path():
     """Add ~/.local/share/man to $HOME/.manpath"""
@@ -106,3 +108,7 @@ def html2man(data, formatter):
     groff_text = formatter(data)
     man_text = groff2man(groff_text)
     return man_text
+
+
+def fixupHTML(data):
+    return str(bs4.BeautifulSoup(data))

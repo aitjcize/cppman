@@ -215,7 +215,10 @@ class Cppman(Crawler):
         except OSError:
             pass
 
-        data = urllib.urlopen(url).read()
+        # There are often some errors in the HTML, for example: missing closing
+        # tag. We use fixupHTML to fix this.
+        data = util.fixupHTML(urllib.urlopen(url).read())
+
         formatter = importlib.import_module('.' + source[:-4],
                                             'cppman.formatter')
         groff_text = formatter.html2groff(data, name)
