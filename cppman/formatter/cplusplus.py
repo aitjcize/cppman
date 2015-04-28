@@ -2,7 +2,7 @@
 #
 # formatter.py - format html from cplusplus.com to groff syntax
 #
-# Copyright (C) 2010 - 2014  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
+# Copyright (C) 2010 - 2015  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
 #
 # This file is part of cppman.
@@ -108,7 +108,7 @@ rps = [
     # Footer
     (r'<div id="CH_bb">.*$',
      r'\n.SE\n.SH "REFERENCE"\n'
-     r'cplusplus.com, 2000-2014 - All rights reserved.', re.S),
+     r'cplusplus.com, 2000-2015 - All rights reserved.', re.S),
     # C++ version tag
     (r'<div title="(C\+\+..)"[^>]*>', r'.sp\n\1\n', 0),
     # 'br' tag
