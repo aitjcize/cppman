@@ -22,7 +22,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-from __future__ import print_function
+
 
 import gzip
 import importlib
@@ -32,7 +32,7 @@ import shutil
 import sqlite3
 import subprocess
 import sys
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from cppman import environ
 from cppman import util
@@ -158,7 +158,7 @@ class Cppman(Crawler):
               'Caching all contents will take several minutes, '
               'do you want to continue [y/N]?')
 
-        respond = raw_input()
+        respond = input()
         if respond.lower() not in ['y', 'ye', 'yes']:
             raise KeyboardInterrupt
 
@@ -217,7 +217,7 @@ class Cppman(Crawler):
 
         # There are often some errors in the HTML, for example: missing closing
         # tag. We use fixupHTML to fix this.
-        data = util.fixupHTML(urllib.urlopen(url).read())
+        data = util.fixupHTML(urllib.request.urlopen(url).read())
 
         formatter = importlib.import_module('.' + source[:-4],
                                             'cppman.formatter')
