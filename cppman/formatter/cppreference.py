@@ -195,7 +195,7 @@ def html2groff(data, name):
         pass
 
     # Remove non prinatable characters
-    data = [x for x in data if x in string.printable]
+    data = ''.join([x for x in data if x in string.printable])
 
     for table in re.findall(
             r'<table class="(?:wikitable|dsctable)"[^>]*>.*?</table>',
@@ -210,7 +210,7 @@ def html2groff(data, name):
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
     # Remove non prinatable characters
-    data = [x for x in data if x in string.printable]
+    data = ''.join([x for x in data if x in string.printable])
 
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
