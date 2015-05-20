@@ -219,8 +219,7 @@ class Cppman(Crawler):
         # tag. We use fixupHTML to fix this.
         data = util.fixupHTML(urllib.request.urlopen(url).read())
 
-        formatter = importlib.import_module('.' + source[:-4],
-                                            'cppman.formatter')
+        formatter = importlib.import_module('cppman.formatter.%s' % source[:-4])
         groff_text = formatter.html2groff(data, name)
 
         with gzip.open(outname, 'w') as f:
