@@ -223,7 +223,7 @@ class Cppman(Crawler):
         groff_text = formatter.html2groff(data, name)
 
         with gzip.open(outname, 'w') as f:
-            f.write(groff_text)
+            f.write(groff_text.encode('utf-8'))
 
     def clear_cache(self):
         """Clear all cache in man3"""
