@@ -32,7 +32,7 @@ import shutil
 import sqlite3
 import subprocess
 import sys
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
 
 from cppman import environ
 from cppman import util

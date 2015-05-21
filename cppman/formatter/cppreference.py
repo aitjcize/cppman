@@ -25,7 +25,7 @@
 import datetime
 import re
 import string
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
 
 from functools import partial
 
