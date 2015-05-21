@@ -24,7 +24,7 @@
 
 import datetime
 import re
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
 
 from cppman.util import html2man, fixupHTML
 from cppman.formatter.tableparser import parse_table
