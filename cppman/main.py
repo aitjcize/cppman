@@ -177,7 +177,7 @@ class Cppman(Crawler):
         cursor = conn.cursor()
 
         source = environ.config.source
-        print('Caching manpage pages from %s ...' % source)
+        print('Caching manpages from %s ...' % source)
         data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
         for name, url in data:
