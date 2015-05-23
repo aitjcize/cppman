@@ -23,7 +23,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-from __future__ import print_function
+
 
 import os
 import sys
@@ -168,7 +168,7 @@ def main():
             # TODO: find out what happened
             try:
                 try:
-                    raw_input()
+                    input()
                 except EOFError:
                     continue
                 except KeyboardInterrupt:
