@@ -152,7 +152,7 @@ class Cppman(Crawler):
 
     def cache_all(self):
         """Cache all available man pages"""
-        print('By default, cppman fetch pages on-the-fly if corresponding '
+        print('By default, cppman fetches pages on-the-fly if corresponding '
               'page is not found in the cache. The "cache-all" option is only '
               'useful if you want to view man pages offline. '
               'Caching all contents will take several minutes, '
@@ -177,7 +177,7 @@ class Cppman(Crawler):
         cursor = conn.cursor()
 
         source = environ.config.source
-        print('Caching mange pages from %s ...' % source)
+        print('Caching manpage pages from %s ...' % source)
         data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
         for name, url in data:
