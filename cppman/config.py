@@ -22,7 +22,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import ConfigParser
+import configparser
 import os
 
 
@@ -42,13 +42,13 @@ class Config(object):
         if not os.path.exists(configfile):
             self.set_default()
         else:
-            self._config = ConfigParser.RawConfigParser()
+            self._config = configparser.RawConfigParser()
             self._config.read(self._configfile)
 
     def __getattr__(self, name):
         try:
             value = self._config.get('Settings', name)
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             value = self.DEFAULTS[name]
             setattr(self, name, value)
             self._config.read(self._configfile)
@@ -68,10 +68,10 @@ class Config(object):
         except:
             pass
 
-        self._config = ConfigParser.RawConfigParser()
+        self._config = configparser.RawConfigParser()
         self._config.add_section('Settings')
 
-        for key, val in self.DEFAULTS.iteritems():
+        for key, val in self.DEFAULTS.items():
             self._config.set('Settings', key, val)
 
         with open(self._configfile, 'w') as f:

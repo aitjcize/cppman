@@ -25,7 +25,7 @@
 import datetime
 import re
 import string
-import urllib
+import urllib.request
 
 from functools import partial
 
@@ -155,7 +155,7 @@ rps = [
     # Escape
     (r'^#', r'\#', 0),
     (r'&#160;', ' ', 0),
-    (r'&#(\d+);', lambda g: unichr(int(g.group(1))), 0),
+    (r'&#(\d+);', lambda g: chr(int(g.group(1))), 0),
     # Misc
     (r'&lt;', r'<', 0),
     (r'&gt;', r'>', 0),
@@ -195,7 +195,7 @@ def html2groff(data, name):
         pass
 
     # Remove non prinatable characters
-    data = filter(lambda x: x in string.printable, data)
+    data = ''.join([x for x in data if x in string.printable])
 
     for table in re.findall(
             r'<table class="(?:wikitable|dsctable)"[^>]*>.*?</table>',
@@ -210,7 +210,7 @@ def html2groff(data, name):
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
     # Remove non prinatable characters
-    data = filter(lambda x: x in string.printable, data)
+    data = ''.join([x for x in data if x in string.printable])
 
     # Upper case all section headers
     for st in re.findall(r'.SH .*\n', data):
@@ -308,7 +308,7 @@ def html2groff(data, name):
 
 def func_test():
     """Test if there is major format changes in cplusplus.com"""
-    ifs = urllib.urlopen('http://en.cppreference.com/w/cpp/container/vector')
+    ifs = urllib.request.urlopen('http://en.cppreference.com/w/cpp/container/vector')
     result = html2groff(fixupHTML(ifs.read()), 'std::vector')
     assert '.SH "NAME"' in result
     assert '.SH "SYNOPSIS"' in result
@@ -318,8 +318,8 @@ def func_test():
 def test():
     """Simple Text"""
     import bs4
-    ifs = urllib.urlopen('http://en.cppreference.com/w/cpp/container/vector')
-    print html2groff(fixupHTML(ifs.read()), 'std::vector'),
+    ifs = urllib.request.urlopen('http://en.cppreference.com/w/cpp/container/vector')
+    print(html2groff(fixupHTML(ifs.read()), 'std::vector'), end=' ')
     #with open('test.html') as ifs:
     #    data = fixupHTML(ifs.read())
     #    print html2groff(data, 'std::vector'),
