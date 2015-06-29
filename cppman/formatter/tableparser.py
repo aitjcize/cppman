@@ -22,10 +22,10 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-from __future__ import print_function
+
 
 import re
-import StringIO
+import io
 
 
 NODE = re.compile(r'<\s*([^/]\w*)\s?(.*?)>(.*?)<\s*/\1.*?>', re.S)
@@ -156,6 +156,6 @@ class Node(object):
 
 def parse_table(html):
     root = Node(None, 'root', '', html)
-    fd = StringIO.StringIO()
+    fd = io.StringIO()
     root.gen(fd)
     return fd.getvalue()
