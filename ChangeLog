@@ -2,6 +2,15 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.4.5 (July 1th, 2015):
+
+	Bug fixed:
+        * Multiple formating bug fixed
+	* Fix typos
+
+        Features add:
+        * Migrate to Python 3
+
 cppman 0.4.2 (January 18th, 2015):
 
 	Bug fixed:
