@@ -22,7 +22,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-# viewer.sh is a lauches vim as man page viewer and provides some convinient
+# viewer.sh is a launches vim as man page viewer and provides some convenient
 # settings
 #
 
