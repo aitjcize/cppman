@@ -41,6 +41,8 @@ Installation
 
     $ pip install cppman
 
+Note that cppman requires Python 3. Make sure that either ``pip`` is configured for Python 3 installation, your default Python interpeter is version 3 or just use ``pip3`` instead.
+
 2. Arch Linux users can find it on AUR or using `Yaourt <https://wiki.archlinux.org/index.php/Yaourt>`_:
 
 .. code-block:: bash
