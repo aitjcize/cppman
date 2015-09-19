@@ -317,7 +317,6 @@ def func_test():
 
 def test():
     """Simple Text"""
-    import bs4
     ifs = urllib.request.urlopen('http://en.cppreference.com/w/cpp/container/vector')
     print(html2groff(fixupHTML(ifs.read()), 'std::vector'), end=' ')
     #with open('test.html') as ifs:
