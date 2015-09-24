@@ -38,7 +38,7 @@ class Document(object):
         self.url = url
         self.query = '' if '?' not in url else url.split('?')[-1]
         self.status = res.status
-        self.text = res.read()
+        self.text = res.read().decode()
         self.headers = dict(res.getheaders())
 
 
