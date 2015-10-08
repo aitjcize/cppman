@@ -22,10 +22,9 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-
-
-import re
 import io
+import platform
+import re
 
 
 NODE = re.compile(r'<\s*([^/]\w*)\s?(.*?)>(.*?)<\s*/\1.*?>', re.S)
@@ -73,14 +72,16 @@ class Node(object):
     def scan_format(self, index=0, width=0, rowspan={}):
         format_str = ''
 
+        expand_char = 'x' if platform.system() != 'Darwin' else ''
+
         if self.name in ['th', 'td']:
             extend = ((width == 3 and index == 1) or
                       (width != 3 and width < 5 and index == width - 1))
 
             if self.name == 'th':
-                format_str += 'c%s ' % ('x' if extend else '')
+                format_str += 'c%s ' % (expand_char if extend else '')
             else:
-                format_str += 'l%s ' % ('x' if extend else '')
+                format_str += 'l%s ' % (expand_char if extend else '')
 
             if 'colspan' in self.attr:
                 for i in range(int(self.attr['colspan']) - 1):
