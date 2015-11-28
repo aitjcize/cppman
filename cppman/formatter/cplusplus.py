@@ -130,7 +130,7 @@ rps = [
     (r'&amp;', r'&', 0),
     (r'&nbsp;', r' ', 0),
     (r'\\([^\^nE])', r'\\\\\1', 0),
-    #: vector::data SYNOPSIS section has \x0d separting two lines
+    #: vector::data SYNOPSIS section has \x0d separating two lines
     ('\x0d([^)])', r'\n.br\n\1', 0),
     ('\x0d', r'', 0),
     (r'>/">', r'', 0),

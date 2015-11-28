@@ -21,7 +21,7 @@ cppman 0.4.1 (October 12th, 2014):
 
 	Bug fixed:
 	* Minor bug fixes
-	* Fix emtpy man pages on some system (MacOS)
+	* Fix empty man pages on some system (MacOS)
 	* Fix wrong output dev
 
 cppman 0.4.0 (October 10th, 2014):
@@ -134,7 +134,7 @@ cppman 0.1.6 (April 2nd, 2011):
 cppman 0.1.5 (January 31st, 2011):
 
 	Bug fixed:
-	* Backslashs in EXAMPLE section disapears
+	* Backslashes in EXAMPLE section disappear
 	* Empty "#include" line in some pages
 
 	Features added:
