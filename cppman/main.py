@@ -86,13 +86,13 @@ class Cppman(Crawler):
                 self.insert_index('cplusplus.com', name, url)
             self.db_conn.commit()
 
-            # Rename dumplicate entries
-            dumplicates = self.db_cursor.execute('SELECT name, COUNT(name) '
-                                                 'AS NON '
-                                                 'FROM "cplusplus.com" '
-                                                 'GROUP BY NAME '
-                                                 'HAVING (NON > 1)').fetchall()
-            for name, num in dumplicates:
+            # Rename duplicate entries
+            duplicates = self.db_cursor.execute('SELECT name, COUNT(name) '
+                                                'AS NON '
+                                                'FROM "cplusplus.com" '
+                                                'GROUP BY NAME '
+                                                'HAVING (NON > 1)').fetchall()
+            for name, num in duplicates:
                 dump = self.db_cursor.execute('SELECT name, url FROM '
                                               '"cplusplus.com" WHERE name="%s"'
                                               % name).fetchall()

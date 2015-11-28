@@ -194,7 +194,7 @@ def html2groff(data, name):
     except ValueError:
         pass
 
-    # Remove non prinatable characters
+    # Remove non-printable characters
     data = ''.join([x for x in data if x in string.printable])
 
     for table in re.findall(
@@ -209,7 +209,7 @@ def html2groff(data, name):
     for rp in rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
-    # Remove non prinatable characters
+    # Remove non-printable characters
     data = ''.join([x for x in data if x in string.printable])
 
     # Upper case all section headers
@@ -285,7 +285,7 @@ def html2groff(data, name):
                                   content)
                 data = data.replace(content, content2)
 
-    # Remove uneeded pseudo macro
+    # Remove unneeded pseudo macro
     data = re.sub('(?:\n.SE|.IBEGIN.*?\n|\n.IEND)', '', data)
 
     # Replace all macros

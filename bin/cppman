@@ -31,11 +31,11 @@ from optparse import OptionParser, make_option
 
 
 program = sys.argv[0]
-LANUCH_DIR = os.path.dirname(os.path.abspath(sys.path[0]))
+LAUNCH_DIR = os.path.dirname(os.path.abspath(sys.path[0]))
 
 # If launched from source directory
 if program.startswith('./') or program.startswith('bin/'):
-    sys.path.insert(0, LANUCH_DIR)
+    sys.path.insert(0, LAUNCH_DIR)
 
 from cppman.main import Cppman
 from cppman.environ import config
