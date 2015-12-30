@@ -5,7 +5,7 @@ cppman Changelog
 cppman 0.4.5 (July 1th, 2015):
 
 	Bug fixed:
-        * Multiple formating bug fixed
+	* Multiple formatting bugs fixed
 	* Fix typos
 
         Features add:
@@ -42,7 +42,7 @@ cppman 0.3.1 (November 29th, 2013):
 cppman 0.3.0 (November 15th, 2013):
 
 	Bug fixed:
-	* Fix various formatting bug, issue #15, #17
+	* Fix various formatting bugs, issue #15, #17
 
 	Features added:
 	* Update search index (index.db).
@@ -61,7 +61,7 @@ cppman 0.2.6 (September 24th, 2013):
 
 	Bug fixed:
 	* Fix prefix when install via easy_install or pip
-	* Fix formating bugs
+	* Fix formatting bugs
 	* Add Travis CI test
 
 cppman 0.2.5 (July 28th, 2013):
@@ -120,7 +120,7 @@ cppman 0.1.8 (November 29th, 2011):
 cppman 0.1.7 (October 7th, 2011):
 
 	Bug fixed:
-	* Minor formating bug
+	* Minor formatting bug
 
 	Features added:
 	* Pager is now configurable, either 'vim' or 'less' is accepted.

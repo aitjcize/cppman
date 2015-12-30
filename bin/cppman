@@ -64,7 +64,7 @@ def main():
         make_option('-c', '--cache-all', action='store_true',
                     dest='cache_all', default=False,
                     help='cache all available man pages from cppreference.com '
-                         'and cplusplus.com o enable offline browsing'),
+                         'and cplusplus.com to enable offline browsing'),
         make_option('-C', '--clear-cache', action='store_true',
                     dest='clear_cache', default=False,
                     help='clear all cached files'),
