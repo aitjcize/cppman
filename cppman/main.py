@@ -22,8 +22,6 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-
-
 import gzip
 import importlib
 import os
@@ -41,12 +39,13 @@ from cppman.crawler import Crawler
 
 class Cppman(Crawler):
     """Manage cpp man pages, indexes"""
-    def __init__(self, forced=False):
+    def __init__(self, forced=False, force_columns=-1):
         Crawler.__init__(self)
         self.results = set()
         self.forced = forced
         self.success_count = None
         self.failure_count = None
+        self.force_columns = force_columns
 
         self.blacklist = [
         ]
@@ -273,12 +272,13 @@ class Cppman(Crawler):
         pager = environ.pager if sys.stdout.isatty() else environ.renderer
 
         # Call viewer
+        columns = (util.get_width() if self.force_columns == -1 else
+                   self.force_columns)
         pid = os.fork()
         if pid == 0:
             os.execl('/bin/sh', '/bin/sh', pager,
                      self.get_page_path(environ.source, page_name),
-                     str(util.get_width()), environ.pager_config,
-                     page_name)
+                     str(columns), environ.pager_config, page_name)
         return pid
 
     def find(self, pattern):

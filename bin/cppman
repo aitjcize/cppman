@@ -88,7 +88,9 @@ def main():
                     dest='rebuild_index', default=False,
                     help='rebuild index database from cplusplus.com'),
         make_option('-v', '--version', action='store_true', dest='version',
-                    default=False, help='show version information')
+                    default=False, help='show version information'),
+        make_option('--force-columns', action='store', dest='force_columns',
+                    type=int, default=-1, help='force terminal columns')
     ]
 
     parser = OptionParser(
@@ -156,7 +158,7 @@ def main():
         sys.stderr.write('What manual page do you want?\n')
         sys.exit(1)
 
-    cm = Cppman(options.force)
+    cm = Cppman(options.force, options.force_columns)
     for i in args:
         if i != args[0]:
             print('--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '

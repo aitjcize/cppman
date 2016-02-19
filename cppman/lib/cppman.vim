@@ -91,7 +91,7 @@ echo s:old_col
 function s:reload()
   echo "Loading..."
   exec "%d"
-  exec "0r! cppman '" . g:page_name . "'"
+  exec "0r! cppman --force-columns " . &co . " '" . g:page_name . "'"
 endfunction
 
 function Rerender()

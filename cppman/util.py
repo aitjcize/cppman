@@ -25,8 +25,9 @@
 import fcntl
 import os
 import struct
-import termios
 import subprocess
+import sys
+import termios
 
 from cppman import environ
 
@@ -83,9 +84,9 @@ def get_width():
     """Get terminal width"""
     # Get terminal size
     ws = struct.pack("HHHH", 0, 0, 0, 0)
-    ws = fcntl.ioctl(0, termios.TIOCGWINSZ, ws)
+    ws = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, ws)
     lines, columns, x, y = struct.unpack("HHHH", ws)
-    width = columns * 39 / 40
+    width = int(columns * 39 / 40)
     if width >= columns - 2:
         width = columns - 2
     return width
