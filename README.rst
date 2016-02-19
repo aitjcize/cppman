@@ -61,6 +61,12 @@ or install the git version
 
     $ sudo apt-get install cppman
 
+Package Maintainers
+-------------------
+* Arch Linux: myself
+* Debian: `czchen <https://github.com/czchen>`_
+* MacPorts: `eborisch <https://github.com/eborisch>`_
+
 FAQ
 ---
 * Q: Can I use the system ``man`` command instead of ``cppman``?
