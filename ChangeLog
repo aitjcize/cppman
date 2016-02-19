@@ -2,6 +2,14 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.4.6 (October 8th, 2015):
+
+	Bug fixed:
+	* Various of bug fix.
+
+        Features add:
+        * MacOS support
+
 cppman 0.4.5 (July 1th, 2015):
 
 	Bug fixed:
