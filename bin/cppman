@@ -86,7 +86,8 @@ def main():
                     "The default value is 'vim'."),
         make_option('-r', '--rebuild-index', action='store_true',
                     dest='rebuild_index', default=False,
-                    help='rebuild index database from cplusplus.com'),
+                    help="rebuild index database for the selected source"
+                    ", either 'cppreference.com' or 'cplusplus.com'."),
         make_option('-v', '--version', action='store_true', dest='version',
                     default=False, help='show version information'),
         make_option('--force-columns', action='store', dest='force_columns',
