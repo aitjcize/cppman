@@ -63,19 +63,19 @@ def main():
                          "'cplusplus.com'. Default is 'cplusplus.com'."),
         make_option('-c', '--cache-all', action='store_true',
                     dest='cache_all', default=False,
-                    help='cache all available man pages from cppreference.com '
-                         'and cplusplus.com to enable offline browsing'),
+                    help='Cache all available man pages from cppreference.com '
+                         'and cplusplus.com to enable offline browsing.'),
         make_option('-C', '--clear-cache', action='store_true',
                     dest='clear_cache', default=False,
-                    help='clear all cached files'),
+                    help='Clear all cached files.'),
         make_option('-f', '--find-page', action='store', type='string',
                     dest='keyword', default=None,
-                    help='find man page'),
+                    help='Find man page.'),
         make_option('-o', '--force-update', action='store_true',
                     dest='force', default=False,
-                    help="force cppman to update existing cache when "
+                    help="Force cppman to update existing cache when "
                     "'--cache-all' or browsing man pages that were already "
-                    "cached"),
+                    "cached."),
         make_option('-m', '--use-mandb', action='store', dest='mandb',
                     help="Accepts 'true' or 'false'. If true, cppman adds "
                     "manpage path to mandb so that you can view C++ manpages "
@@ -86,12 +86,12 @@ def main():
                     "The default value is 'vim'."),
         make_option('-r', '--rebuild-index', action='store_true',
                     dest='rebuild_index', default=False,
-                    help="rebuild index database for the selected source"
-                    ", either 'cppreference.com' or 'cplusplus.com'."),
+                    help="Rebuild index database for 'cppreference.com' "
+                    "and 'cplusplus.com'."),
         make_option('-v', '--version', action='store_true', dest='version',
-                    default=False, help='show version information'),
+                    default=False, help='Show version information.'),
         make_option('--force-columns', action='store', dest='force_columns',
-                    type=int, default=-1, help='force terminal columns')
+                    type=int, default=-1, help='Force terminal columns.')
     ]
 
     parser = OptionParser(
