@@ -62,7 +62,7 @@ class Cppman(Crawler):
         return name
 
     def rebuild_index(self):
-        """Rebuild index database from cplusplus.com."""
+        """Rebuild index database from cplusplus.com and cppreference.com."""
         try:
             os.remove(environ.index_db_re)
         except:
