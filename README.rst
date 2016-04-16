@@ -65,6 +65,7 @@ Package Maintainers
 -------------------
 * Arch Linux: myself
 * Debian: `czchen <https://github.com/czchen>`_
+* Gentoo: `rindeal <https://github.com/rindeal>`_
 * MacPorts: `eborisch <https://github.com/eborisch>`_
 
 FAQ
