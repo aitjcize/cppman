@@ -181,35 +181,36 @@ class Crawler(object):
         if self.max_depth and self._calc_depth(target) > self.max_depth:
             return
 
-        self.targets_lock.acquire()
-        if target in self.visited:
-            self.targets_lock.release()
-            return
-        self.targets.add(target)
-        self.targets_lock.release()
+        with self.targets_lock:
+          if target in self.visited:
+              return
+          self.targets.add(target)
 
     def _spawn_new_worker(self):
-        self.concurrency_lock.acquire()
-        self.concurrency += 1
-        t = Thread(target=self._worker, args=(self.concurrency,))
-        t.daemon = True
-        self.threads.append(t)
-        t.start()
-        self.concurrency_lock.release()
+        with self.concurrency_lock:
+          self.concurrency += 1
+          t = Thread(target=self._worker, args=(self.concurrency,))
+          t.daemon = True
+          self.threads.append(t)
+          t.start()
 
     def _worker(self, sid):
         while self.targets:
             try:
-                self.targets_lock.acquire()
-                url = self.targets.pop()
-                self.visited[url] = True
-                self.targets_lock.release()
+                with self.targets_lock:
+                  url = self.targets.pop()
+                  self.visited[url] = True
 
-                rx = re.match('https?://([^/]+)(.*)', url)
-                host = rx.group(1)
-                path = rx.group(2)
+                rx = re.match('(https?)://([^/]+)(.*)', url)
+                protocol = rx.group(1)
+                host = rx.group(2)
+                path = rx.group(3)
 
-                conn = http.client.HTTPConnection(host, timeout=10)
+                if protocol == 'http':
+                    conn = http.client.HTTPConnection(host, timeout=10)
+                else:
+                    conn = http.client.HTTPSConnection(host, timeout=10)
+
                 conn.request('GET', path)
                 res = conn.getresponse()
 
@@ -245,11 +246,8 @@ class Crawler(object):
                 # Pop from an empty set
                 break
             except (http.client.HTTPException, EnvironmentError):
-                # print('%s, retrying' % str(e))
-                self.targets_lock.acquire()
-                self.targets.add(url)
-                self.targets_lock.release()
+                with self.targets_lock:
+                  self.targets.add(url)
 
-        self.concurrency_lock.acquire()
-        self.concurrency -= 1
-        self.concurrency_lock.release()
+        with self.concurrency_lock:
+          self.concurrency -= 1
