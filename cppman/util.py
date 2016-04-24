@@ -76,6 +76,10 @@ def update_man3_link():
         else:
             raise RuntimeError("Can't create link since `%s' already exists" %
                                man3_path)
+    try:
+        os.makedirs(os.path.join(environ.man_dir, environ.config.Source))
+    except Exception:
+        pass
 
     os.symlink(environ.config.Source, man3_path)
 
