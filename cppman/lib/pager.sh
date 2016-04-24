@@ -58,7 +58,7 @@ remove_escape() {
     sed "s/$escape\[[^m]*m//g" | col -x -b
 }
 
-if [ "$pager_type" == "vim" ]; then
+if [ "$pager_type" = "vim" ]; then
   if ! which vim >/dev/null 2>&1; then
     pager_type=less
   fi
