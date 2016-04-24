@@ -116,4 +116,4 @@ def html2man(data, formatter):
 
 
 def fixupHTML(data):
-    return str(bs4.BeautifulSoup(data, "html.parser"))
+    return str(bs4.BeautifulSoup(data, "html5lib"))
