@@ -94,16 +94,16 @@ rps = [
     # 'pre' tag
     (r'<pre[^>]*>(.+?)</pre\s*>', r'\n.nf\n\1\n.fi\n', re.S),
     # Subsections
-    (r'<b>(.+?)</b>:<br>', r'.SS \1\n', 0),
+    (r'<b>(.+?)</b>:<br/>', r'.SS \1\n', 0),
     # Member functions / See Also table
-    # # Without C++11 tag
-    (r'<dl class="links"><dt>.*?<b>([^ ]+?)</b>.*?</dt><dd>(.*?)'
-     r'<span class="typ">(.*?)</span></dd></dl>',
+    # Without C++11 tag
+    (r'<dl class="links"><dt><a href="[^"]*"><b>([^ ]+?)</b></a></dt><dd>'
+     r'([^<]*?)<span class="typ">([^<]*?)</span></dd></dl>',
      r'\n.IP "\1(3)"\n\2 \3\n', re.S),
-    # # With C++11 tag
-    (r'<dl class="links"><dt>.*?<b>([^ ]+?) <b class="C_cpp11" '
-     r'title="(.+?)">\W*</b>.*?</dt><dd>(.*?)'
-     r'<span class="typ">(.*?)</span></dd></dl>',
+    # With C++11 tag
+    (r'<dl class="links"><dt><a href="[^"]*"><b>([^ ]+?) <b class="C_cpp11" '
+     r'title="(.+?)"></b></b></a></dt><dd>'
+     r'([^<]*?)<span class="typ">(.*?)</span></dd></dl>',
      r'\n.IP "\1(3) [\2]"\n\3 \4\n', re.S),
     # Footer
     (r'<div id="CH_bb">.*$',
@@ -112,7 +112,7 @@ rps = [
     # C++ version tag
     (r'<div.+?title="(C\+\+..)"[^>]*>', r'.sp\n\1\n', 0),
     # 'br' tag
-    (r'<br>', r'\n.br\n', 0),
+    (r'<br/>', r'\n.br\n', 0),
     (r'\n.br\n.br\n', r'\n.sp\n', 0),
     # 'dd' 'dt' tag
     (r'<dt>(.+?)</dt>\s*<dd>(.+?)</dd>', r'.IP "\1"\n\2\n', re.S),
