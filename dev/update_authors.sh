@@ -11,4 +11,7 @@ Contributors
 ------------
 EOF
 
-git log --all --format='%aN <%cE>' | sort -u | grep -v "$AUTHOR" >> AUTHORS
+git log --all --format='%aN <%cE>' | \
+  egrep -v '(wnhuang|aitjcize)' | \
+  sort -u | \
+  grep -v "$AUTHOR" >> AUTHORS
