@@ -265,8 +265,8 @@ class Cppman(Crawler):
         finally:
             conn.close()
 
-        page_name = page_name.replace('/', '_')
-        if self.forced or page_name + '.3.gz' not in avail:
+        page_filename = self.get_normalized_page_name(page_name)
+        if self.forced or page_filename + '.3.gz' not in avail:
             self.cache_man_page(environ.source, url, page_name)
 
         pager = environ.pager if sys.stdout.isatty() else environ.renderer
@@ -313,5 +313,9 @@ class Cppman(Crawler):
         cmd = 'mandb %s' % (' -q' if quiet else '')
         subprocess.Popen(cmd, shell=True).wait()
 
+    def get_normalized_page_name(self, name):
+        return name.replace('/', '_')
+
     def get_page_path(self, source, name):
+        name = self.get_normalized_page_name(name)
         return os.path.join(environ.man_dir, source, name + '.3.gz')
