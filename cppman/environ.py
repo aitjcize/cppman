@@ -45,18 +45,11 @@ index_db_re = os.path.normpath(os.path.join(config_dir, 'index.db'))
 index_db = index_db_re if os.path.exists(index_db_re) \
     else get_lib_path('index.db')
 
+pager = config.Pager
 pager_config = get_lib_path('cppman.vim')
-
-if config.pager == 'vim':
-    pager = get_lib_path('pager_vim.sh')
-elif config.pager == 'less':
-    pager = get_lib_path('pager_less.sh')
-else:
-    pager = get_lib_path('pager_system.sh')
+pager_script = get_lib_path('pager.sh')
 
 source = config.Source
 if source not in config.SOURCES:
     source = config.SOURCES[0]
     config.Source = source
-
-renderer = get_lib_path('render.sh')

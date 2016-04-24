@@ -269,14 +269,14 @@ class Cppman(Crawler):
         if self.forced or page_filename + '.3.gz' not in avail:
             self.cache_man_page(environ.source, url, page_name)
 
-        pager = environ.pager if sys.stdout.isatty() else environ.renderer
+        pager_type = environ.pager if sys.stdout.isatty() else 'pipe'
 
         # Call viewer
         columns = (util.get_width() if self.force_columns == -1 else
                    self.force_columns)
         pid = os.fork()
         if pid == 0:
-            os.execl('/bin/sh', '/bin/sh', pager,
+            os.execl('/bin/sh', '/bin/sh', environ.pager_script, pager_type,
                      self.get_page_path(environ.source, page_name),
                      str(columns), environ.pager_config, page_name)
         return pid
