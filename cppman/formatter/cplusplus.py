@@ -79,7 +79,7 @@ rps = [
      r'\n.SE\n.SH "TYPE"\n\1\n'
      r'\n.SE\n.SH "SYNOPSIS"\n\3\n'
      r'\n.SE\n.SH "DESCRIPTION"\n' % datetime.date.today(), re.S),
-    (r'<span class="C_ico cpp11warning"[^>]*>', r' [C++11]', re.S),
+    (r'<span alt="[^"]*?" class="C_ico cpp11warning"[^>]*>', r' [C++11]', re.S),
     # Remove empty #include
     (r'#include \n.sp\n', r'', 0),
     # Remove empty sections
