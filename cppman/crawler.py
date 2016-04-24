@@ -2,7 +2,7 @@
 #
 # crawler.py
 #
-# Copyright (C) 2010 - 2015  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
+# Copyright (C) 2010 - 2016  Wei-Ning Huang (AZ) <aitjcize@gmail.com>
 # All Rights reserved.
 #
 # This file is part of cppman.
@@ -22,15 +22,21 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+from __future__ import print_function
 
-
-import http.client
 import os
 import re
 import sys
 
 from threading import Thread, Lock
-from urllib.parse import quote
+
+if sys.version_info < (3, 0):
+    import httplib
+
+    from urllib import quote
+else:
+    import http.client as httplib
+    from urllib.parse import quote
 
 
 class Document(object):
@@ -38,8 +44,11 @@ class Document(object):
         self.url = url
         self.query = '' if '?' not in url else url.split('?')[-1]
         self.status = res.status
-        self.text = res.read().decode()
+        self.text = res.read()
         self.headers = dict(res.getheaders())
+
+        if sys.version_info >= (3, 0):
+            self.text = self.text.decode()
 
 
 class Crawler(object):
@@ -207,12 +216,15 @@ class Crawler(object):
                 path = rx.group(3)
 
                 if protocol == 'http':
-                    conn = http.client.HTTPConnection(host, timeout=10)
+                    conn = httplib.HTTPConnection(host, timeout=10)
                 else:
-                    conn = http.client.HTTPSConnection(host, timeout=10)
+                    conn = httplib.HTTPSConnection(host, timeout=10)
 
                 conn.request('GET', path)
                 res = conn.getresponse()
+
+                if res.status == 404:
+                    continue
 
                 if res.status == 301 or res.status == 302:
                     rlink = self._follow_link(url, res.getheader('location'))
@@ -245,7 +257,7 @@ class Crawler(object):
             except KeyError:
                 # Pop from an empty set
                 break
-            except (http.client.HTTPException, EnvironmentError):
+            except (httplib.HTTPException, EnvironmentError):
                 with self.targets_lock:
                   self.targets.add(url)
 
