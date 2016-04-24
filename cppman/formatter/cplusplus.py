@@ -98,13 +98,13 @@ rps = [
     # Member functions / See Also table
     # Without C++11 tag
     (r'<dl class="links"><dt><a href="[^"]*"><b>([^ ]+?)</b></a></dt><dd>'
-     r'([^<]*?)<span class="typ">([^<]*?)</span></dd></dl>',
-     r'\n.IP "\1(3)"\n\2 \3\n', re.S),
+     r'([^<]*?)<span class="typ">\s*\(([^<]*?)\n?\)</span></dd></dl>',
+     r'\n.IP "\1(3)"\n\2 (\3)\n', re.S),
     # With C++11 tag
     (r'<dl class="links"><dt><a href="[^"]*"><b>([^ ]+?) <b class="C_cpp11" '
      r'title="(.+?)"></b></b></a></dt><dd>'
-     r'([^<]*?)<span class="typ">(.*?)</span></dd></dl>',
-     r'\n.IP "\1(3) [\2]"\n\3 \4\n', re.S),
+     r'([^<]*?)<span class="typ">\s*\((.*?)\n?\)</span></dd></dl>',
+     r'\n.IP "\1(3) [\2]"\n\3 (\4)\n', re.S),
     # Footer
     (r'<div id="CH_bb">.*$',
      r'\n.SE\n.SH "REFERENCE"\n'
@@ -130,9 +130,6 @@ rps = [
     (r'&amp;', r'&', 0),
     (r'&nbsp;', r' ', 0),
     (r'\\([^\^nE])', r'\\\\\1', 0),
-    #: vector::data SYNOPSIS section has \x0d separating two lines
-    ('\x0d([^)])', r'\n.br\n\1', 0),
-    ('\x0d', r'', 0),
     (r'>/">', r'', 0),
     (r'/">', r'', 0),
     # Remove empty lines
@@ -141,6 +138,13 @@ rps = [
     # Preserve \n" in EXAMPLE
     (r'\\n', r'\en', 0),
 ]
+
+def escape_pre_section(table):
+    """Escape <pre> seciton in table."""
+    def replace_newline(g):
+        return g.group(1).replace('\n', '\n.br\n')
+
+    return re.sub('<pre.*?>(.*?)</pre>', replace_newline, table, flags=re.S)
 
 
 def html2groff(data, name):
@@ -151,17 +155,17 @@ def html2groff(data, name):
     except ValueError:
         pass
 
-    # Replace all
+    # Pre replace all
     for rp in pre_rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
     for table in re.findall(r'<table.*?>.*?</table>', data, re.S):
-        tbl = parse_table(table)
+        tbl = parse_table(escape_pre_section(table))
         # Escape column with '.' as prefix
         tbl = re.compile(r'T{\n(\..*?)\nT}', re.S).sub(r'T{\n\E \1\nT}', tbl)
         data = data.replace(table, tbl)
 
-    # Pre replace all
+    # Replace all
     for rp in rps:
         data = re.compile(rp[0], rp[2]).sub(rp[1], data)
 
