@@ -54,7 +54,7 @@ class Node(object):
         return NODE.sub(self.strip_tags, html)
 
     def traverse(self, depth=0):
-        print('%s%s: %s' % (' ' * depth, self.name, self.text))
+        print('%s%s: %s %s' % (' ' * depth, self.name, self.attr, self.text))
 
         for c in self.children:
             c.traverse(depth + 2)
@@ -69,7 +69,10 @@ class Node(object):
                 total += 1
         return total
 
-    def scan_format(self, index=0, width=0, rowspan={}):
+    def scan_format(self, index=0, width=0, rowspan=None):
+        if rowspan is None:
+            rowspan = {}
+
         format_str = ''
 
         expand_char = 'x' if platform.system() != 'Darwin' else ''
@@ -100,8 +103,13 @@ class Node(object):
                     else:
                         rowspan[i] -= 1
                 else:
-                    format_str += self.children[ci].scan_format(
-                        i, width, rowspan)
+                    # There is a row span, but the current number of column is
+                    # not enough. Pad empty node when this happens.
+                    if ci >= len(self.children):
+                        self.children.append(Node(self, 'td', '', ''))
+
+                    format_str += self.children[ci].scan_format(i, width,
+                                                                rowspan)
                     ci += 1
         else:
             if self.children and self.children[0].name == 'tr':
@@ -117,7 +125,10 @@ class Node(object):
 
         return format_str
 
-    def gen(self, fd, index=0, last=False, rowspan={}):
+    def gen(self, fd, index=0, last=False, rowspan=None):
+        if rowspan is None:
+            rowspan = {}
+
         if self.name == 'table':
             fd.write('.TS\n')
             fd.write('allbox tab(|);\n')
@@ -140,6 +151,11 @@ class Node(object):
                     else:
                         rowspan[i] -= 1
                 else:
+                    # There is a row span, but the current number of column is
+                    # not enough. Pad empty node when this happens.
+                    if ci >= len(self.children):
+                        self.children.append(Node(self, 'td', '', ''))
+
                     self.children[ci].gen(fd, i, i == total - 1, rowspan)
                     ci += 1
         else:
