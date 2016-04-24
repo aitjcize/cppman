@@ -93,6 +93,7 @@ rps = [
     # Remove tags
     (r'<span class="edit.*?">.*?</span> ?', r'', re.S),
     (r'&#91;edit&#93;', r'', re.S),
+    (r'\[edit\]', r'', re.S),
     (r'<div id="siteSub">.*?</div>', r'', 0),
     (r'<div id="contentSub">.*?</div>', r'', 0),
     (r'<table class="toc" id="toc"[^>]*>.*?</table>', r'', re.S),
