@@ -140,7 +140,7 @@ rps = [
 ]
 
 def escape_pre_section(table):
-    """Escape <pre> seciton in table."""
+    """Escape <pre> section in table."""
     def replace_newline(g):
         return g.group(1).replace('\n', '\n.br\n')
 
