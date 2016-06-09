@@ -97,7 +97,7 @@ def get_width():
 
 
 def groff2man(data):
-    """Read groff-formated text and output man pages."""
+    """Read groff-formatted text and output man pages."""
     width = get_width()
 
     cmd = 'groff -t -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)

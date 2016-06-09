@@ -6,7 +6,7 @@ cppman 0.4.8 (April 24th, 2016):
 
 	Bug fixed:
 	* Fix in-vim loading.
-	* Use html5lib instead of html.paser.
+	* Use html5lib instead of html.parser.
 	* Fix table parser for certain situation.
 	* Various bug fixes.
 	* Unify pager script.
