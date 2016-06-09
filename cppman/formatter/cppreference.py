@@ -187,7 +187,7 @@ rps = [
 
 
 def html2groff(data, name):
-    """Convert HTML text from cppreference.com to Groff-formated text."""
+    """Convert HTML text from cppreference.com to Groff-formatted text."""
     # Remove header and footer
     try:
         data = data[data.index('<div id="cpp-content-base">'):]

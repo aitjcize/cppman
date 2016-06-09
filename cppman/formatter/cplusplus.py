@@ -148,7 +148,7 @@ def escape_pre_section(table):
 
 
 def html2groff(data, name):
-    """Convert HTML text from cplusplus.com to Groff-formated text."""
+    """Convert HTML text from cplusplus.com to Groff-formatted text."""
     # Remove sidebar
     try:
         data = data[data.index('<div class="C_doc">'):]
