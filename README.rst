@@ -3,7 +3,7 @@
 .. image:: http://img.shields.io/pypi/v/cppman.svg?style=flat
    :target: https://pypi.python.org/pypi/cppman
 .. image:: http://img.shields.io/pypi/dm/cppman.svg?style=flat
-   :target: https://crate.io/packages/cppman
+   :target: https://pypi.python.org/pypi/cppman#downloads
 
 cppman
 ======
