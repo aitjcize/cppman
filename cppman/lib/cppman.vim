@@ -34,6 +34,7 @@
 " For version 6.x: Quit when a syntax file was already loaded
 
 setl nonu
+setl nornu
 setl iskeyword+=:,=,~,[,],*,!,<,>
 setl keywordprg=cppman
 noremap <buffer> q :q!<CR>
