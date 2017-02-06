@@ -36,7 +36,7 @@
 set nonu
 set iskeyword+=:,=,~,[,],*,!,<,>
 set keywordprg=cppman
-map q :q!<CR>
+noremap <buffer> q :q!<CR>
 
 if version < 600
   syntax clear
@@ -127,12 +127,12 @@ function BackToPrevPage()
   end
 endfunction
 
-map K :call LoadNewPage()<CR>
-map <CR> K
-map <C-]> K
-map <2-LeftMouse> K
+noremap <buffer> K :call LoadNewPage()<CR>
+map <buffer> <CR> K
+map <buffer> <C-]> K
+map <buffer> <2-LeftMouse> K
 
-map <C-T> :call BackToPrevPage()<CR>
-map <RightMouse> <C-T>
+noremap <buffer> <C-T> :call BackToPrevPage()<CR>
+map <buffer> <RightMouse> <C-T>
 
 let b:current_syntax = "man"
