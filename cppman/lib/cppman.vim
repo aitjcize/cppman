@@ -35,6 +35,7 @@
 
 setl nonu
 setl nornu
+setl noma
 setl iskeyword+=:,=,~,[,],*,!,<,>
 setl keywordprg=cppman
 noremap <buffer> q :q!<CR>
@@ -90,9 +91,14 @@ let s:old_col = &co
 echo s:old_col
 
 function s:reload()
+  setl noro
+  setl ma
   echo "Loading..."
   exec "%d"
   exec "0r! cppman --force-columns " . (&co - 2) . " '" . g:page_name . "'"
+  setl ro
+  setl noma
+  setl nomod
 endfunction
 
 function Rerender()
@@ -113,9 +119,12 @@ function LoadNewPage()
   call add(g:stack, [g:page_name, getpos(".")])
   let g:page_name = expand("<cword>")
   setl noro
+  setl ma
   call s:reload()
   normal! gg
   setl ro
+  setl noma
+  setl nomod
 endfunction
 
 function BackToPrevPage()
