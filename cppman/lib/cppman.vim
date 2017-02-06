@@ -33,9 +33,9 @@
 " For version 5.x: Clear all syntax items
 " For version 6.x: Quit when a syntax file was already loaded
 
-set nonu
-set iskeyword+=:,=,~,[,],*,!,<,>
-set keywordprg=cppman
+setl nonu
+setl iskeyword+=:,=,~,[,],*,!,<,>
+setl keywordprg=cppman
 noremap <buffer> q :q!<CR>
 
 if version < 600
@@ -82,8 +82,8 @@ if version >= 508 || !exists("did_man_syn_inits")
 endif
 
 """ Vim Viewer
-set mouse=a
-set colorcolumn=0
+setl mouse=a
+setl colorcolumn=0
 
 let s:old_col = &co
 echo s:old_col
@@ -111,10 +111,10 @@ function LoadNewPage()
   " Save current page to stack
   call add(g:stack, [g:page_name, getpos(".")])
   let g:page_name = expand("<cword>")
-  set noro
+  setl noro
   call s:reload()
   normal! gg
-  set ro
+  setl ro
 endfunction
 
 function BackToPrevPage()
