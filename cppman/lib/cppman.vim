@@ -33,10 +33,12 @@
 " For version 5.x: Clear all syntax items
 " For version 6.x: Quit when a syntax file was already loaded
 
-set nonu
-set iskeyword+=:,=,~,[,],*,!,<,>
-set keywordprg=cppman
-map q :q!<CR>
+setl nonu
+setl nornu
+setl noma
+setl iskeyword+=:,=,~,[,],*,!,<,>
+setl keywordprg=cppman
+noremap <buffer> q :q!<CR>
 
 if version < 600
   syntax clear
@@ -82,16 +84,21 @@ if version >= 508 || !exists("did_man_syn_inits")
 endif
 
 """ Vim Viewer
-set mouse=a
-set colorcolumn=0
+setl mouse=a
+setl colorcolumn=0
 
 let s:old_col = &co
 echo s:old_col
 
 function s:reload()
+  setl noro
+  setl ma
   echo "Loading..."
   exec "%d"
   exec "0r! cppman --force-columns " . (&co - 2) . " '" . g:page_name . "'"
+  setl ro
+  setl noma
+  setl nomod
 endfunction
 
 function Rerender()
@@ -111,10 +118,13 @@ function LoadNewPage()
   " Save current page to stack
   call add(g:stack, [g:page_name, getpos(".")])
   let g:page_name = expand("<cword>")
-  set noro
+  setl noro
+  setl ma
   call s:reload()
   normal! gg
-  set ro
+  setl ro
+  setl noma
+  setl nomod
 endfunction
 
 function BackToPrevPage()
@@ -127,12 +137,12 @@ function BackToPrevPage()
   end
 endfunction
 
-map K :call LoadNewPage()<CR>
-map <CR> K
-map <C-]> K
-map <2-LeftMouse> K
+noremap <buffer> K :call LoadNewPage()<CR>
+map <buffer> <CR> K
+map <buffer> <C-]> K
+map <buffer> <2-LeftMouse> K
 
-map <C-T> :call BackToPrevPage()<CR>
-map <RightMouse> <C-T>
+noremap <buffer> <C-T> :call BackToPrevPage()<CR>
+map <buffer> <RightMouse> <C-T>
 
 let b:current_syntax = "man"
