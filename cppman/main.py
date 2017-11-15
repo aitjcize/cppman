@@ -308,11 +308,11 @@ class Cppman(Crawler):
         pat = re.compile('(%s)' % pattern, re.I)
 
         if selected:
-            for name, url in selected:
+            for name, url, std in selected:
                 if os.isatty(sys.stdout.fileno()):
-                    print(pat.sub(r'\033[1;31m\1\033[0m', name))
+                    print(pat.sub(r'\033[1;31m\1\033[0m', name) + (' \033[1;33m[%s]\033[0m' % std if std else ''))
                 else:
-                    print(name)
+                    print(name + (' [%s]' % std if std else ''))
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
