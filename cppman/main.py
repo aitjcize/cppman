@@ -71,9 +71,9 @@ class Cppman(Crawler):
         self.db_conn = sqlite3.connect(environ.index_db_re)
         self.db_cursor = self.db_conn.cursor()
         self.db_cursor.execute('CREATE TABLE "cplusplus.com" '
-                               '(name VARCHAR(255), url VARCHAR(255))')
+                               '(name VARCHAR(255), url VARCHAR(255), std VARCHAR(255))')
         self.db_cursor.execute('CREATE TABLE "cppreference.com" '
-                               '(name VARCHAR(255), url VARCHAR(255))')
+                               '(name VARCHAR(255), url VARCHAR(255), std VARCHAR(255))')
 
         try:
             self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf|svg)$')
@@ -81,8 +81,8 @@ class Cppman(Crawler):
 
             # cplusplus.com
             self.crawl('http://www.cplusplus.com/reference/')
-            for name, url in self.results:
-                self.insert_index('cplusplus.com', name, url)
+            for name, url, std in self.results:
+                self.insert_index('cplusplus.com', name, url, std)
             self.db_conn.commit()
 
             # Rename duplicate entries
@@ -114,26 +114,27 @@ class Cppman(Crawler):
             self.results = set()
             self.crawl('http://en.cppreference.com/w/cpp', '/w/cpp')
 
-            for name, url in self.results:
-                self.insert_index('cppreference.com', name, url)
+            for name, url, std in self.results:
+                self.insert_index('cppreference.com', name, url, std)
             self.db_conn.commit()
+
         except KeyboardInterrupt:
             os.remove(environ.index_db_re)
             raise KeyboardInterrupt
         finally:
             self.db_conn.close()
 
-    def process_document(self, doc):
+    def process_document(self, doc, std):
         """callback to insert index"""
         if doc.url not in self.blacklist:
-            print("Indexing '%s' ..." % doc.url)
+            print("Indexing '%s' %s..." % (doc.url, std))
             name = self.extract_name(doc.text)
-            self.results.add((name, doc.url))
+            self.results.add((name, doc.url, std))
         else:
             print("Skipping blacklisted page '%s' ..." % doc.url)
             return None
 
-    def insert_index(self, table, name, url):
+    def insert_index(self, table, name, url, std=""):
         """callback to insert index"""
         names = name.split(',')
 
@@ -146,8 +147,8 @@ class Cppman(Crawler):
 
         for n in names:
             self.db_cursor.execute(
-                'INSERT INTO "%s" (name, url) VALUES ("%s", "%s")' %
-                (table, n.strip(), url))
+                'INSERT INTO "%s" (name, url, std) VALUES ("%s", "%s", "%s")' %
+                (table, n.strip(), url, std))
 
     def cache_all(self):
         """Cache all available man pages"""
@@ -297,11 +298,11 @@ class Cppman(Crawler):
         pat = re.compile('(%s)' % pattern, re.I)
 
         if selected:
-            for name, url in selected:
+            for name, url, std in selected:
                 if os.isatty(sys.stdout.fileno()):
-                    print(pat.sub(r'\033[1;31m\1\033[0m', name))
+                    print(pat.sub(r'\033[1;31m\1\033[0m', name) + (' \033[1;33m[%s]\033[0m' % std if std else ''))
                 else:
-                    print(name)
+                    print(name + (' [%s]' % std if std else ''))
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
