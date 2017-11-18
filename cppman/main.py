@@ -146,8 +146,6 @@ class Cppman(Crawler):
                 names = [prefix + n for n in names]
 
         for n in names:
-            print('INSERT INTO "%s" (name, url, std) VALUES ("%s", "%s", "%s")' %
-                (table, n.strip(), url, std))
             self.db_cursor.execute(
                 'INSERT INTO "%s" (name, url, std) VALUES ("%s", "%s", "%s")' %
                 (table, n.strip(), url, std))
