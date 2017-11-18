@@ -61,16 +61,6 @@ class Cppman(Crawler):
         name = re.sub(r'&lt;', r'<', name)
         return name
 
-    def extract_std(self, data):
-        """Extract standard from web page."""
-        std = re.search('<h1[^>]*>(.+?)</h1>', data).group(1)
-        # cplusplus.com
-        if re.search('<span[^>]*cpp11warning[^>]*>', std):
-            std = "c++11"
-        else:
-            std = ""
-        return std
-
     def rebuild_index(self):
         """Rebuild index database from cplusplus.com and cppreference.com."""
         try:
