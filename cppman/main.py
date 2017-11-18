@@ -125,20 +125,20 @@ class Cppman(Crawler):
             self.crawl('http://en.cppreference.com/w/cpp', '/w/cpp')
 
             for name, url, std in self.results:
-                self.insert_index('cppreference.com', name, url)
+                self.insert_index('cppreference.com', name, url, std)
             self.db_conn.commit()
+
         except KeyboardInterrupt:
             os.remove(environ.index_db_re)
             raise KeyboardInterrupt
         finally:
             self.db_conn.close()
 
-    def process_document(self, doc):
+    def process_document(self, doc, std):
         """callback to insert index"""
         if doc.url not in self.blacklist:
-            print("Indexing '%s' ..." % doc.url)
+            print("Indexing '%s' %s..." % (doc.url, std))
             name = self.extract_name(doc.text)
-            std = self.extract_std(doc.text)
             self.results.add((name, doc.url, std))
         else:
             print("Skipping blacklisted page '%s' ..." % doc.url)
@@ -156,6 +156,8 @@ class Cppman(Crawler):
                 names = [prefix + n for n in names]
 
         for n in names:
+            print('INSERT INTO "%s" (name, url, std) VALUES ("%s", "%s", "%s")' %
+                (table, n.strip(), url, std))
             self.db_cursor.execute(
                 'INSERT INTO "%s" (name, url, std) VALUES ("%s", "%s", "%s")' %
                 (table, n.strip(), url, std))

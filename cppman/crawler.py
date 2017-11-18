@@ -50,6 +50,79 @@ class Document(object):
         if sys.version_info >= (3, 0):
             self.text = self.text.decode()
 
+class Link(object):
+    def __init__(self, url, std):
+        self.url = url
+        self.std = std
+
+    def __eq__(self, other):
+        return self.url == other.url
+
+    def __hash__(self):
+        return self.url.__hash__()
+
+class LinkParser(object):
+    def get_unique_links(self, text):
+        self.text = text
+        links = self._find_links()
+        return list(set(links))
+
+class CPlusPlusLinkParser(LinkParser):
+    def _find_links(self):
+        links = []
+        for url, text in re.findall(
+            '''<a[^>]*href\s*=\s*['"]\s*([^'"]+)['"][^>]*>(.+?)</a>''', self.text, re.S):
+            if re.search('''class\s*=\s*['"][^'"]*C_cpp11[^'"]*['"]''', text):
+                links.append(Link(url, "C++11"))
+            else:
+                links.append(Link(url, ""))
+        return links
+
+class CPPReferenceLinkParser(LinkParser):
+    def _find_links(self):
+        processed = {}
+        links = []
+        body = re.search('<[^>]*body[^>]*>(.+?)</body>', self.text, re.S).group(1)
+        """
+        The link follow by the span.t-mark-rev will contained c++xx information.
+        Consider the below case
+          <a href="LinkA">LinkA</a>
+          <a href="LinkB">LinkB</a>
+          <span class="t-mark-rev">(C++11)</span>
+        We're reversing the body so it is easier to write the regex to get the pair of (std, url).
+        """
+        bodyr = body[::-1]
+        href = "href"[::-1]
+        span = "span"[::-1]
+        mark_rev = "t-mark-rev"[::-1]
+        _class = "class"[::-1]
+        for std, url in re.findall(
+            '>' + span + '/<\)([^(<>]*)\(' + '>[^<]*?' +
+            '''['"][^'"]*''' + mark_rev + '''[^'"]*['"]\s*=\s*''' + _class +
+            '[^<]*' + span + '''<.*?['"]([^'"]+)['"]=''' + href
+            , bodyr):
+            std = std[::-1]
+            url = url[::-1]
+            links.append(Link(url, std))
+            processed[url] = True
+
+
+        for url in re.findall('''href\s*=\s*['"]\s*([^'"]+)['"]''', self.text):
+            if url in processed:
+                continue
+            links.append(Link(url, ""))
+            processed[url] = True
+
+        return links
+
+
+def create_link_parser(url):
+    if "cplusplus.com" in url:
+        return CPlusPlusLinkParser()
+    elif "cppreference.com" in url:
+        return CPPReferenceLinkParser()
+    else:
+        return None
 
 class Crawler(object):
     F_ANY, F_SAME_DOMAIN, F_SAME_HOST, F_SAME_PATH = list(range(4))
@@ -92,12 +165,13 @@ class Crawler(object):
     def set_include_hashtag(self, include):
         self.include_hashtag = include
 
-    def process_document(self, doc):
-        print('GET', doc.status, doc.url)
+    def process_document(self, doc, std):
+        print('GET', doc.status, doc.url, std)
         # to do stuff with url depth use self._calc_depth(doc.url)
 
     def crawl(self, url, path=None):
         self.root_url = url
+        self.link_parser = create_link_parser(url)
 
         rx = re.match('(https?://)([^/]+)([^\?]*)(\?.*)?', url)
         self.proto = rx.group(1)
@@ -109,7 +183,7 @@ class Crawler(object):
         if path:
             self.dir_path = path
 
-        self.targets.add(url)
+        self.targets.add((url, ""))
         self._spawn_new_worker()
 
         while self.threads:
@@ -183,7 +257,7 @@ class Crawler(object):
         return len(url.replace('https', 'http').replace(
             self.root_url, '').rstrip('/').split('/')) - 1
 
-    def _add_target(self, target):
+    def _add_target(self, target, std = ""):
         if not target:
             return
 
@@ -193,7 +267,7 @@ class Crawler(object):
         with self.targets_lock:
           if target in self.visited:
               return
-          self.targets.add(target)
+          self.targets.add((target, std))
 
     def _spawn_new_worker(self):
         with self.concurrency_lock:
@@ -207,7 +281,7 @@ class Crawler(object):
         while self.targets:
             try:
                 with self.targets_lock:
-                  url = self.targets.pop()
+                  (url, std) = self.targets.pop()
                   self.visited[url] = True
 
                 rx = re.match('(https?)://([^/]+)(.*)', url)
@@ -241,16 +315,15 @@ class Crawler(object):
                     continue
 
                 doc = Document(res, url)
-                self.process_document(doc)
+                self.process_document(doc, std)
 
                 # Make unique list
-                links = re.findall(
-                    '''href\s*=\s*['"]\s*([^'"]+)['"]''', doc.text, re.S)
-                links = list(set(links))
+                links = self.link_parser.get_unique_links(doc.text)
+
 
                 for link in links:
-                    rlink = self._follow_link(url, link.strip())
-                    self._add_target(rlink)
+                    rlink = self._follow_link(url, link.url.strip())
+                    self._add_target(rlink, link.std)
 
                 if self.concurrency < self.max_outstanding:
                     self._spawn_new_worker()
@@ -259,7 +332,7 @@ class Crawler(object):
                 break
             except (httplib.HTTPException, EnvironmentError):
                 with self.targets_lock:
-                  self.targets.add(url)
+                  self.targets.add((url, ""))
 
         with self.concurrency_lock:
           self.concurrency -= 1
