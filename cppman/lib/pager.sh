@@ -58,9 +58,19 @@ remove_escape() {
     sed "s/$escape\[[^m]*m//g" | col -x -b
 }
 
+
+if [ "$pager_type" = "nvim" ]; then
+  if ! which nvim >/dev/null 2>&1; then
+    pager_type=vim
+  fi
+fi
 if [ "$pager_type" = "vim" ]; then
   if ! which vim >/dev/null 2>&1; then
-    pager_type=less
+    if ! which nvim >/dev/null 2>&1; then
+      pager_type=nvim
+    else
+      pager_type=less
+    fi
   fi
 fi
 
@@ -69,9 +79,9 @@ case $pager_type in
     [ -z "$PAGER" ] && PAGER=less
     render | $PAGER
     ;;
-  vim)
+  vim|nvim)
     render | remove_escape | \
-      vim -R -c "let g:page_name=\"$page_name\"" -S $vim_config -
+      "$pager_type" -R -c "let g:page_name=\"$page_name\"" -S $vim_config -
     ;;
   less)
     render | less
