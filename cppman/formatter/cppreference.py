@@ -22,10 +22,14 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+from __future__ import print_function
 import datetime
 import re
 import string
-import urllib.request
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib import urlopen
 
 from functools import partial
 
@@ -309,7 +313,7 @@ def html2groff(data, name):
 
 def func_test():
     """Test if there is major format changes in cplusplus.com"""
-    ifs = urllib.request.urlopen('http://en.cppreference.com/w/cpp/container/vector')
+    ifs = urlopen('http://en.cppreference.com/w/cpp/container/vector')
     result = html2groff(fixupHTML(ifs.read()), 'std::vector')
     assert '.SH "NAME"' in result
     assert '.SH "SYNOPSIS"' in result
@@ -318,7 +322,7 @@ def func_test():
 
 def test():
     """Simple Text"""
-    ifs = urllib.request.urlopen('http://en.cppreference.com/w/cpp/container/vector')
+    ifs = urlopen('http://en.cppreference.com/w/cpp/container/vector')
     print(html2groff(fixupHTML(ifs.read()), 'std::vector'), end=' ')
     #with open('test.html') as ifs:
     #    data = fixupHTML(ifs.read())

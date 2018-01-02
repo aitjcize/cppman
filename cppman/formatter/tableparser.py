@@ -22,7 +22,11 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import io
+import sys
+if sys.version_info[0] > 2:
+    from io import StringIO
+else:
+    from io import BytesIO as StringIO
 import platform
 import re
 
@@ -173,6 +177,6 @@ class Node(object):
 
 def parse_table(html):
     root = Node(None, 'root', '', html)
-    fd = io.StringIO()
+    fd = StringIO()
     root.gen(fd)
     return fd.getvalue()

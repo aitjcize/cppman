@@ -30,7 +30,10 @@ import shutil
 import sqlite3
 import subprocess
 import sys
-import urllib.request
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib import urlopen
 
 from cppman import environ
 from cppman import util
@@ -217,7 +220,7 @@ class Cppman(Crawler):
 
         # There are often some errors in the HTML, for example: missing closing
         # tag. We use fixupHTML to fix this.
-        data = util.fixupHTML(urllib.request.urlopen(url).read())
+        data = util.fixupHTML(urlopen(url).read())
 
         formatter = importlib.import_module('cppman.formatter.%s' % source[:-4])
         groff_text = formatter.html2groff(data, name)
