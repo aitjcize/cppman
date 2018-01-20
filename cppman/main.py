@@ -152,14 +152,15 @@ class Cppman(Crawler):
 
     def cache_all(self):
         """Cache all available man pages"""
-        print('By default, cppman fetches pages on-the-fly if corresponding '
+
+        respond = input(
+              'By default, cppman fetches pages on-the-fly if corresponding '
               'page is not found in the cache. The "cache-all" option is only '
               'useful if you want to view man pages offline. '
               'Caching all contents will take several minutes, '
-              'do you want to continue [y/N]?')
-
-        respond = input()
-        if respond.lower() not in ['y', 'ye', 'yes']:
+              'do you want to continue [y/N]?'
+              '\n')
+        if not (respond and 'yes'.startswith(respond.lower())):
             raise KeyboardInterrupt
 
         try:
@@ -181,8 +182,8 @@ class Cppman(Crawler):
         data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
         for name, url in data:
-            retries = 3
             print('Caching %s ...' % name)
+            retries = 3
             while retries > 0:
                 try:
                     self.cache_man_page(source, url, name)
@@ -190,13 +191,12 @@ class Cppman(Crawler):
                     print('Retrying ...')
                     retries -= 1
                 else:
+                    self.success_count += 1
                     break
-
-            if retries == 0:
+            else:
                 print('Error caching %s ...' % name)
                 self.failure_count += 1
-            else:
-                self.success_count += 1
+                
         conn.close()
 
         print('\n%d manual pages cached successfully.' % self.success_count)
