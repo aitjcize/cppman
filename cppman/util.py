@@ -55,11 +55,7 @@ def update_mandb_path():
                 lines.append('MANDATORY_MANPATH\t%s\n' %
                              os.path.normpath(os.path.join(HOME, manpath)))
         else:
-            new_lines = []
-            for line in lines:
-                if manpath not in line:
-                    new_lines.append(line)
-            lines = new_lines
+            lines = [line for line in lines if manpath not in line]
 
         f.writelines(lines)
 
@@ -90,9 +86,7 @@ def get_width():
     ws = struct.pack("HHHH", 0, 0, 0, 0)
     ws = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, ws)
     lines, columns, x, y = struct.unpack("HHHH", ws)
-    width = int(columns * 39 / 40)
-    if width >= columns - 2:
-        width = columns - 2
+    width = min(int(columns * 39 / 40), columns - 2)
     return width
 
 
