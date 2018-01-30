@@ -86,7 +86,7 @@ def get_width():
     ws = struct.pack("HHHH", 0, 0, 0, 0)
     ws = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, ws)
     lines, columns, x, y = struct.unpack("HHHH", ws)
-    width = min(int(columns * 39 / 40), columns - 2)
+    width = min(columns * 39 // 40, columns - 2)
     return width
 
 
