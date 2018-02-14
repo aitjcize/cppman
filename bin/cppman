@@ -139,12 +139,10 @@ def main():
             sys.exit(0)
 
     if options.mandb:
-        if options.mandb != 'true' and options.mandb != 'false':
+        if options.mandb not in ('true', 'false'):
             raise Exception("invalid value `%s' for option `--use-mandb'" %
                             options.mandb)
-        value = config.parse_bool(options.mandb)
-        if config.UpdateManPath ^ value:
-            config.UpdateManPath = value
+        config.UpdateManPath = config.parse_bool(options.mandb)
         if config.UpdateManPath:
             update_mandb_path()
             update_man3_link()
@@ -155,13 +153,14 @@ def main():
         cm.rebuild_index()
         sys.exit(0)
 
-    if len(args) == 0:
+    if not args:
         sys.stderr.write('What manual page do you want?\n')
         sys.exit(1)
 
     cm = Cppman(options.force, options.force_columns)
+    first = True
     for i in args:
-        if i != args[0]:
+        if not first:
             print('--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '
                   '| quit (Ctrl-C) ]' % i)
             # For some reason, if only one layer of try...except is used
@@ -180,6 +179,8 @@ def main():
             except KeyboardInterrupt:
                 print('\n')
                 break
+        first = False
+
         try:
             pid = cm.man(i)
         except RuntimeError as e:
