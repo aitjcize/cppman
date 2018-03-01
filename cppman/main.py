@@ -158,8 +158,7 @@ class Cppman(Crawler):
               'page is not found in the cache. The "cache-all" option is only '
               'useful if you want to view man pages offline. '
               'Caching all contents will take several minutes, '
-              'do you want to continue [y/N]?'
-              '\n')
+              'do you want to continue [y/N]? ')
         if not (respond and 'yes'.startswith(respond.lower())):
             raise KeyboardInterrupt
 
