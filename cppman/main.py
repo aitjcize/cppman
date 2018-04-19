@@ -180,7 +180,7 @@ class Cppman(Crawler):
         print('Caching manpages from %s ...' % source)
         data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
 
-        for name, url in data:
+        for name, url, _ in data:
             print('Caching %s ...' % name)
             retries = 3
             while retries > 0:
