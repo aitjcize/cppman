@@ -187,7 +187,7 @@ class Cppman(Crawler):
                 try:
                     self.cache_man_page(source, url, name)
                 except Exception as exc:
-                    print('Encountered exception: ' + str(exc));
+                    print('Encountered exception: ' + str(exc))
                     print('\tRetrying ...')
                     retries -= 1
                 else:
