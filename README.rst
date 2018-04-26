@@ -71,7 +71,7 @@ Package Maintainers
 FAQ
 ---
 * Q: Can I use the system ``man`` command instead of ``cppman``?
-* A: Yes, just execute ``cppman -m true`` and all cached man pages are exposed to the system ``man`` command.  Note: You may want to download all available man pages with ``cppman -c``.
+* A: Yes, just execute ``cppman -m true`` and all cached man pages are exposed to the system ``man`` command.  Note: You may want to download all available man pages with ``sudo cppman -c``.
 
 Bugs
 ----
