@@ -33,7 +33,7 @@ get_dev_type() {
   local dev=ascii
   local var
   for var in $LC_ALL $LANG; do
-    if [ -n "`printf "%s" "${var}" | sed 's/-//g' | grep -i utf8`" ]; then
+    if [ -n "$(printf "%s" "${var}" | sed 's/-//g' | grep -i utf8)" ]; then
       dev=utf8
       break
     fi
