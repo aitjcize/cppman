@@ -30,7 +30,8 @@
 #   $5: page name
 
 get_dev_type() {
-  dev=ascii
+  local dev=ascii
+  local var
   for var in $LC_ALL $LANG; do
     if [ -n "`printf "%s" "${var}" | sed 's/-//g' | grep -i utf8`" ]; then
       dev=utf8
@@ -54,7 +55,7 @@ render() {
 }
 
 remove_escape() {
-    escape=$(printf '\033')
+    local escape=$(printf '\033')
     sed "s/$escape\[[^m]*m//g" | col -x -b
 }
 
