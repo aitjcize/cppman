@@ -136,7 +136,7 @@ rps = [
     (r'\n\s*\n+', r'\n', 0),
     (r'\n\n+', r'\n', 0),
     # Preserve \n" in EXAMPLE
-    (r'\\n', r'\en', 0),
+    (r'\\n', r'\\en', 0),
 ]
 
 def escape_pre_section(table):
@@ -162,7 +162,7 @@ def html2groff(data, name):
     for table in re.findall(r'<table.*?>.*?</table>', data, re.S):
         tbl = parse_table(escape_pre_section(table))
         # Escape column with '.' as prefix
-        tbl = re.compile(r'T{\n(\..*?)\nT}', re.S).sub(r'T{\n\E \1\nT}', tbl)
+        tbl = re.compile(r'T{\n(\..*?)\nT}', re.S).sub(r'T{\n\\E \1\nT}', tbl)
         data = data.replace(table, tbl)
 
     # Replace all
