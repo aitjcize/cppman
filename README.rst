@@ -2,7 +2,7 @@
    :target: https://travis-ci.org/aitjcize/cppman
 .. image:: http://img.shields.io/pypi/v/cppman.svg?style=flat
    :target: https://pypi.python.org/pypi/cppman
-.. image:: http://img.shields.io/pypi/dm/cppman.svg?style=flat
+.. image::  https://img.shields.io/github/downloads/aitjcize/cppman/total.svg
    :target: https://pypi.python.org/pypi/cppman#downloads
 
 cppman
