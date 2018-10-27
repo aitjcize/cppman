@@ -195,7 +195,7 @@ class Cppman(Crawler):
             else:
                 print('Error caching %s ...' % name)
                 self.failure_count += 1
-                
+
         conn.close()
 
         print('\n%d manual pages cached successfully.' % self.success_count)
@@ -299,7 +299,8 @@ class Cppman(Crawler):
         if selected:
             for name, url, std in selected:
                 if os.isatty(sys.stdout.fileno()):
-                    print(pat.sub(r'\033[1;31m\1\033[0m', name) + (' \033[1;33m[%s]\033[0m' % std if std else ''))
+                    print(pat.sub(r'\033[1;31m\1\033[0m', name) +
+                          (' \033[1;33m[%s]\033[0m' % std if std else ''))
                 else:
                     print(name + (' [%s]' % std if std else ''))
         else:
