@@ -36,7 +36,7 @@ from cppman.formatter.tableparser import parse_table
 def member_table_def(g):
     tbl = parse_table('<table>%s</table>' % str(g.group(3)))
     # Escape column with '.' as prefix
-    tbl = re.compile(r'T{\n(\..*?)\nT}', re.S).sub(r'T{\n\E \1\nT}', tbl)
+    tbl = re.compile(r'T{\n(\..*?)\nT}', re.S).sub(r'T{\n\\E \1\nT}', tbl)
     return '\n.IP "%s"\n%s\n%s\n' % (g.group(1), g.group(2), tbl)
 
 
@@ -172,7 +172,7 @@ rps = [
     (r'\n\s*\n+', r'\n', 0),
     (r'\n\n+', r'\n', 0),
     # Preserve \n" in EXAMPLE
-    (r'\\n', r'\en', 0),
+    (r'\\n', r'\\en', 0),
     # Remove leading whitespace
     (r'^\s+', r'', re.S),
     # Trailing white-spaces
@@ -203,7 +203,7 @@ def html2groff(data, name):
             data, re.S):
         tbl = parse_table(table)
         # Escape column with '.' as prefix
-        tbl = re.compile(r'T{\n(\..*?)\nT}', re.S).sub(r'T{\n\E \1\nT}', tbl)
+        tbl = re.compile(r'T{\n(\..*?)\nT}', re.S).sub(r'T{\n\\E \1\nT}', tbl)
         data = data.replace(table, tbl)
 
     # Pre replace all
