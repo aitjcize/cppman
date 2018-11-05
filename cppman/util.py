@@ -35,33 +35,33 @@ import bs4
 
 
 def update_mandb_path():
-    """Add ~/.local/share/man to $HOME/.manpath"""
-    HOME = os.path.expanduser('~')
-    manpath_file = os.path.normpath(os.path.join(HOME, '.manpath'))
-    manpath = '.local/share/man'
+    """Add $XDG_CACHE_HOME/cppman/man to $HOME/.manpath"""
+    manpath_file = os.path.join(environ.HOME, ".manpath")
+    man_dir      = environ.cache_dir
+    manindex_dir = environ.manindex_dirl
+
     lines = []
+
+    """ read all lines """
     try:
         with open(manpath_file, 'r') as f:
             lines = f.readlines()
     except IOError:
-        if not environ.config.UpdateManPath:
-            return
+        return
 
-    has_path = any([manpath in l for l in lines])
+    """ remove MANDATORY_MANPATH and MANDB_MAP entry """
+    lines = [line for line in lines if man_dir not in line]
 
     with open(manpath_file, 'w') as f:
         if environ.config.UpdateManPath:
-            if not has_path:
-                lines.append('MANDATORY_MANPATH\t%s\n' %
-                             os.path.normpath(os.path.join(HOME, manpath)))
-        else:
-            lines = [line for line in lines if manpath not in line]
+            lines.append('MANDATORY_MANPATH\t%s\n' % man_dir)
+            lines.append('MANDB_MAP\t\t\t%s\t%s\n' % (man_dir, manindex_dir))
 
         f.writelines(lines)
 
 
 def update_man3_link():
-    man3_path = os.path.join(environ.man_dir, 'man3')
+    man3_path = os.path.join(environ.cache_dir, 'man3')
 
     if os.path.lexists(man3_path):
         if os.path.islink(man3_path):
@@ -73,7 +73,7 @@ def update_man3_link():
             raise RuntimeError("Can't create link since `%s' already exists" %
                                man3_path)
     try:
-        os.makedirs(os.path.join(environ.man_dir, environ.config.Source))
+        os.makedirs(os.path.join(environ.cache_dir, environ.config.Source))
     except Exception:
         pass
 

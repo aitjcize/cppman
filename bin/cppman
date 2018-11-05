@@ -124,8 +124,7 @@ def main():
                             options.source)
         else:
             config.Source = options.source
-            if config.UpdateManPath:
-                update_man3_link()
+            update_man3_link()
             print("Source set to `%s'." % options.source)
             sys.exit(0)
 
@@ -143,9 +142,8 @@ def main():
             raise Exception("invalid value `%s' for option `--use-mandb'" %
                             options.mandb)
         config.UpdateManPath = config.parse_bool(options.mandb)
-        if config.UpdateManPath:
-            update_mandb_path()
-            update_man3_link()
+        update_mandb_path()
+        update_man3_link()
         sys.exit(0)
 
     if options.rebuild_index:

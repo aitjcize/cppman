@@ -163,7 +163,7 @@ class Cppman(Crawler):
             raise KeyboardInterrupt
 
         try:
-            os.makedirs(environ.man_dir)
+            os.makedirs(environ.cache_dir)
         except:
             pass
 
@@ -210,7 +210,7 @@ class Cppman(Crawler):
             return
 
         try:
-            os.makedirs(os.path.join(environ.man_dir, source))
+            os.makedirs(os.path.join(environ.cache_dir, source))
         except OSError:
             pass
 
@@ -225,13 +225,13 @@ class Cppman(Crawler):
             f.write(groff_text.encode('utf-8'))
 
     def clear_cache(self):
-        """Clear all cache in man3"""
-        shutil.rmtree(environ.man_dir)
+        """Clear all cache in man"""
+        shutil.rmtree(environ.cache_dir)
 
     def man(self, pattern):
         """Call viewer.sh to view man page"""
         try:
-            avail = os.listdir(os.path.join(environ.man_dir, environ.source))
+            avail = os.listdir(os.path.join(environ.cache_dir, environ.source))
         except OSError:
             avail = []
 
@@ -319,4 +319,4 @@ class Cppman(Crawler):
 
     def get_page_path(self, source, name):
         name = self.get_normalized_page_name(name)
-        return os.path.join(environ.man_dir, source, name + '.3.gz')
+        return os.path.join(environ.cache_dir, source, name + '.3.gz')
