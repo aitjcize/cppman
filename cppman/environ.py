@@ -27,20 +27,27 @@ import os
 from cppman import get_lib_path
 from cppman.config import Config
 
-HOME = os.path.expanduser('~')
+HOME = os.environ["HOME"];
 
-man_dir = HOME + '/.local/share/man/'
-config_dir = HOME + '/.config/cppman/'
-config_file = config_dir + 'cppman.cfg'
+XDG_CACHE_HOME  = os.getenv("XDG_CACHE_HOME", os.path.join(HOME, ".cache"))
+XDG_CONFIG_HOME = os.getenv("XDG_CONFIG_HOME", os.path.join(HOME, ".config"))
+
+cache_dir   = os.path.join(XDG_CACHE_HOME, 'cppman')
+manindex_dir = os.path.join(cache_dir, 'manindex')
+config_dir  = os.path.join(XDG_CONFIG_HOME, 'cppman')
+config_file = os.path.join(config_dir, 'cppman.cfg')
 
 config = Config(config_file)
 
 try:
+    os.makedirs(cache_dir)
+    os.makedirs(manindex_dir)
     os.makedirs(config_dir)
+    update_man3_link()
 except:
     pass
 
-index_db_re = os.path.normpath(os.path.join(config_dir, 'index.db'))
+index_db_re = os.path.join(cache_dir, 'index.db')
 
 index_db = index_db_re if os.path.exists(index_db_re) \
     else get_lib_path('index.db')
