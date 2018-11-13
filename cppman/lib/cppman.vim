@@ -38,6 +38,7 @@ setl nornu
 setl noma
 setl iskeyword+=:,=,~,[,],*,!,<,>
 setl keywordprg=cppman
+setl buftype=nofile
 noremap <buffer> q :q!<CR>
 
 if version < 600
