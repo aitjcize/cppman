@@ -7,7 +7,7 @@
 
 cppman
 ======
-C++ 98/11/14 manual pages for Linux, with source from `cplusplus.com <http://cplusplus.com/>`_ and `cppreference.com <http://cppreference.com/>`_.
+C++ 98/11/14/17/20 manual pages for Linux, with source from `cplusplus.com <http://cplusplus.com/>`_ and `cppreference.com <https://cppreference.com/>`_.
 
 .. image:: https://raw.github.com/aitjcize/cppman/master/wiki/screenshot.png
 
