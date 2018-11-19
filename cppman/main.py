@@ -112,7 +112,7 @@ class Cppman(Crawler):
 
             # cppreference.com
             self.results = set()
-            self.crawl('http://en.cppreference.com/w/cpp', '/w/cpp')
+            self.crawl('https://en.cppreference.com/w/cpp', '/w/cpp')
 
             for name, url, std in self.results:
                 self.insert_index('cppreference.com', name, url, std)
