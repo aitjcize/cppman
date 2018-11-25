@@ -11,5 +11,5 @@ Architecture: all
 XB-Python-Version: ${python:Versions}
 Depends: ${python:Depends}, vim, groff
 Description: C++ man pages generator
- cppman generates C++ manual pages from cplusplus.com and provide a man-like
+ cppman generates C++ manual pages from cplusplus.com or cppreference.com and provide a man-like
  interface to view man pages.

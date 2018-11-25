@@ -100,7 +100,7 @@ rps = [
     (r'<h2[^>]*>.*?</h2>', r'', re.S),
     (r'<div class="coliru-btn coliru-btn-run-init">.*?</div>', r'', re.S),
     (r'<tr class="t-dsc-hitem">.*?</tr>', r'', re.S),
-    # C++11/14
+    # C++11/14/17/20
     (r'\(((?:since|until) C\+\+\d+)\)', r' [\1]', re.S),
     (r'\((C\+\+\d+)\)', r' [\1]', re.S),
     # Subsections
