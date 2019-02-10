@@ -157,6 +157,7 @@ def main():
 
     cm = Cppman(options.force, options.force_columns)
     first = True
+    failure = False
     for i in args:
         if not first:
             print('--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '
@@ -183,9 +184,12 @@ def main():
             pid = cm.man(i)
         except RuntimeError as e:
             print(e)
+            failure = True
             continue
         else:
             os.waitpid(pid, 0)
+    if failure:
+      sys.exit(1)
 
 if __name__ == '__main__':
     try:
