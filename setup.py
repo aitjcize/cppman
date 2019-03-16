@@ -15,7 +15,7 @@ _data_files = [
 
 setup(
         name = 'cppman',
-        version = '0.4.9',
+        version = '0.5.0',
         description = 'C++ 98/11/14/17/20 manual pages for Linux/MacOS',
         author = 'Wei-Ning Huang (AZ)',
         author_email = 'aitjcize@gmail.com',
