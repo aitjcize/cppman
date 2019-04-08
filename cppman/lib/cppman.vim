@@ -89,7 +89,6 @@ setl mouse=a
 setl colorcolumn=0
 
 let s:old_col = &co
-echo s:old_col
 
 function s:reload()
   setl noro

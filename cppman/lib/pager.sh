@@ -71,8 +71,10 @@ case $pager_type in
     render | $PAGER
     ;;
   vim)
-    render | remove_escape | \
-      vim -R -c "let g:page_name=\"$page_name\"" -S $vim_config -
+
+    render | remove_escape 3<&- | {
+      vim -R -c "let g:page_name=\"$page_name\"" -S $vim_config /dev/fd/3 </dev/tty
+    } 3<&0
     ;;
   less)
     render | less
