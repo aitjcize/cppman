@@ -134,21 +134,72 @@ class Cppman(Crawler):
             print("Skipping blacklisted page '%s' ..." % doc.url)
             return None
 
+    def parse_expression(self, expr):
+        """
+            split expression into prefix and expression
+            tested with
+            ```
+            operator==
+            !=
+            std::rel_ops::operator!=
+            std::atomic::operator=
+            std::array::operator[]
+            std::function::operator()
+            std::vector::at
+            std::relational operators
+            std::vector::begin
+            std::abs(float)
+            std::fabs()
+            ```
+        """
+        m = re.match(r'^(.*?(?:::)?(?:operator)?)((?:::[^:]*|[^:]*)?)$', expr);
+        prefix = m.group(1)
+        tail = m.group(2)
+        return [prefix, tail]
+
+    def parse_title(self, title):
+        """
+             split of the last parenthesis  operator==,!=,<,<=(std::vector)
+             tested with
+            ```
+              operator==,!=,<,<=,>,>=(std::vector)  
+            operator==,!=,<,<=,>,>=(std::vector)
+              operator==,!=,<,<=,>,>= 
+            operator==,!=,<,<=,>,>=
+              std::rel_ops::operator!=,>,<=,>=  
+            std::atomic::operator= 
+            std::array::operator[]  
+             std::function::operator() 
+             std::vector::at
+            std::relational operators (vector)
+            std::vector::begin, std::vector::cbegin
+            std::abs(float), std::fabs
+            std::unordered_set::begin(size_type), std::unordered_set::cbegin(size_type)
+            ```
+        """
+        m = re.match(r'^\s*((?:\(size_type\)|(?:.|\(\))*?)*)((?:\([^)]+\))?)\s*$', title)
+        postfix = m.group(2)
+
+        t_names = m.group(1).split(',')
+        t_names = [n.strip() for n in t_names]
+        prefix = self.parse_expression(t_names[0])[0]
+        names = []
+        for n in t_names:
+            r = self.parse_expression(n);
+            if prefix == r[0]:
+                names.append(n + postfix)
+            else:
+                names.append(prefix + r[1] + postfix)
+        return names
+
     def insert_index(self, table, name, url, std=""):
         """callback to insert index"""
-        names = name.split(',')
-
-        if len(names) > 1:
-            m = re.match(r'^\s*(.*?::(?:operator)?)([^:]*)\s*$', names[0])
-            if m:
-                prefix = m.group(1)
-                names[0] = m.group(2)
-                names = [prefix + n for n in names]
+        names = self.parse_title(name);
 
         for n in names:
             self.db_cursor.execute(
-                'INSERT INTO "%s" (name, url, std) VALUES ("%s", "%s", "%s")' %
-                (table, n.strip(), url, std))
+                'INSERT INTO "%s" (name, url, std) VALUES (?, ?, ?)' % table, (
+                n, url, std))
 
     def cache_all(self):
         """Cache all available man pages"""
