@@ -72,6 +72,8 @@ FAQ
 ---
 * Q: Can I use the system ``man`` command instead of ``cppman``?
 * A: Yes, just execute ``cppman -m true`` and all cached man pages are exposed to the system ``man`` command.  Note: You may want to download all available man pages with ``cppman -c``.
+* Q: Why is bash completion is not working properly with "::"?
+* A: It is because bash treats ':' like a white space. To fix this add `export COMP_WORDBREAKS=" /\"\'><;|&("` to your `~/.bashrc`.
 
 Bugs
 ----
