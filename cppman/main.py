@@ -345,7 +345,7 @@ class Cppman(Crawler):
             'LIKE "%%%s%%" ORDER BY LENGTH(name)'
             % (environ.source, pattern)).fetchall()
 
-        pat = re.compile('(%s)' % pattern, re.I)
+        pat = re.compile('(%s)' % re.escape(pattern), re.I)
 
         if selected:
             for name, url, std in selected:
