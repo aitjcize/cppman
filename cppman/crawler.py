@@ -129,7 +129,7 @@ class Crawler(object):
 
     def __init__(self):
         self.host = None
-        self.visited = {}
+        self.queued  = set()
         self.targets = set()
         self.threads = []
         self.concurrency = 0
@@ -257,17 +257,18 @@ class Crawler(object):
         return len(url.replace('https', 'http').replace(
             self.root_url, '').rstrip('/').split('/')) - 1
 
-    def _add_target(self, target, std = ""):
-        if not target:
+    def _add_target(self, url, std = ""):
+        if not url:
             return
 
-        if self.max_depth and self._calc_depth(target) > self.max_depth:
+        if self.max_depth and self._calc_depth(url) > self.max_depth:
             return
 
         with self.targets_lock:
-          if target in self.visited:
+          if url in self.queued:
               return
-          self.targets.add((target, std))
+          self.queued.add(url)
+          self.targets.add((url, std))
 
     def _spawn_new_worker(self):
         with self.concurrency_lock:
@@ -282,7 +283,6 @@ class Crawler(object):
             try:
                 with self.targets_lock:
                   (url, std) = self.targets.pop()
-                  self.visited[url] = True
 
                 rx = re.match('(https?)://([^/]+)(.*)', url)
                 protocol = rx.group(1)
