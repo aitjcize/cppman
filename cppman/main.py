@@ -124,10 +124,10 @@ class Cppman(Crawler):
         finally:
             self.db_conn.close()
 
-    def process_document(self, doc, std):
+    def process_document(self, doc, depth, std):
         """callback to insert index"""
         if doc.url not in self.blacklist:
-            print("Indexing '%s' %s..." % (doc.url, std))
+            print("Indexing '%s' %s (depth %s)..." % (doc.url, std, depth))
             name = self.extract_name(doc.text)
             self.results.add((name, doc.url, std))
         else:

@@ -167,7 +167,6 @@ class Crawler(object):
 
     def process_document(self, doc, std):
         print('GET', doc.status, doc.url, std)
-        # to do stuff with url depth use self._calc_depth(doc.url)
 
     def crawl(self, url, path=None):
         self.root_url = url
@@ -183,7 +182,7 @@ class Crawler(object):
         if path:
             self.dir_path = path
 
-        self.targets.add((url, ""))
+        self._add_target(url, 1, "")
         self._spawn_new_worker()
 
         while self.threads:
@@ -249,26 +248,27 @@ class Crawler(object):
             if self.host == link_host and \
                     link_dir_path.startswith(self.dir_path):
                 return link_url
+            elif "localhost" in link_host and len(link_dir_path) > 0 and \
+                    (link_dir_path[0] != '/' or link_dir_path.startswith(self.dir_path)):
+                return link_url
+#            elif "localhost" in link_host and link_dir_path.startswith(self.dir_path):
+#                return link_url
             else:
+#                print('skipped "%s" "%s" "%s"' % (link_dir_path, self.dir_path, link_url))
                 return None
 
-    def _calc_depth(self, url):
-        # calculate url depth
-        return len(url.replace('https', 'http').replace(
-            self.root_url, '').rstrip('/').split('/')) - 1
-
-    def _add_target(self, url, std = ""):
+    def _add_target(self, url, depth, std = ""):
         if not url:
             return
 
-        if self.max_depth and self._calc_depth(url) > self.max_depth:
+        if self.max_depth and depth > self.max_depth:
             return
 
         with self.targets_lock:
           if url in self.queued:
               return
           self.queued.add(url)
-          self.targets.add((url, std))
+          self.targets.add((depth, url, std))
 
     def _spawn_new_worker(self):
         with self.concurrency_lock:
@@ -282,7 +282,8 @@ class Crawler(object):
         while self.targets:
             try:
                 with self.targets_lock:
-                  (url, std) = self.targets.pop()
+                  (depth, url, std) = sorted(self.targets)[0]
+                  self.targets.remove((depth, url, std))
 
                 rx = re.match('(https?)://([^/]+)(.*)', url)
                 protocol = rx.group(1)
@@ -302,7 +303,7 @@ class Crawler(object):
 
                 if res.status == 301 or res.status == 302:
                     rlink = self._follow_link(url, res.getheader('location'))
-                    self._add_target(rlink)
+                    self._add_target(rlink, depth+1)
                     continue
 
                 # Check content type
@@ -315,7 +316,7 @@ class Crawler(object):
                     continue
 
                 doc = Document(res, url)
-                self.process_document(doc, std)
+                self.process_document(doc, depth, std)
 
                 # Make unique list
                 links = self.link_parser.get_unique_links(doc.text)
@@ -323,7 +324,7 @@ class Crawler(object):
 
                 for link in links:
                     rlink = self._follow_link(url, link.url.strip())
-                    self._add_target(rlink, link.std)
+                    self._add_target(rlink, depth+1, link.std)
 
                 if self.concurrency < self.max_outstanding:
                     self._spawn_new_worker()
@@ -332,7 +333,7 @@ class Crawler(object):
                 break
             except (httplib.HTTPException, EnvironmentError):
                 with self.targets_lock:
-                  self.targets.add((url, ""))
+                  self._add_target(url, depth+1, "")
 
         with self.concurrency_lock:
           self.concurrency -= 1
