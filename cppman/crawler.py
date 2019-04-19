@@ -33,10 +33,10 @@ from threading import Thread, Lock
 if sys.version_info < (3, 0):
     import httplib
 
-    from urllib import quote
+    from urllib import quote, urlparse, urlunparse, urljoin
 else:
     import http.client as httplib
-    from urllib.parse import quote
+    from urllib.parse import quote, urlparse, urlunparse, urljoin
 
 
 class Document(object):
@@ -125,18 +125,15 @@ def create_link_parser(url):
         return None
 
 class Crawler(object):
-    F_ANY, F_SAME_DOMAIN, F_SAME_HOST, F_SAME_PATH = list(range(4))
+    F_ANY, F_SAME_HOST, F_SAME_PATH = list(range(3))
 
     def __init__(self):
-        self.host = None
         self.queued  = set()
         self.targets = set()
         self.threads = []
         self.concurrency = 0
         self.max_outstanding = 16
         self.max_depth = 0
-        self.include_hashtag = False
-
         self.follow_mode = self.F_SAME_HOST
         self.content_type_filter = '(text/html)'
         self.url_filters = []
@@ -152,8 +149,8 @@ class Crawler(object):
         self.url_filters.append(uf)
 
     def set_follow_mode(self, mode):
-        if mode > 5:
-            raise RuntimeError('invalid follow mode.')
+        if mode > 2:
+            raise RuntimeError('invalid follow mode %s.' % mode)
         self.follow_mode = mode
 
     def set_concurrency_level(self, level):
@@ -162,25 +159,13 @@ class Crawler(object):
     def set_max_depth(self, max_depth):
         self.max_depth = max_depth
 
-    def set_include_hashtag(self, include):
-        self.include_hashtag = include
-
-    def process_document(self, doc, std):
-        print('GET', doc.status, doc.url, std)
-
     def crawl(self, url, path=None):
-        self.root_url = url
         self.link_parser = create_link_parser(url)
 
-        rx = re.match('(https?://)([^/]+)([^\?]*)(\?.*)?', url)
-        self.proto = rx.group(1)
-        self.host = rx.group(2)
-        self.path = rx.group(3)
-        self.dir_path = os.path.dirname(self.path)
-        self.query = rx.group(4)
-
+        self.url = urlparse(url)
         if path:
-            self.dir_path = path
+            self.url = self.url._replace(path=path)
+        self.url = self.url._replace(fragment="")
 
         self._add_target(url, 1, "")
         self._spawn_new_worker()
@@ -194,71 +179,28 @@ class Crawler(object):
             except KeyboardInterrupt:
                 sys.exit(1)
 
-    def _url_domain(self, host):
-        parts = host.split('.')
-        if len(parts) <= 2:
-            return host
-        elif re.match('^[0-9]+(?:\.[0-9]+){3}$', host):  # IP
-            return host
-        else:
-            return '.'.join(parts[1:])
+    def _fix_link(self, root, link):
+        link =  urlparse(link.strip())
+        if (link.fragment != ""):
+            link = link._replace(fragment="")
+        return urljoin(root, urlunparse(link))
 
-    def _follow_link(self, url, link):
-        # Skip prefix
-        if re.search(self.prefix_filter, link):
-            return None
+    def _valid_link(self, link):
+        if not link:
+            return False
 
-        # Filter url
-        for f in self.url_filters:
-            if re.search(f, link):
-                return None
-
-        if not self.include_hashtag:
-            link = re.sub(r'(%23|#).*$', '', link)
-
-        rx = re.match('(https?://)([^/:]+)(:[0-9]+)?([^\?]*)(\?.*)?', url)
-        url_proto = rx.group(1)
-        url_host = rx.group(2)
-        url_port = rx.group(3) if rx.group(3) else ''
-        url_path = rx.group(4) if len(rx.group(4)) > 0 else '/'
-        url_dir_path = os.path.dirname(url_path)
-
-        rx = re.match('((https?://)([^/:]+)(:[0-9]+)?)?([^\?]*)(\?.*)?', link)
-        link_full_url = rx.group(1) is not None
-        link_proto = rx.group(2) if rx.group(2) else url_proto
-        link_host = rx.group(3) if rx.group(3) else url_host
-        link_port = rx.group(4) if rx.group(4) else url_port
-        link_path = quote(rx.group(5), '/%') if rx.group(5) else url_path
-        link_query = quote(rx.group(6), '?=&%') if rx.group(6) else ''
-        link_dir_path = os.path.dirname(link_path)
-
-        if not link_full_url and not link.startswith('/'):
-            link_path = os.path.normpath(os.path.join(url_dir_path, link_path))
-
-        link_url = link_proto + link_host + link_port + link_path + link_query
-
+        link = urlparse(link)
         if self.follow_mode == self.F_ANY:
-            return link_url
-        elif self.follow_mode == self.F_SAME_DOMAIN:
-            return link_url if self._url_domain(self.host) == \
-                self._url_domain(link_host) else None
+            return True
         elif self.follow_mode == self.F_SAME_HOST:
-            return link_url if self.host == link_host else None
+            return self.url.hostname == link.hostname
         elif self.follow_mode == self.F_SAME_PATH:
-            if self.host == link_host and \
-                    link_dir_path.startswith(self.dir_path):
-                return link_url
-            elif "localhost" in link_host and len(link_dir_path) > 0 and \
-                    (link_dir_path[0] != '/' or link_dir_path.startswith(self.dir_path)):
-                return link_url
-#            elif "localhost" in link_host and link_dir_path.startswith(self.dir_path):
-#                return link_url
-            else:
-#                print('skipped "%s" "%s" "%s"' % (link_dir_path, self.dir_path, link_url))
-                return None
+            return self.url.hostname == link.hostname and \
+                link.path.startswith(self.url.path)
+        return False
 
     def _add_target(self, url, depth, std = ""):
-        if not url:
+        if not self._valid_link(url):
             return
 
         if self.max_depth and depth > self.max_depth:
@@ -285,25 +227,24 @@ class Crawler(object):
                   (depth, url, std) = sorted(self.targets)[0]
                   self.targets.remove((depth, url, std))
 
-                rx = re.match('(https?)://([^/]+)(.*)', url)
-                protocol = rx.group(1)
-                host = rx.group(2)
-                path = rx.group(3)
+                url_p = urlparse(url)
 
-                if protocol == 'http':
-                    conn = httplib.HTTPConnection(host, timeout=10)
+                if url_p.scheme == "http":
+                    conn = httplib.HTTPConnection(url_p.netloc, timeout=10)
+                elif url_p.scheme == "https":
+                    conn = httplib.HTTPSConnection(url_p.netloc, timeout=10)
                 else:
-                    conn = httplib.HTTPSConnection(host, timeout=10)
+                    raise RuntimeError('Unknown protocol %s' % url_p.scheme)
 
-                conn.request('GET', path)
+                conn.request('GET', url_p.path)
                 res = conn.getresponse()
 
                 if res.status == 404:
                     continue
 
                 if res.status == 301 or res.status == 302:
-                    rlink = self._follow_link(url, res.getheader('location'))
-                    self._add_target(rlink, depth+1)
+                    target = self._fix_link(url, res.getheader('location'))
+                    self._add_target(target, depth+1)
                     continue
 
                 # Check content type
@@ -323,8 +264,8 @@ class Crawler(object):
 
 
                 for link in links:
-                    rlink = self._follow_link(url, link.url.strip())
-                    self._add_target(rlink, depth+1, link.std)
+                    link.url = self._fix_link(url, link.url)
+                    self._add_target(link.url, depth+1, link.std)
 
                 if self.concurrency < self.max_outstanding:
                     self._spawn_new_worker()
