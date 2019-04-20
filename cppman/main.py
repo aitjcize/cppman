@@ -46,20 +46,6 @@ class Cppman(Crawler):
         self.failure_count = None
         self.force_columns = force_columns
 
-        self.blacklist = [
-        ]
-        self.name_exceptions = [
-            'http://www.cplusplus.com/reference/string/swap/'
-        ]
-
-    def extract_name(self, data):
-        """Extract man page name from web page."""
-        name = re.search('<h1[^>]*>(.+?)</h1>', data).group(1)
-        name = re.sub(r'<([^>]+)>', r'', name)
-        name = re.sub(r'&gt;', r'>', name)
-        name = re.sub(r'&lt;', r'<', name)
-        return name
-
     def rebuild_index(self):
         """Rebuild index database from cplusplus.com and cppreference.com."""
 
@@ -87,15 +73,22 @@ class Cppman(Crawler):
         finally:
             self.db_conn.close()
 
-    def process_document(self, doc, depth):
+    def process_document(self, url, content, depth):
         """callback to insert index"""
-        if doc.url not in self.blacklist:
-            print("Indexing '%s' (depth %s)..." % (doc.url, depth))
-            name = self.extract_name(doc.text)
-            self.results.add((name, doc.url))
-        else:
-            print("Skipping blacklisted page '%s' ..." % doc.url)
-            return None
+        print("Indexing '%s' (depth %s)..." % (url, depth))
+        name = self.extract_name(content)
+
+        for n in self.parse_title(name):
+            self.results.add((n, url))
+        return True
+
+    def extract_name(self, data):
+        """Extract man page name from web page."""
+        name = re.search('<h1[^>]*>(.+?)</h1>', data).group(1)
+        name = re.sub(r'<([^>]+)>', r'', name)
+        name = re.sub(r'&gt;', r'>', name)
+        name = re.sub(r'&lt;', r'<', name)
+        return name
 
     def parse_expression(self, expr):
         """
@@ -157,12 +150,9 @@ class Cppman(Crawler):
 
     def insert_index(self, table, name, url):
         """callback to insert index"""
-        names = self.parse_title(name);
-
-        for n in names:
-            self.db_cursor.execute(
-                'INSERT INTO "%s" (name, url) VALUES (?, ?)' % table, (
-                n, url))
+        self.db_cursor.execute(
+            'INSERT INTO "%s" (name, url) VALUES (?, ?)' % table, (
+            name, url))
 
     def cache_all(self):
         """Cache all available man pages"""

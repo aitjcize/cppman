@@ -30,25 +30,8 @@ import sys
 
 from threading import Thread, Lock
 
-if sys.version_info < (3, 0):
-    import httplib
-
-    from urllib import quote, urlparse, urlunparse, urljoin
-else:
-    import http.client as httplib
-    from urllib.parse import quote, urlparse, urlunparse, urljoin
-
-
-class Document(object):
-    def __init__(self, res, url):
-        self.url = url
-        self.query = '' if '?' not in url else url.split('?')[-1]
-        self.status = res.status
-        self.text = res.read()
-        self.headers = dict(res.getheaders())
-
-        if sys.version_info >= (3, 0):
-            self.text = self.text.decode()
+import http.client as httplib
+from urllib.parse import quote, urlparse, urlunparse, urljoin
 
 class Crawler(object):
     F_ANY, F_SAME_HOST, F_SAME_PATH = list(range(3))
@@ -85,8 +68,10 @@ class Crawler(object):
     def set_max_depth(self, max_depth):
         self.max_depth = max_depth
 
-    def link_parser(self, content):
-        return re.findall('''href\s*=\s*['"]\s*([^'"]+)['"]''', content)
+    def link_parser(self, url, content):
+        links = re.findall('''href\s*=\s*['"]\s*([^'"]+)['"]''', content)
+        links = [self._fix_link(url, link) for link in links]
+        return links
 
     def crawl(self, url, path=None):
         self.results = set()
@@ -185,15 +170,14 @@ class Crawler(object):
                 except TypeError:  # getheader result is None
                     continue
 
-                doc = Document(res, url)
-                self.process_document(doc, depth)
+                content = res.read().decode()
+                if self.process_document(url, content, depth):
 
-                # Find links in document
-                links = self.link_parser(doc.text)
+                    # Find links in document
+                    links = self.link_parser(url, content)
+                    for link in links:
+                        self._add_target(link, depth+1)
 
-                for link in links:
-                    link = self._fix_link(url, link)
-                    self._add_target(link, depth+1)
 
                 if self.concurrency < self.max_outstanding:
                     self._spawn_new_worker()
