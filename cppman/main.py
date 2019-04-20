@@ -41,7 +41,6 @@ class Cppman(Crawler):
     """Manage cpp man pages, indexes"""
     def __init__(self, forced=False, force_columns=-1):
         Crawler.__init__(self)
-        self.results = set()
         self.forced = forced
         self.success_count = None
         self.failure_count = None
@@ -63,35 +62,24 @@ class Cppman(Crawler):
 
     def rebuild_index(self):
         """Rebuild index database from cplusplus.com and cppreference.com."""
-        try:
-            os.remove(environ.index_db_re)
-        except:
-            pass
 
         self.db_conn = sqlite3.connect(environ.index_db_re)
         self.db_cursor = self.db_conn.cursor()
-        self.db_cursor.execute('CREATE TABLE "cplusplus.com" '
-                               '(name VARCHAR(255), url VARCHAR(255))')
-        self.db_cursor.execute('CREATE TABLE "cppreference.com" '
-                               '(name VARCHAR(255), url VARCHAR(255))')
-
         try:
             self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf|svg)$')
             self.set_follow_mode(Crawler.F_SAME_PATH)
 
-            # cplusplus.com
-            self.crawl('http://www.cplusplus.com/reference/')
-            for name, url in self.results:
-                self.insert_index('cplusplus.com', name, url)
-            self.db_conn.commit()
+            sources = [('cplusplus.com', 'http://www.cplusplus.com/reference/', None),
+                      ('cppreference.com', 'https://en.cppreference.com/w/cpp', '/w/cpp')]
 
-            # cppreference.com
-            self.results = set()
-            self.crawl('https://en.cppreference.com/w/cpp', '/w/cpp')
-
-            for name, url in self.results:
-                self.insert_index('cppreference.com', name, url)
-            self.db_conn.commit()
+            for table, url, path in sources:
+                self.db_cursor.execute('DROP TABLE IF EXISTS "%s"' % table)
+                self.db_cursor.execute('CREATE TABLE "%s" '
+                               '(name VARCHAR(255), url VARCHAR(255))' % table)
+                results = self.crawl(url)
+                for name, url in results:
+                    self.insert_index(table, name, url)
+                self.db_conn.commit()
 
         except KeyboardInterrupt:
             os.remove(environ.index_db_re)

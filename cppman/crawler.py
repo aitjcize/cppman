@@ -89,6 +89,7 @@ class Crawler(object):
         return re.findall('''href\s*=\s*['"]\s*([^'"]+)['"]''', content)
 
     def crawl(self, url, path=None):
+        self.results = set()
         self.url = urlparse(url)
         if path:
             self.url = self.url._replace(path=path)
@@ -105,6 +106,7 @@ class Crawler(object):
                         self.threads.remove(t)
             except KeyboardInterrupt:
                 sys.exit(1)
+        return self.results
 
     def _fix_link(self, root, link):
         link =  urlparse(link.strip())
