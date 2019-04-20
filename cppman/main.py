@@ -71,9 +71,9 @@ class Cppman(Crawler):
         self.db_conn = sqlite3.connect(environ.index_db_re)
         self.db_cursor = self.db_conn.cursor()
         self.db_cursor.execute('CREATE TABLE "cplusplus.com" '
-                               '(name VARCHAR(255), url VARCHAR(255), std VARCHAR(255))')
+                               '(name VARCHAR(255), url VARCHAR(255))')
         self.db_cursor.execute('CREATE TABLE "cppreference.com" '
-                               '(name VARCHAR(255), url VARCHAR(255), std VARCHAR(255))')
+                               '(name VARCHAR(255), url VARCHAR(255))')
 
         try:
             self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf|svg)$')
@@ -81,41 +81,16 @@ class Cppman(Crawler):
 
             # cplusplus.com
             self.crawl('http://www.cplusplus.com/reference/')
-            for name, url, std in self.results:
-                self.insert_index('cplusplus.com', name, url, std)
-            self.db_conn.commit()
-
-            # Rename duplicate entries
-            duplicates = self.db_cursor.execute('SELECT name, COUNT(name) '
-                                                'AS NON '
-                                                'FROM "cplusplus.com" '
-                                                'GROUP BY NAME '
-                                                'HAVING (NON > 1)').fetchall()
-            for name, num in duplicates:
-                dump = self.db_cursor.execute('SELECT name, url FROM '
-                                              '"cplusplus.com" WHERE name="%s"'
-                                              % name).fetchall()
-                for n, u in dump:
-                    if u not in self.name_exceptions:
-                        n2 = n[5:] if n.startswith('std::') else n
-                        try:
-                            group = re.search('/([^/]+)/%s/$' % n2, u).group(1)
-                        except Exception:
-                            group = re.search('/([^/]+)/[^/]+/$', u).group(1)
-
-                        new_name = '%s (%s)' % (n, group)
-                        self.db_cursor.execute('UPDATE "cplusplus.com" '
-                                               'SET name="%s", url="%s" '
-                                               'WHERE url="%s"' %
-                                               (new_name, u, u))
+            for name, url in self.results:
+                self.insert_index('cplusplus.com', name, url)
             self.db_conn.commit()
 
             # cppreference.com
             self.results = set()
             self.crawl('https://en.cppreference.com/w/cpp', '/w/cpp')
 
-            for name, url, std in self.results:
-                self.insert_index('cppreference.com', name, url, std)
+            for name, url in self.results:
+                self.insert_index('cppreference.com', name, url)
             self.db_conn.commit()
 
         except KeyboardInterrupt:
@@ -124,12 +99,12 @@ class Cppman(Crawler):
         finally:
             self.db_conn.close()
 
-    def process_document(self, doc, depth, std):
+    def process_document(self, doc, depth):
         """callback to insert index"""
         if doc.url not in self.blacklist:
-            print("Indexing '%s' %s (depth %s)..." % (doc.url, std, depth))
+            print("Indexing '%s' (depth %s)..." % (doc.url, depth))
             name = self.extract_name(doc.text)
-            self.results.add((name, doc.url, std))
+            self.results.add((name, doc.url))
         else:
             print("Skipping blacklisted page '%s' ..." % doc.url)
             return None
@@ -192,14 +167,14 @@ class Cppman(Crawler):
                 names.append(prefix + r[1] + postfix)
         return names
 
-    def insert_index(self, table, name, url, std=""):
+    def insert_index(self, table, name, url):
         """callback to insert index"""
         names = self.parse_title(name);
 
         for n in names:
             self.db_cursor.execute(
-                'INSERT INTO "%s" (name, url, std) VALUES (?, ?, ?)' % table, (
-                n, url, std))
+                'INSERT INTO "%s" (name, url) VALUES (?, ?)' % table, (
+                n, url))
 
     def cache_all(self):
         """Cache all available man pages"""
@@ -348,12 +323,11 @@ class Cppman(Crawler):
         pat = re.compile('(%s)' % re.escape(pattern), re.I)
 
         if selected:
-            for name, url, std in selected:
+            for name, url in selected:
                 if os.isatty(sys.stdout.fileno()):
-                    print(pat.sub(r'\033[1;31m\1\033[0m', name) +
-                          (' \033[1;33m[%s]\033[0m' % std if std else ''))
+                    print(pat.sub(r'\033[1;31m\1\033[0m', name))
                 else:
-                    print(name + (' [%s]' % std if std else ''))
+                    print(name)
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
