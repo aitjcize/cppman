@@ -61,28 +61,22 @@ class Link(object):
     def __hash__(self):
         return self.url.__hash__()
 
-class LinkParser(object):
-    def get_unique_links(self, text):
-        self.text = text
-        links = self._find_links()
-        return list(set(links))
 
-class CPlusPlusLinkParser(LinkParser):
-    def _find_links(self):
+class CPlusPlusLinkParser(object):
+    def find_links(self, content):
         links = []
         for url, text in re.findall(
-            '''<a[^>]*href\s*=\s*['"]\s*([^'"]+)['"][^>]*>(.+?)</a>''', self.text, re.S):
+            '''<a[^>]*href\s*=\s*['"]\s*([^'"]+)['"][^>]*>(.+?)</a>''', content, re.S):
             if re.search('''class\s*=\s*['"][^'"]*C_cpp11[^'"]*['"]''', text):
                 links.append(Link(url, "C++11"))
             else:
                 links.append(Link(url, ""))
         return links
 
-class CPPReferenceLinkParser(LinkParser):
-    def _find_links(self):
-        processed = {}
+class CPPReferenceLinkParser(object):
+    def find_links(self, content):
         links = []
-        body = re.search('<[^>]*body[^>]*>(.+?)</body>', self.text, re.S).group(1)
+        body = re.search('<[^>]*body[^>]*>(.+?)</body>', content, re.S).group(1)
         """
         The link follow by the span.t-mark-rev will contained c++xx information.
         Consider the below case
@@ -104,14 +98,10 @@ class CPPReferenceLinkParser(LinkParser):
             std = std[::-1]
             url = url[::-1]
             links.append(Link(url, std))
-            processed[url] = True
 
 
-        for url in re.findall('''href\s*=\s*['"]\s*([^'"]+)['"]''', self.text):
-            if url in processed:
-                continue
+        for url in re.findall('''href\s*=\s*['"]\s*([^'"]+)['"]''', content):
             links.append(Link(url, ""))
-            processed[url] = True
 
         return links
 
@@ -259,8 +249,8 @@ class Crawler(object):
                 doc = Document(res, url)
                 self.process_document(doc, depth, std)
 
-                # Make unique list
-                links = self.link_parser.get_unique_links(doc.text)
+                # Find links in document
+                links = self.link_parser.find_links(doc.text)
 
 
                 for link in links:
