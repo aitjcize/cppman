@@ -138,7 +138,9 @@ class Crawler(object):
         while self.targets:
             try:
                 with self.targets_lock:
-                  (depth, url) = sorted(self.targets)[0]
+                  if len(self.targets) == 0:
+                    continue
+                  depth, url = sorted(self.targets)[0]
                   self.targets.remove((depth, url))
 
                 url_p = urlparse(url)
