@@ -362,7 +362,7 @@ class Cppman(Crawler):
         """ fetches result for a keyword """
         return self.cursor.execute('SELECT t1.name, t1.keyword, t1.url, t2.count FROM "%s" AS t1 JOIN '
             '(SELECT name, keyword, url, COUNT(keyword) AS count FROM "%s" GROUP BY keyword) AS t2 '
-            'WHERE t1.keyword = t2.keyword and t1.keyword LIKE "%s" ORDER BY t1.keyword' % (self.source, self.source, keyword)).fetchall()
+            'WHERE t1.keyword = t2.keyword and t1.keyword LIKE ? ORDER BY t1.keyword' % (self.source, self.source), [keyword]).fetchall()
 
     def _search_keyword(self, pattern):
         """ multiple fetches for each pattern """

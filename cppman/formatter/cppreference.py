@@ -54,7 +54,9 @@ def member_type_function(g):
         head = ', '.join([x.strip() + ' (3)' for x in head.split(',')])
     else:
         head = head.strip() + ' (3)'
-    return '\n.IP "%s"\n%s\n' % (head + tail, g.group(2))
+    full = (head + tail).replace('"', '\\(dq')
+    return '\n.IP "%s"\n%s\n' % (full, g.group(2))
+
 
 
 NAV_BAR_END = '<div class="t-navbar-sep">.?</div></div>'
