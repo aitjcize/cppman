@@ -31,10 +31,53 @@ import sqlite3
 import subprocess
 import sys
 import urllib.request
+from bs4 import BeautifulSoup
 
 from cppman import environ
 from cppman import util
 from cppman.crawler import Crawler
+
+def _sort_crawl(entry):
+    """ Sorting entries for putting '(1)' indexes behind keyword
+
+        1. keywords that have 'std::' in them have highest priority
+        2. priority if 'std::' is inside their name
+        3. sorting by keyword
+        4. sorting by name
+    """
+    name, keyword, url, count = entry
+    hasStd1 = keyword.find("std::")
+    if hasStd1 == -1:
+        hasStd1 = 1
+    else:
+        hasStd1 = 0
+
+    hasStd2 = name.find("std::")
+    if hasStd2 == -1:
+        hasStd2 = 1
+    else:
+        hasStd2 = 0
+
+    return (hasStd1, hasStd2, keyword, name)
+
+def _sort_search(entry, pattern):
+    """ sort results if std:: is available, than which position the keyword appears """
+    name, keyword, url, count = entry
+    hasStd1 = keyword.find("std::")
+    if hasStd1 == -1:
+        hasStd1 = 1
+    else:
+        hasStd1 = 0
+
+    hasStd2 = name.find("std::")
+    if hasStd2 == -1:
+        hasStd2 = 1
+    else:
+        hasStd2 = 0
+
+
+    return (hasStd1, hasStd2, keyword.find(pattern), keyword)
+
 
 
 class Cppman(Crawler):
@@ -58,13 +101,33 @@ class Cppman(Crawler):
             sources = [('cplusplus.com', 'http://www.cplusplus.com/reference/', None),
                       ('cppreference.com', 'https://en.cppreference.com/w/cpp', '/w/cpp')]
 
+
             for table, url, path in sources:
+                # drop and recreate tables
                 self.db_cursor.execute('DROP TABLE IF EXISTS "%s"' % table)
                 self.db_cursor.execute('CREATE TABLE "%s" '
-                               '(name VARCHAR(255), url VARCHAR(255))' % table)
+                               '(name VARCHAR(255), keyword VARCHAR(255), url VARCHAR(255))' % table)
+                # crawl and insert all entries
                 results = self.crawl(url)
-                for name, url in results:
-                    self.insert_index(table, name, url)
+                #insert all keywords
+                for name, keyword, url in results:
+                    self.insert_index(table, name, keyword, url)
+
+                # give duplicate entries numbers
+                results = self.db_cursor.execute('SELECT t2.*, t1.count '
+                                    'FROM (SELECT keyword, COUNT(*) AS count FROM "cppreference.com" '
+                                    'GROUP BY keyword HAVING count > 1) AS t1 JOIN "%s" AS t2 WHERE t1.keyword = t2.keyword '
+                                    'ORDER BY t2.keyword, t2.name' % table).fetchall()
+                keywords = {}
+                results = sorted(results, key=_sort_crawl)
+                for name, keyword, url, count in results:
+                    if not keyword in keywords:
+                        keywords[keyword] = 0
+                    keywords[keyword] += 1
+                    new_keyword = "%s (%s)" % (keyword, keywords[keyword])
+                    self.db_cursor.execute('UPDATE "%s" SET keyword=? WHERE '
+                                        'name=? AND keyword=? AND url=?' % table, (new_keyword, name, keyword, url))
+
                 self.db_conn.commit()
 
         except KeyboardInterrupt:
@@ -76,13 +139,16 @@ class Cppman(Crawler):
     def process_document(self, url, content, depth):
         """callback to insert index"""
         print("Indexing '%s' (depth %s)..." % (url, depth))
-        name = self.extract_name(content)
+        name     = self._extract_name(content)
+        keywords = self._extract_keywords(content)
 
-        for n in self.parse_title(name):
-            self.results.add((n, url))
+        for n in self._parse_title(name):
+            self.results.add((name, n, url))
+        for k in keywords:
+            self.results.add((name, k, url))
         return True
 
-    def extract_name(self, data):
+    def _extract_name(self, data):
         """Extract man page name from web page."""
         name = re.search('<h1[^>]*>(.+?)</h1>', data).group(1)
         name = re.sub(r'<([^>]+)>', r'', name)
@@ -90,7 +156,7 @@ class Cppman(Crawler):
         name = re.sub(r'&lt;', r'<', name)
         return name
 
-    def parse_expression(self, expr):
+    def _parse_expression(self, expr):
         """
             split expression into prefix and expression
             tested with
@@ -113,7 +179,7 @@ class Cppman(Crawler):
         tail = m.group(2)
         return [prefix, tail]
 
-    def parse_title(self, title):
+    def _parse_title(self, title):
         """
              split of the last parenthesis  operator==,!=,<,<=(std::vector)
              tested with
@@ -138,21 +204,79 @@ class Cppman(Crawler):
 
         t_names = m.group(1).split(',')
         t_names = [n.strip() for n in t_names]
-        prefix = self.parse_expression(t_names[0])[0]
+        prefix = self._parse_expression(t_names[0])[0]
         names = []
         for n in t_names:
-            r = self.parse_expression(n);
+            r = self._parse_expression(n);
             if prefix == r[0]:
                 names.append(n + postfix)
             else:
                 names.append(prefix + r[1] + postfix)
         return names
 
-    def insert_index(self, table, name, url):
+    def _extract_keywords(self, text):
+        """
+            extract aliases like std::string, template specializations like std::atomic_bool
+            and helper functions like std::is_same_v
+        """
+        soup = BeautifulSoup(text, "lxml")
+        names = []
+
+        # search for typedef list
+        for x in soup.find_all('table'):
+            # just searching for "Type" is not enough, see std::is_same
+            p = x.find_previous_sibling('h3')
+            if p:
+                if p.get_text().strip() == "Member types":
+                    continue
+
+            typedefTable = False
+            for tr in x.find_all('tr'):
+                tds = tr.find_all('td')
+                if len(tds) == 2:
+                    if re.match("\s*Type\s*", tds[0].get_text()):
+                         typedefTable = True
+                    elif typedefTable:
+                        res = re.search('^\s*(\S*)\s+.*$', tds[0].get_text())
+                        names.append(res.group(1))
+                    elif not typedefTable:
+                        break
+            if typedefTable:
+                break
+
+        # search for "Helper variable template" list
+        for x in soup.find_all('h3'):
+            variableTemplateHeader = False
+            if x.find('span', id="Helper_variable_template"):
+                e = x.find_next_sibling()
+                while e.name == "":
+                    e = e.find_next_sibling()
+                if e.name == "table":
+                    for tr in e.find_all('tr'):
+                        text = re.sub('\n', ' ', tr.get_text())
+                        res = re.search('^.* (\S+)\s*=.*$', text)
+                        if res:
+                            names.append(res.group(1))
+        # search for "Helper types" list
+        for x in soup.find_all('h3'):
+            variableTemplateHeader = False
+            if x.find('span', id="Helper_types"):
+                e = x.find_next_sibling()
+                while e.name == "":
+                    e = e.find_next_sibling()
+                if e.name == "table":
+                    for tr in e.find_all('tr'):
+                        text = re.sub('\n', ' ', tr.get_text())
+                        res = re.search('^.* (\S+)\s*=.*$', text)
+                        if res:
+                            names.append(res.group(1))
+        return names
+
+    def insert_index(self, table, name, keyword, url):
         """callback to insert index"""
         self.db_cursor.execute(
-            'INSERT INTO "%s" (name, url) VALUES (?, ?)' % table, (
-            name, url))
+            'INSERT INTO "%s" (name, keyword, url) VALUES (?, ?, ?)' % table, (
+            name, keyword, url))
 
     def cache_all(self):
         """Cache all available man pages"""
@@ -232,42 +356,50 @@ class Cppman(Crawler):
         """Clear all cache in man"""
         shutil.rmtree(environ.cache_dir)
 
-    def man(self, pattern):
-        """Call viewer.sh to view man page"""
-        try:
-            avail = os.listdir(os.path.join(environ.cache_dir, environ.source))
-        except OSError:
-            avail = []
+    def _fetch_page_by_keyword(self, keyword):
+        """ fetches result for a keyword """
+        return self.cursor.execute('SELECT t1.name, t1.keyword, t1.url, t2.count FROM "%s" AS t1 JOIN '
+            '(SELECT name, keyword, url, COUNT(keyword) AS count FROM "%s" GROUP BY keyword) AS t2 '
+            'WHERE t1.keyword = t2.keyword and t1.keyword LIKE "%s" ORDER BY t1.keyword' % (self.source, self.source, keyword)).fetchall()
 
+    def _search_keyword(self, pattern):
+        """ multiple fetches for each pattern """
         if not os.path.exists(environ.index_db):
             raise RuntimeError("can't find index.db")
 
         conn = sqlite3.connect(environ.index_db)
-        cursor = conn.cursor()
+        self.cursor = conn.cursor()
+        self.source = environ.source
 
-        # Try direct match
+        results = self._fetch_page_by_keyword("%s" % pattern)
+        results.extend(self._fetch_page_by_keyword("%s %%" % pattern))
+        results.extend(self._fetch_page_by_keyword("%% %s" % pattern))
+        results.extend(self._fetch_page_by_keyword("%% %s %%" % pattern))
+
+        results.extend(self._fetch_page_by_keyword("std::%s" % pattern))
+        results.extend(self._fetch_page_by_keyword("std::%s %%" % pattern))
+        results.extend(self._fetch_page_by_keyword("%% std::%s" % pattern))
+        results.extend(self._fetch_page_by_keyword("%% std::%s %%" % pattern))
+        results.extend(self._fetch_page_by_keyword("%s%%" % pattern))
+        results.extend(self._fetch_page_by_keyword("std::%s%%" % pattern))
+        if len(results) == 0:
+            results = self._fetch_page_by_keyword("%%%s%%" % pattern)
+
+        conn.close()
+        return sorted(list(set(results)), key=lambda e : _sort_search(e, pattern))
+
+    def man(self, pattern):
+        """Call viewer.sh to view man page"""
+        results = self._search_keyword(pattern)
+        if len(results) == 0:
+            raise RuntimeError('No manual entry for %s ' % pattern)
+
+        page_name, keyword, url, count = results[0]
+
         try:
-            page_name, url = cursor.execute(
-                'SELECT name,url FROM "%s" '
-                'WHERE name="%s" ORDER BY LENGTH(name)'
-                % (environ.source, pattern)).fetchone()
-        except TypeError:
-            # Try standard library
-            try:
-                page_name, url = cursor.execute(
-                    'SELECT name,url FROM "%s" '
-                    'WHERE name="std::%s" ORDER BY LENGTH(name)'
-                    % (environ.source, pattern)).fetchone()
-            except TypeError:
-                try:
-                    page_name, url = cursor.execute(
-                        'SELECT name,url FROM "%s" '
-                        'WHERE name LIKE "%%%s%%" ORDER BY LENGTH(name)'
-                        % (environ.source, pattern)).fetchone()
-                except TypeError:
-                    raise RuntimeError('No manual entry for ' + pattern)
-        finally:
-            conn.close()
+            avail = os.listdir(os.path.join(environ.cache_dir, environ.source))
+        except OSError:
+            avail = []
 
         page_filename = self.get_normalized_page_name(page_name)
         if self.forced or page_filename + '.3.gz' not in avail:
@@ -288,24 +420,16 @@ class Cppman(Crawler):
     def find(self, pattern):
         """Find pages in database."""
 
-        if not os.path.exists(environ.index_db):
-            raise RuntimeError("can't find index.db")
+        results = self._search_keyword(pattern)
 
-        conn = sqlite3.connect(environ.index_db)
-        cursor = conn.cursor()
-        selected = cursor.execute(
-            'SELECT * FROM "%s" WHERE name '
-            'LIKE "%%%s%%" ORDER BY LENGTH(name)'
-            % (environ.source, pattern)).fetchall()
+        pat = re.compile('(.*?)(%s)(.*?)( \(.*\))?$' % re.escape(pattern), re.I)
 
-        pat = re.compile('(%s)' % re.escape(pattern), re.I)
-
-        if selected:
-            for name, url in selected:
+        if results:
+            for name, keyword, url, count in results:
                 if os.isatty(sys.stdout.fileno()):
-                    print(pat.sub(r'\033[1;31m\1\033[0m', name))
+                    print(pat.sub(r'\1\033[1;31m\2\033[0m\3\033[1;33m\4\033[0m', keyword), "- %s" % name)
                 else:
-                    print(name)
+                    print(keyword, "- %s " % name)
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 

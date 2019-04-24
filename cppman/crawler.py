@@ -27,6 +27,7 @@ from __future__ import print_function
 import os
 import re
 import sys
+from bs4 import BeautifulSoup
 
 from threading import Thread, Lock
 
