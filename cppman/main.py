@@ -109,9 +109,11 @@ class Cppman(Crawler):
                                '(name VARCHAR(255), keyword VARCHAR(255), url VARCHAR(255))' % table)
                 # crawl and insert all entries
                 results = self.crawl(url)
-                #insert all keywords
+                # insert all keywords
                 for name, keyword, url in results:
                     self.insert_index(table, name, keyword, url)
+                    if keyword.find("std::") == 0:
+                        self.insert_index(table, name, keyword[5:], url)
 
                 # give duplicate entries numbers
                 results = self.db_cursor.execute('SELECT t2.*, t1.count '
@@ -376,12 +378,7 @@ class Cppman(Crawler):
         results.extend(self._fetch_page_by_keyword("%% %s" % pattern))
         results.extend(self._fetch_page_by_keyword("%% %s %%" % pattern))
 
-        results.extend(self._fetch_page_by_keyword("std::%s" % pattern))
-        results.extend(self._fetch_page_by_keyword("std::%s %%" % pattern))
-        results.extend(self._fetch_page_by_keyword("%% std::%s" % pattern))
-        results.extend(self._fetch_page_by_keyword("%% std::%s %%" % pattern))
         results.extend(self._fetch_page_by_keyword("%s%%" % pattern))
-        results.extend(self._fetch_page_by_keyword("std::%s%%" % pattern))
         if len(results) == 0:
             results = self._fetch_page_by_keyword("%%%s%%" % pattern)
 
