@@ -99,12 +99,12 @@ rps = [
     # Without C++11 tag
     (r'<dl class="links"><dt><a href="[^"]*"><b>([^ ]+?)</b></a></dt><dd>'
      r'([^<]*?)<span class="typ">\s*\(([^<]*?)\n?\)</span></dd></dl>',
-     r'\n.IP "\1(3)"\n\2 (\3)\n', re.S),
+     r'\n.IP "\1 (3)"\n\2 (\3)\n', re.S),
     # With C++11 tag
     (r'<dl class="links"><dt><a href="[^"]*"><b>([^ ]+?) <b class="C_cpp11" '
      r'title="(.+?)"></b></b></a></dt><dd>'
      r'([^<]*?)<span class="typ">\s*\((.*?)\n?\)</span></dd></dl>',
-     r'\n.IP "\1(3) [\2]"\n\3 (\4)\n', re.S),
+     r'\n.IP "\1 (3) [\2]"\n\3 (\4)\n', re.S),
     # Footer
     (r'<div id="CH_bb">.*$',
      r'\n.SE\n.SH "REFERENCE"\n'

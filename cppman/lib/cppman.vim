@@ -36,7 +36,6 @@
 setl nonu
 setl nornu
 setl noma
-setl iskeyword+=:,=,~,[,],*,!,<,>
 setl keywordprg=cppman
 setl buftype=nofile
 noremap <buffer> q :q!<CR>
@@ -49,7 +48,7 @@ endif
 
 syntax on
 syntax case ignore
-syntax match  manReference       "[a-z_:+-\*][a-z_:+-~!\*<>]\+([1-9][a-z]\=)"
+syntax match  manReference       "[a-z_:+-\*][a-z_:+-~!\*<>]\+ ([1-9][a-z]\=)"
 syntax match  manTitle           "^\w.\+([0-9]\+[a-z]\=).*"
 syntax match  manSectionHeading  "^[a-z][a-z_ \-:]*[a-z]$"
 syntax match  manSubHeading      "^\s\{3\}[a-z][a-z ]*[a-z]$"
@@ -117,7 +116,7 @@ let g:stack = []
 function LoadNewPage()
   " Save current page to stack
   call add(g:stack, [g:page_name, getpos(".")])
-  let g:page_name = expand("<cword>")
+  let g:page_name = expand("<cWORD>")
   setl noro
   setl ma
   call s:reload()

@@ -49,9 +49,9 @@ def member_type_function(g):
         tail = ' ' + cppvertag.group(2)
 
     if ',' in head:
-        head = ', '.join([x.strip() + '(3)' for x in head.split(',')])
+        head = ', '.join([x.strip() + ' (3)' for x in head.split(',')])
     else:
-        head = head.strip() + '(3)'
+        head = head.strip() + ' (3)'
     return '\n.IP "%s"\n%s\n' % (head + tail, g.group(2))
 
 
