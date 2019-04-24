@@ -151,45 +151,19 @@ def main():
         cm.rebuild_index()
         sys.exit(0)
 
-    if not args:
+    if not args or len(args) == 0:
         sys.stderr.write('What manual page do you want?\n')
         sys.exit(1)
 
     cm = Cppman(options.force, options.force_columns)
-    first = True
     failure = False
-    for i in args:
-        if not first:
-            print('--CppMan-- next: %s(3) [ view (return) | skip (Ctrl-D) '
-                  '| quit (Ctrl-C) ]' % i)
-            # For some reason, if only one layer of try...except is used
-            # pressing CTRL-D CTRL-C, the second CTRL-C didn't catch by the
-            # try..except clause. As a workaround, I add another layer to catch
-            # the KeyboardInterrupt exception
-            # TODO: find out what happened
-            try:
-                try:
-                    input()
-                except EOFError:
-                    continue
-                except KeyboardInterrupt:
-                    print('\n')
-                    break
-            except KeyboardInterrupt:
-                print('\n')
-                break
-        first = False
 
-        try:
-            pid = cm.man(i)
-        except RuntimeError as e:
-            print(e)
-            failure = True
-            continue
-        else:
-            os.waitpid(pid, 0)
-    if failure:
-      sys.exit(1)
+    try:
+        pid = cm.man(args[0])
+    except RuntimeError as e:
+        print(e)
+    else:
+        os.waitpid(pid, 0)
 
 if __name__ == '__main__':
     try:
