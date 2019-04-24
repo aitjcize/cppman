@@ -41,6 +41,8 @@ def member_table_def(g):
 
 
 def member_type_function(g):
+    if g.group(1).find("<a href=") == -1:
+        return ""
     head = re.sub(r'<.*?>', '', g.group(1)).strip()
     tail = ''
     cppvertag = re.search('^(.*)(\[(?:(?:since|until) )?C\+\+\d+\])$', head)
