@@ -24,6 +24,7 @@
 
 import gzip
 import importlib
+import html
 import os
 import re
 import shutil
@@ -145,9 +146,9 @@ class Cppman(Crawler):
         keywords = self._extract_keywords(content)
 
         for n in self._parse_title(name):
-            self.results.add((name, n, url))
+            self.results.add((html.unescape(name), html.unescape(n), url))
         for k in keywords:
-            self.results.add((name, k, url))
+            self.results.add((html.unescape(name), html.unescape(k), url))
         return True
 
     def _extract_name(self, data):
