@@ -22,8 +22,8 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import fcntl
 import os
+import shutil
 import struct
 import subprocess
 import sys
@@ -83,9 +83,7 @@ def update_man3_link():
 def get_width():
     """Get terminal width"""
     # Get terminal size
-    ws = struct.pack("HHHH", 0, 0, 0, 0)
-    ws = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, ws)
-    lines, columns, x, y = struct.unpack("HHHH", ws)
+    columns, lines = shutil.get_terminal_size()
     width = min(columns * 39 // 40, columns - 2)
     return width
 
