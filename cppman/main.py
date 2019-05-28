@@ -170,7 +170,7 @@ class Cppman(Crawler):
         name = re.sub(r'<([^>]+)>', r'', name)
         name = re.sub(r'&gt;', r'>', name)
         name = re.sub(r'&lt;', r'<', name)
-        return name
+        return html.unescape(name)
 
     def _parse_expression(self, expr):
         """
@@ -286,7 +286,7 @@ class Cppman(Crawler):
                         res = re.search('^.* (\S+)\s*=.*$', text)
                         if res:
                             names.append(res.group(1))
-        return names
+        return [html.unescape(n) for n in names]
 
     def insert_index(self, table, name, keyword, url):
         """callback to insert index"""
