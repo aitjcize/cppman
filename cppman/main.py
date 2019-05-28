@@ -123,7 +123,15 @@ class Cppman(Crawler):
                     # 2. insert all keywords
                     for k in results[title]["keywords"]:
                         self.db_cursor.execute('INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (lastRow, k));
+                # 3. add all aliases
+                for title in results:
+                    for (k, a) in results[title]["aliases"]:
+                        sql_results = self.db_cursor.execute('SELECT id, keyword FROM "%s_keywords" '
+                                    'WHERE keyword LIKE "%s::%%"' % (table, k)).fetchall();
+                        for id, keyword in sql_results:
+                            keyword = keyword.replace("%s::"%k, "%s::"%a)
 
+                            self.db_cursor.execute('INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (id, keyword));
                 self.db_conn.commit()
 
                 # give duplicate entries numbers
@@ -156,12 +164,12 @@ class Cppman(Crawler):
         name     = self._extract_name(content)
         keywords = self._extract_keywords(content)
 
-        self.results[name] = {'url': url, 'keywords': set()}
+        self.results[name] = {'url': url, 'keywords': set(), 'aliases': set()}
 
         for n in self._parse_title(name):
             self.results[name]["keywords"].add(n)
-        for k in keywords:
-            self.results[name]["keywords"].add(k)
+            for k in keywords:
+                self.results[name]["aliases"].add((n, k))
         return True
 
     def _extract_name(self, data):
@@ -287,12 +295,6 @@ class Cppman(Crawler):
                         if res:
                             names.append(res.group(1))
         return [html.unescape(n) for n in names]
-
-    def insert_index(self, table, name, keyword, url):
-        """callback to insert index"""
-        self.db_cursor.execute(
-            'INSERT INTO "%s" (name, keyword, url) VALUES (?, ?, ?)' % table, (
-            name, keyword, url))
 
     def cache_all(self):
         """Cache all available man pages"""
