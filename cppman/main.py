@@ -397,6 +397,7 @@ class Cppman(Crawler):
         self.cursor = conn.cursor()
         self.source = environ.source
 
+        self.cursor.execute('PRAGMA case_sensitive_like=ON')
         results = self._fetch_page_by_keyword("%s" % pattern)
         results.extend(self._fetch_page_by_keyword("%s %%" % pattern))
         results.extend(self._fetch_page_by_keyword("%% %s" % pattern))
