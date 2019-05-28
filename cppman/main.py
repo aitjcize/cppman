@@ -46,31 +46,31 @@ def _sort_crawl(entry):
         3. sorting by keyword
         4. sorting by name
     """
-    name, keyword, url, count = entry
+    id, title, keyword, count = entry
     hasStd1 = keyword.find("std::")
     if hasStd1 == -1:
         hasStd1 = 1
     else:
         hasStd1 = 0
 
-    hasStd2 = name.find("std::")
+    hasStd2 = title.find("std::")
     if hasStd2 == -1:
         hasStd2 = 1
     else:
         hasStd2 = 0
 
-    return (hasStd1, hasStd2, keyword, name)
+    return (hasStd1, hasStd2, keyword, title)
 
 def _sort_search(entry, pattern):
     """ sort results if std:: is available, than which position the keyword appears """
-    name, keyword, url, count = entry
+    title, keyword, url = entry
     hasStd1 = keyword.find("std::")
     if hasStd1 == -1:
         hasStd1 = 1
     else:
         hasStd1 = 0
 
-    hasStd2 = name.find("std::")
+    hasStd2 = title.find("std::")
     if hasStd2 == -1:
         hasStd2 = 1
     else:
@@ -106,30 +106,41 @@ class Cppman(Crawler):
             for table, url, path in sources:
                 # drop and recreate tables
                 self.db_cursor.execute('DROP TABLE IF EXISTS "%s"' % table)
+                self.db_cursor.execute('DROP TABLE IF EXISTS "%s_keywords"' % table)
+
                 self.db_cursor.execute('CREATE TABLE "%s" '
-                               '(name VARCHAR(255), keyword VARCHAR(255), url VARCHAR(255))' % table)
+                               '(id INTEGER NOT NULL PRIMARY KEY, title VARCHAR(255) NOT NULL UNIQUE, url VARCHAR(255) NOT NULL UNIQUE)' % table)
+                self.db_cursor.execute('CREATE TABLE "%s_keywords" '
+                               '(id INTEGER NOT NULL, keyword VARCHAR(255), FOREIGN KEY(id) REFERENCES "%s"(id))' % (table, table))
                 # crawl and insert all entries
                 results = self.crawl(url)
-                # insert all keywords
-                for name, keyword, url in results:
-                    self.insert_index(table, name, keyword, url)
-                    if keyword.find("std::") == 0:
-                        self.insert_index(table, name, keyword[5:], url)
+
+                for title in results:
+                    # 1. insert title
+                    self.db_cursor.execute('INSERT INTO "%s" (title, url) VALUES (?, ?)' % table, (title, results[title]["url"]));
+                    lastRow = self.db_cursor.execute('SELECT last_insert_rowid()').fetchall()[0][0]
+
+                    # 2. insert all keywords
+                    for k in results[title]["keywords"]:
+                        self.db_cursor.execute('INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (lastRow, k));
+
+                self.db_conn.commit()
 
                 # give duplicate entries numbers
-                results = self.db_cursor.execute('SELECT t2.*, t1.count '
-                                    'FROM (SELECT keyword, COUNT(*) AS count FROM "cppreference.com" '
-                                    'GROUP BY keyword HAVING count > 1) AS t1 JOIN "%s" AS t2 WHERE t1.keyword = t2.keyword '
-                                    'ORDER BY t2.keyword, t2.name' % table).fetchall()
+                results = self.db_cursor.execute('SELECT t3.id, t3.title, t2.keyword, t1.count '
+                                    'FROM (SELECT keyword, COUNT(*) AS count FROM "%s_keywords" '
+                                    'GROUP BY keyword HAVING count > 1) AS t1 JOIN "%s_keywords" AS t2 JOIN "%s" AS t3 WHERE t1.keyword = t2.keyword AND t3.id = t2.id '
+                                    'ORDER BY t2.keyword, t3.title' % (table, table, table)).fetchall()
+
                 keywords = {}
                 results = sorted(results, key=_sort_crawl)
-                for name, keyword, url, count in results:
+                for id, title, keyword, count in results:
                     if not keyword in keywords:
                         keywords[keyword] = 0
                     keywords[keyword] += 1
                     new_keyword = "%s (%s)" % (keyword, keywords[keyword])
-                    self.db_cursor.execute('UPDATE "%s" SET keyword=? WHERE '
-                                        'name=? AND keyword=? AND url=?' % table, (new_keyword, name, keyword, url))
+                    self.db_cursor.execute('UPDATE "%s_keywords" SET keyword=? WHERE '
+                                        'id=? AND keyword=?' % table, (new_keyword, id, keyword))
 
                 self.db_conn.commit()
 
@@ -145,10 +156,12 @@ class Cppman(Crawler):
         name     = self._extract_name(content)
         keywords = self._extract_keywords(content)
 
+        self.results[name] = {'url': url, 'keywords': set()}
+
         for n in self._parse_title(name):
-            self.results.add((html.unescape(name), html.unescape(n), url))
+            self.results[name]["keywords"].add(n)
         for k in keywords:
-            self.results.add((html.unescape(name), html.unescape(k), url))
+            self.results[name]["keywords"].add(k)
         return True
 
     def _extract_name(self, data):
@@ -361,9 +374,11 @@ class Cppman(Crawler):
 
     def _fetch_page_by_keyword(self, keyword):
         """ fetches result for a keyword """
-        return self.cursor.execute('SELECT t1.name, t1.keyword, t1.url, t2.count FROM "%s" AS t1 JOIN '
-            '(SELECT name, keyword, url, COUNT(keyword) AS count FROM "%s" GROUP BY keyword) AS t2 '
-            'WHERE t1.keyword = t2.keyword and t1.keyword LIKE ? ORDER BY t1.keyword' % (self.source, self.source), [keyword]).fetchall()
+        return self.cursor.execute('SELECT t1.title, t2.keyword, t1.url '
+                                   'FROM "%s" AS t1 '
+                                   'JOIN "%s_keywords" AS t2 '
+                                   'WHERE t1.id = t2.id AND t2.keyword '
+                                   'LIKE ? ORDER BY t2.keyword' % (self.source, self.source), [keyword]).fetchall()
 
     def _search_keyword(self, pattern):
         """ multiple fetches for each pattern """
@@ -392,7 +407,7 @@ class Cppman(Crawler):
         if len(results) == 0:
             raise RuntimeError('No manual entry for %s ' % pattern)
 
-        page_name, keyword, url, count = results[0]
+        page_name, keyword, url = results[0]
 
         try:
             avail = os.listdir(os.path.join(environ.cache_dir, environ.source))
@@ -423,7 +438,7 @@ class Cppman(Crawler):
         pat = re.compile('(.*?)(%s)(.*?)( \(.*\))?$' % re.escape(pattern), re.I)
 
         if results:
-            for name, keyword, url, count in results:
+            for name, keyword, url in results:
                 if os.isatty(sys.stdout.fileno()):
                     print(pat.sub(r'\1\033[1;31m\2\033[0m\3\033[1;33m\4\033[0m', keyword), "- %s" % name)
                 else:

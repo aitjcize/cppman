@@ -75,7 +75,7 @@ class Crawler(object):
         return links
 
     def crawl(self, url, path=None):
-        self.results = set()
+        self.results = {}
         self.url = urlparse(url)
         if path:
             self.url = self.url._replace(path=path)
