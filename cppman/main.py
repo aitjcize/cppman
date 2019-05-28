@@ -447,10 +447,10 @@ class Cppman(Crawler):
 
         if results:
             for name, keyword, url in results:
+
                 if os.isatty(sys.stdout.fileno()):
-                    print(pat.sub(r'\1\033[1;31m\2\033[0m\3\033[1;33m\4\033[0m', keyword), "- %s" % name)
-                else:
-                    print(keyword, "- %s " % name)
+                    keyword = pat.sub(r'\1\033[1;31m\2\033[0m\3\033[1;33m\4\033[0m', keyword)
+                print("%s - %s" % (keyword, name))
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 

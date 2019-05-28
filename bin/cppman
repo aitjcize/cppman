@@ -168,6 +168,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
+    except BrokenPipeError:
+        sys.exit()
     except (Exception, KeyboardInterrupt) as e:
         if type(e) == KeyboardInterrupt:
             print('\nAborted.')
