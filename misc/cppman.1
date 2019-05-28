@@ -30,7 +30,8 @@ force cppman to update existing cache when '\-\-cache\-all' or browsing man page
 .IP "\-m MANDB, \-\-use\-mandb=MANDB"
 Accepts 'true' or 'false'. If true, cppman adds manpage path to mandb so that you can view C++ manpages with `man' command. The default value is 'false'.
 .IP "\-p PAGER, \-\-pager=PAGER"
-Select pager to use, accepts 'vim' or 'less'. The default value is 'vim'.
+Select pager to use, accepts 'vim', 'nvim' or 'less'. The default value is 'vim'.
+If 'nvim' is selected, but not available, 'vim' is used as a fallback and vice versa. If either is selected, but neither is available, 'less' is used as a fallback.
 .IP "\-r, \-\-rebuild\-index"
 rebuild index database from cplusplus.com
 .IP "\-v, \-\-version"
