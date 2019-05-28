@@ -127,9 +127,9 @@ class Cppman(Crawler):
                 for title in results:
                     for (k, a) in results[title]["aliases"]:
                         sql_results = self.db_cursor.execute('SELECT id, keyword FROM "%s_keywords" '
-                                    'WHERE keyword LIKE "%s::%%"' % (table, k)).fetchall();
+                                    'WHERE keyword LIKE "%s::%%" OR keyword LIKE "%s" OR keyword LIKE "%s %%" OR keyword LIKE "%s)%%" OR keyword LIKE "%s,%%"' % (table, k, k, k, k, k)).fetchall();
                         for id, keyword in sql_results:
-                            keyword = keyword.replace("%s::"%k, "%s::"%a)
+                            keyword = keyword.replace("%s"%k, "%s"%a)
 
                             self.db_cursor.execute('INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (id, keyword));
                 self.db_conn.commit()
@@ -161,15 +161,21 @@ class Cppman(Crawler):
     def process_document(self, url, content, depth):
         """callback to insert index"""
         print("Indexing '%s' (depth %s)..." % (url, depth))
-        name     = self._extract_name(content)
+        name     = self._extract_name(content).replace('\n', '')
         keywords = self._extract_keywords(content)
 
         self.results[name] = {'url': url, 'keywords': set(), 'aliases': set()}
 
         for n in self._parse_title(name):
             self.results[name]["keywords"].add(n)
+            if n.find("std::") != -1:
+                self.results[name]["keywords"].add(n.replace('std::', ''))
+
             for k in keywords:
                 self.results[name]["aliases"].add((n, k))
+                if k.find("std::") != -1:
+                    self.results[name]["aliases"].add((n, k.replace('std::', '')))
+
         return True
 
     def _extract_name(self, data):
