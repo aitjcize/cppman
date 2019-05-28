@@ -31,7 +31,7 @@ class Config(object):
     SOURCES = ['cplusplus.com', 'cppreference.com']
 
     DEFAULTS = {
-        'Source': 'cplusplus.com',
+        'Source': 'cppreference.com',
         'UpdateManPath': 'false',
         'Pager': 'vim'
     }
