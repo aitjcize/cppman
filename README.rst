@@ -43,17 +43,17 @@ Installation
 
 Note that cppman requires Python 3. Make sure that either ``pip`` is configured for Python 3 installation, your default Python interpreter is version 3 or just use ``pip3`` instead.
 
-2. Arch Linux users can find it on AUR or using `Yaourt <https://wiki.archlinux.org/index.php/Yaourt>`_:
+2. Arch Linux users can find it on AUR or using `Trizen <https://wiki.archlinux.org/title/Trizen>`_:
 
 .. code-block:: bash
 
-    $ yaourt -S cppman
+    $ trizen -S cppman
 
 or install the git version
 
 .. code-block:: bash
 
-    $ yaourt -S cppman-git
+    $ trizen -S cppman-git
 
 3. Debian / Ubuntu: cppman is available in Debian sid/unstable and Ubuntu vivid.
 
