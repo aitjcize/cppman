@@ -26,9 +26,8 @@ import datetime
 import re
 import urllib.request
 
-from cppman.util import html2man, fixupHTML
 from cppman.formatter.tableparser import parse_table
-
+from cppman.util import fixupHTML, html2man
 
 # Format replacement RE list
 # The '.SE' pseudo macro is described in the function: html2groff
@@ -79,7 +78,8 @@ rps = [
      r'\n.SE\n.SH "TYPE"\n\1\n'
      r'\n.SE\n.SH "SYNOPSIS"\n\3\n'
      r'\n.SE\n.SH "DESCRIPTION"\n' % datetime.date.today(), re.S),
-    (r'<span alt="[^"]*?" class="C_ico cpp11warning"[^>]*>', r' [C++11]', re.S),
+    (r'<span alt="[^"]*?" class="C_ico cpp11warning"[^>]*>',
+     r' [C++11]', re.S),
     # Remove empty #include
     (r'#include \n.sp\n', r'', 0),
     # Remove empty sections
@@ -139,6 +139,7 @@ rps = [
     (r'\\n', r'\\en', 0),
 ]
 
+
 def escape_pre_section(table):
     """Escape <pre> section in table."""
     def replace_newline(g):
@@ -187,7 +188,8 @@ def html2groff(data, name):
 
     page_type = re.search(r'\n\.SH "TYPE"\n(.+?)\n', data)
     if page_type and 'class' in page_type.group(1):
-        class_name = re.search(r'\n\.SH "NAME"\n(?:.*::)?(.+?) ', data).group(1)
+        class_name = re.search(
+            r'\n\.SH "NAME"\n(?:.*::)?(.+?) ', data).group(1)
 
         secs = re.findall(r'\n\.SH "(.+?)"(.+?)\.SE', data, re.S)
 
@@ -196,7 +198,7 @@ def html2groff(data, name):
             if ('MEMBER' in sec and
                 'NON-MEMBER' not in sec and
                 'INHERITED' not in sec and
-                sec != 'MEMBER TYPES'):
+                    sec != 'MEMBER TYPES'):
                 content2 = re.sub(r'\n\.IP "([^:]+?)"', r'\n.IP "%s::\1"'
                                   % class_name, content)
                 # Replace (constructor) (destructor)
@@ -234,6 +236,7 @@ def test():
     print(html2groff(fixupHTML(ifs.read()), 'std::vector'), end=' ')
     # with open('test.html') as ifs:
     #    print html2groff(fixupHTML(ifs.read()), 'std::vector'),
+
 
 if __name__ == '__main__':
     test()

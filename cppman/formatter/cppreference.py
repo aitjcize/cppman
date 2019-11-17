@@ -26,11 +26,10 @@ import datetime
 import re
 import string
 import urllib.request
-
 from functools import partial
 
-from cppman.util import html2man, fixupHTML
 from cppman.formatter.tableparser import parse_table
+from cppman.util import fixupHTML, html2man
 
 
 def member_table_def(g):
@@ -45,7 +44,8 @@ def member_type_function(g):
         return ""
     head = re.sub(r'<.*?>', '', g.group(1)).strip()
     tail = ''
-    cppvertag = re.search('^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*)+$', head)
+    cppvertag = re.search(
+        '^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*)+$', head)
     if cppvertag:
         head = cppvertag.group(1).strip()
         tail = ' ' + cppvertag.group(2)
@@ -56,7 +56,6 @@ def member_type_function(g):
         head = head.strip() + ' (3)'
     full = (head + tail).replace('"', '\\(dq')
     return '\n.IP "%s"\n%s\n' % (full, g.group(2))
-
 
 
 NAV_BAR_END = '<div class="t-navbar-sep">.?</div></div>'
@@ -241,7 +240,7 @@ def html2groff(data, name):
     def add_header_multi(prefix, g):
         if ',' in g.group(1):
             res = ', '.join(['%s::%s' % (prefix, x.strip())
-                            for x in g.group(1).split(',')])
+                             for x in g.group(1).split(',')])
         else:
             res = '%s::%s' % (prefix, g.group(1))
 
@@ -261,7 +260,7 @@ def html2groff(data, name):
             if ('MEMBER' in sec and
                 'NON-MEMBER' not in sec and
                 'INHERITED' not in sec and
-                 sec != 'MEMBER TYPES'):
+                    sec != 'MEMBER TYPES'):
                 content2 = re.sub(r'\n\.IP "([^:]+?)"',
                                   partial(add_header_multi, class_name),
                                   content)
@@ -313,7 +312,8 @@ def html2groff(data, name):
 
 def func_test():
     """Test if there is major format changes in cplusplus.com"""
-    ifs = urllib.request.urlopen('http://en.cppreference.com/w/cpp/container/vector')
+    ifs = urllib.request.urlopen(
+        'http://en.cppreference.com/w/cpp/container/vector')
     result = html2groff(fixupHTML(ifs.read()), 'std::vector')
     assert '.SH "NAME"' in result
     assert '.SH "SYNOPSIS"' in result
@@ -322,11 +322,13 @@ def func_test():
 
 def test():
     """Simple Text"""
-    ifs = urllib.request.urlopen('http://en.cppreference.com/w/cpp/container/vector')
+    ifs = urllib.request.urlopen(
+        'http://en.cppreference.com/w/cpp/container/vector')
     print(html2groff(fixupHTML(ifs.read()), 'std::vector'), end=' ')
-    #with open('test.html') as ifs:
+    # with open('test.html') as ifs:
     #    data = fixupHTML(ifs.read())
     #    print html2groff(data, 'std::vector'),
+
 
 if __name__ == '__main__':
     test()

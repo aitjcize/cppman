@@ -24,21 +24,21 @@
 
 from __future__ import print_function
 
+import http.client as httplib
 import os
 import re
 import sys
+from threading import Lock, Thread
+from urllib.parse import quote, urljoin, urlparse, urlunparse
+
 from bs4 import BeautifulSoup
 
-from threading import Thread, Lock
-
-import http.client as httplib
-from urllib.parse import quote, urlparse, urlunparse, urljoin
 
 class Crawler(object):
     F_ANY, F_SAME_HOST, F_SAME_PATH = list(range(3))
 
     def __init__(self):
-        self.queued  = set()
+        self.queued = set()
         self.targets = set()
         self.threads = []
         self.concurrency = 0
@@ -70,7 +70,7 @@ class Crawler(object):
         self.max_depth = max_depth
 
     def link_parser(self, url, content):
-        links = re.findall('''href\s*=\s*['"]\s*([^'"]+)['"]''', content)
+        links = re.findall(r'''href\s*=\s*['"]\s*([^'"]+)['"]''', content)
         links = [self._fix_link(url, link) for link in links]
         return links
 
@@ -95,7 +95,7 @@ class Crawler(object):
         return self.results
 
     def _fix_link(self, root, link):
-        link =  urlparse(link.strip())
+        link = urlparse(link.strip())
         if (link.fragment != ""):
             link = link._replace(fragment="")
         return urljoin(root, urlunparse(link))
@@ -122,27 +122,27 @@ class Crawler(object):
             return
 
         with self.targets_lock:
-          if url in self.queued:
-              return
-          self.queued.add(url)
-          self.targets.add((depth, url))
+            if url in self.queued:
+                return
+            self.queued.add(url)
+            self.targets.add((depth, url))
 
     def _spawn_new_worker(self):
         with self.concurrency_lock:
-          self.concurrency += 1
-          t = Thread(target=self._worker, args=(self.concurrency,))
-          t.daemon = True
-          self.threads.append(t)
-          t.start()
+            self.concurrency += 1
+            t = Thread(target=self._worker, args=(self.concurrency,))
+            t.daemon = True
+            self.threads.append(t)
+            t.start()
 
     def _worker(self, sid):
         while self.targets:
             try:
                 with self.targets_lock:
-                  if len(self.targets) == 0:
-                    continue
-                  depth, url = sorted(self.targets)[0]
-                  self.targets.remove((depth, url))
+                    if len(self.targets) == 0:
+                        continue
+                    depth, url = sorted(self.targets)[0]
+                    self.targets.remove((depth, url))
 
                 url_p = urlparse(url)
 
@@ -181,7 +181,6 @@ class Crawler(object):
                     for link in links:
                         self._add_target(link, depth+1)
 
-
                 if self.concurrency < self.max_outstanding:
                     self._spawn_new_worker()
             except KeyError:
@@ -189,7 +188,7 @@ class Crawler(object):
                 break
             except (httplib.HTTPException, EnvironmentError):
                 with self.targets_lock:
-                  self._add_target(url, depth+1)
+                    self._add_target(url, depth+1)
 
         with self.concurrency_lock:
-          self.concurrency -= 1
+            self.concurrency -= 1

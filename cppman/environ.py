@@ -27,14 +27,14 @@ import os
 from cppman import get_lib_path
 from cppman.config import Config
 
-HOME = os.environ["HOME"];
+HOME = os.environ["HOME"]
 
-XDG_CACHE_HOME  = os.getenv("XDG_CACHE_HOME", os.path.join(HOME, ".cache"))
+XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME", os.path.join(HOME, ".cache"))
 XDG_CONFIG_HOME = os.getenv("XDG_CONFIG_HOME", os.path.join(HOME, ".config"))
 
-cache_dir   = os.path.join(XDG_CACHE_HOME, 'cppman')
+cache_dir = os.path.join(XDG_CACHE_HOME, 'cppman')
 manindex_dir = os.path.join(cache_dir, 'manindex')
-config_dir  = os.path.join(XDG_CONFIG_HOME, 'cppman')
+config_dir = os.path.join(XDG_CONFIG_HOME, 'cppman')
 config_file = os.path.join(config_dir, 'cppman.cfg')
 
 config = Config(config_file)

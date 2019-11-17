@@ -29,15 +29,14 @@ import subprocess
 import sys
 import termios
 
-from cppman import environ
-
 import bs4
+from cppman import environ
 
 
 def update_mandb_path():
     """Add $XDG_CACHE_HOME/cppman/man to $HOME/.manpath"""
     manpath_file = os.path.join(environ.HOME, ".manpath")
-    man_dir      = environ.cache_dir
+    man_dir = environ.cache_dir
     manindex_dir = environ.manindex_dir
 
     lines = []

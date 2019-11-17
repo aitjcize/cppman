@@ -23,8 +23,8 @@
 #
 
 import gzip
-import importlib
 import html
+import importlib
 import os
 import re
 import shutil
@@ -32,11 +32,12 @@ import sqlite3
 import subprocess
 import sys
 import urllib.request
-from bs4 import BeautifulSoup
 
-from cppman import environ
-from cppman import util
+from bs4 import BeautifulSoup
+from cppman import environ, util
 from cppman.crawler import Crawler
+
+
 
 def _sort_crawl(entry):
     """ Sorting entries for putting '(1)' indexes behind keyword
@@ -61,6 +62,7 @@ def _sort_crawl(entry):
 
     return (hasStd1, hasStd2, keyword, title)
 
+
 def _sort_search(entry, pattern):
     """ sort results if std:: is available, than which position the keyword appears """
     title, keyword, url = entry
@@ -76,13 +78,12 @@ def _sort_search(entry, pattern):
     else:
         hasStd2 = 0
 
-
     return (hasStd1, hasStd2, keyword.find(pattern), keyword)
-
 
 
 class Cppman(Crawler):
     """Manage cpp man pages, indexes"""
+
     def __init__(self, forced=False, force_columns=-1):
         Crawler.__init__(self)
         self.forced = forced
@@ -100,45 +101,49 @@ class Cppman(Crawler):
             self.set_follow_mode(Crawler.F_SAME_PATH)
 
             sources = [('cplusplus.com', 'http://www.cplusplus.com/reference/', None),
-                      ('cppreference.com', 'https://en.cppreference.com/w/cpp', '/w/cpp')]
-
+                       ('cppreference.com', 'https://en.cppreference.com/w/cpp', '/w/cpp')]
 
             for table, url, path in sources:
                 # drop and recreate tables
                 self.db_cursor.execute('DROP TABLE IF EXISTS "%s"' % table)
-                self.db_cursor.execute('DROP TABLE IF EXISTS "%s_keywords"' % table)
+                self.db_cursor.execute(
+                    'DROP TABLE IF EXISTS "%s_keywords"' % table)
 
                 self.db_cursor.execute('CREATE TABLE "%s" '
-                               '(id INTEGER NOT NULL PRIMARY KEY, title VARCHAR(255) NOT NULL UNIQUE, url VARCHAR(255) NOT NULL UNIQUE)' % table)
+                                       '(id INTEGER NOT NULL PRIMARY KEY, title VARCHAR(255) NOT NULL UNIQUE, url VARCHAR(255) NOT NULL UNIQUE)' % table)
                 self.db_cursor.execute('CREATE TABLE "%s_keywords" '
-                               '(id INTEGER NOT NULL, keyword VARCHAR(255), FOREIGN KEY(id) REFERENCES "%s"(id))' % (table, table))
+                                       '(id INTEGER NOT NULL, keyword VARCHAR(255), FOREIGN KEY(id) REFERENCES "%s"(id))' % (table, table))
                 # crawl and insert all entries
                 results = self.crawl(url)
 
                 for title in results:
                     # 1. insert title
-                    self.db_cursor.execute('INSERT INTO "%s" (title, url) VALUES (?, ?)' % table, (title, results[title]["url"]));
-                    lastRow = self.db_cursor.execute('SELECT last_insert_rowid()').fetchall()[0][0]
+                    self.db_cursor.execute(
+                        'INSERT INTO "%s" (title, url) VALUES (?, ?)' % table, (title, results[title]["url"]))
+                    lastRow = self.db_cursor.execute(
+                        'SELECT last_insert_rowid()').fetchall()[0][0]
 
                     # 2. insert all keywords
                     for k in results[title]["keywords"]:
-                        self.db_cursor.execute('INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (lastRow, k));
+                        self.db_cursor.execute(
+                            'INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (lastRow, k))
                 # 3. add all aliases
                 for title in results:
                     for (k, a) in results[title]["aliases"]:
                         sql_results = self.db_cursor.execute('SELECT id, keyword FROM "%s_keywords" '
-                                    'WHERE keyword LIKE "%s::%%" OR keyword LIKE "%s" OR keyword LIKE "%s %%" OR keyword LIKE "%s)%%" OR keyword LIKE "%s,%%"' % (table, k, k, k, k, k)).fetchall();
+                                                             'WHERE keyword LIKE "%s::%%" OR keyword LIKE "%s" OR keyword LIKE "%s %%" OR keyword LIKE "%s)%%" OR keyword LIKE "%s,%%"' % (table, k, k, k, k, k)).fetchall()
                         for id, keyword in sql_results:
-                            keyword = keyword.replace("%s"%k, "%s"%a)
+                            keyword = keyword.replace("%s" % k, "%s" % a)
 
-                            self.db_cursor.execute('INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (id, keyword));
+                            self.db_cursor.execute(
+                                'INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (id, keyword))
                 self.db_conn.commit()
 
                 # give duplicate entries numbers
                 results = self.db_cursor.execute('SELECT t3.id, t3.title, t2.keyword, t1.count '
-                                    'FROM (SELECT keyword, COUNT(*) AS count FROM "%s_keywords" '
-                                    'GROUP BY keyword HAVING count > 1) AS t1 JOIN "%s_keywords" AS t2 JOIN "%s" AS t3 WHERE t1.keyword = t2.keyword AND t3.id = t2.id '
-                                    'ORDER BY t2.keyword, t3.title' % (table, table, table)).fetchall()
+                                                 'FROM (SELECT keyword, COUNT(*) AS count FROM "%s_keywords" '
+                                                 'GROUP BY keyword HAVING count > 1) AS t1 JOIN "%s_keywords" AS t2 JOIN "%s" AS t3 WHERE t1.keyword = t2.keyword AND t3.id = t2.id '
+                                                 'ORDER BY t2.keyword, t3.title' % (table, table, table)).fetchall()
 
                 keywords = {}
                 results = sorted(results, key=_sort_crawl)
@@ -148,7 +153,7 @@ class Cppman(Crawler):
                     keywords[keyword] += 1
                     new_keyword = "%s (%s)" % (keyword, keywords[keyword])
                     self.db_cursor.execute('UPDATE "%s_keywords" SET keyword=? WHERE '
-                                        'id=? AND keyword=?' % table, (new_keyword, id, keyword))
+                                           'id=? AND keyword=?' % table, (new_keyword, id, keyword))
 
                 self.db_conn.commit()
 
@@ -161,7 +166,7 @@ class Cppman(Crawler):
     def process_document(self, url, content, depth):
         """callback to insert index"""
         print("Indexing '%s' (depth %s)..." % (url, depth))
-        name     = self._extract_name(content).replace('\n', '')
+        name = self._extract_name(content).replace('\n', '')
         keywords = self._extract_keywords(content)
 
         self.results[name] = {'url': url, 'keywords': set(), 'aliases': set()}
@@ -174,7 +179,8 @@ class Cppman(Crawler):
             for k in keywords:
                 self.results[name]["aliases"].add((n, k))
                 if k.find("std::") != -1:
-                    self.results[name]["aliases"].add((n, k.replace('std::', '')))
+                    self.results[name]["aliases"].add(
+                        (n, k.replace('std::', '')))
 
         return True
 
@@ -204,7 +210,7 @@ class Cppman(Crawler):
             std::fabs()
             ```
         """
-        m = re.match(r'^(.*?(?:::)?(?:operator)?)((?:::[^:]*|[^:]*)?)$', expr);
+        m = re.match(r'^(.*?(?:::)?(?:operator)?)((?:::[^:]*|[^:]*)?)$', expr)
         prefix = m.group(1)
         tail = m.group(2)
         return [prefix, tail]
@@ -229,7 +235,8 @@ class Cppman(Crawler):
             std::unordered_set::begin(size_type), std::unordered_set::cbegin(size_type)
             ```
         """
-        m = re.match(r'^\s*((?:\(size_type\)|(?:.|\(\))*?)*)((?:\([^)]+\))?)\s*$', title)
+        m = re.match(
+            r'^\s*((?:\(size_type\)|(?:.|\(\))*?)*)((?:\([^)]+\))?)\s*$', title)
         postfix = m.group(2)
 
         t_names = m.group(1).split(',')
@@ -237,7 +244,7 @@ class Cppman(Crawler):
         prefix = self._parse_expression(t_names[0])[0]
         names = []
         for n in t_names:
-            r = self._parse_expression(n);
+            r = self._parse_expression(n)
             if prefix == r[0]:
                 names.append(n + postfix)
             else:
@@ -265,7 +272,7 @@ class Cppman(Crawler):
                 tds = tr.find_all('td')
                 if len(tds) == 2:
                     if re.match("\s*Type\s*", tds[0].get_text()):
-                         typedefTable = True
+                        typedefTable = True
                     elif typedefTable:
                         res = re.search('^\s*(\S*)\s+.*$', tds[0].get_text())
                         names.append(res.group(1))
@@ -306,11 +313,11 @@ class Cppman(Crawler):
         """Cache all available man pages"""
 
         respond = input(
-              'By default, cppman fetches pages on-the-fly if corresponding '
-              'page is not found in the cache. The "cache-all" option is only '
-              'useful if you want to view man pages offline. '
-              'Caching all contents will take several minutes, '
-              'do you want to continue [y/N]? ')
+            'By default, cppman fetches pages on-the-fly if corresponding '
+            'page is not found in the cache. The "cache-all" option is only '
+            'useful if you want to view man pages offline. '
+            'Caching all contents will take several minutes, '
+            'do you want to continue [y/N]? ')
         if not (respond and 'yes'.startswith(respond.lower())):
             raise KeyboardInterrupt
 
@@ -370,7 +377,8 @@ class Cppman(Crawler):
         # tag. We use fixupHTML to fix this.
         data = util.fixupHTML(urllib.request.urlopen(url).read())
 
-        formatter = importlib.import_module('cppman.formatter.%s' % source[:-4])
+        formatter = importlib.import_module(
+            'cppman.formatter.%s' % source[:-4])
         groff_text = formatter.html2groff(data, name)
 
         with gzip.open(outname, 'w') as f:
@@ -408,7 +416,7 @@ class Cppman(Crawler):
             results = self._fetch_page_by_keyword("%%%s%%" % pattern)
 
         conn.close()
-        return sorted(list(set(results)), key=lambda e : _sort_search(e, pattern))
+        return sorted(list(set(results)), key=lambda e: _sort_search(e, pattern))
 
     def man(self, pattern):
         """Call viewer.sh to view man page"""
@@ -444,13 +452,15 @@ class Cppman(Crawler):
 
         results = self._search_keyword(pattern)
 
-        pat = re.compile('(.*?)(%s)(.*?)( \(.*\))?$' % re.escape(pattern), re.I)
+        pat = re.compile('(.*?)(%s)(.*?)( \(.*\))?$' %
+                         re.escape(pattern), re.I)
 
         if results:
             for name, keyword, url in results:
 
                 if os.isatty(sys.stdout.fileno()):
-                    keyword = pat.sub(r'\1\033[1;31m\2\033[0m\3\033[1;33m\4\033[0m', keyword)
+                    keyword = pat.sub(
+                        r'\1\033[1;31m\2\033[0m\3\033[1;33m\4\033[0m', keyword)
                 print("%s - %s" % (keyword, name))
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
