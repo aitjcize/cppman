@@ -235,8 +235,12 @@ class Cppman(Crawler):
             std::unordered_set::begin(size_type), std::unordered_set::cbegin(size_type)
             ```
         """
+        """ remove all template stuff """
+        title = re.sub(r" ?<[^>]+>", "", title)
+
         m = re.match(
             r'^\s*((?:\(size_type\)|(?:.|\(\))*?)*)((?:\([^)]+\))?)\s*$', title)
+
         postfix = m.group(2)
 
         t_names = m.group(1).split(',')
