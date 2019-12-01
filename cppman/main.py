@@ -80,6 +80,16 @@ def _sort_search(entry, pattern):
 
     return (hasStd1, hasStd2, keyword.find(pattern), keyword)
 
+# Return the longest prefix of all list elements.
+def _commonprefix(s1, s2):
+    """" Given two strings, returns the longest common leading prefix """
+
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1;
+    for i, c in enumerate(s1):
+        if c != s2[i]:
+            return s1[:i]
+    return s1
 
 class Cppman(Crawler):
     """Manage cpp man pages, indexes"""
@@ -131,7 +141,7 @@ class Cppman(Crawler):
                 for title in results:
                     for (k, a) in results[title]["aliases"]:
                         sql_results = self.db_cursor.execute('SELECT id, keyword FROM "%s_keywords" '
-                                                             'WHERE keyword LIKE "%s::%%" OR keyword LIKE "%s" OR keyword LIKE "%s %%" OR keyword LIKE "%s)%%" OR keyword LIKE "%s,%%"' % (table, k, k, k, k, k)).fetchall()
+                                                             'WHERE keyword LIKE "%%::%s::%%" OR keyword LIKE "%s::%%" OR keyword LIKE "%s" OR keyword LIKE "%s %%" OR keyword LIKE "%s)%%" OR keyword LIKE "%s,%%"' % (table, k, k, k, k, k, k)).fetchall()
                         for id, keyword in sql_results:
                             keyword = keyword.replace("%s" % k, "%s" % a)
 
@@ -139,7 +149,12 @@ class Cppman(Crawler):
                                 'INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (id, keyword))
                 self.db_conn.commit()
 
-                # give duplicate entries numbers
+                """ remove duplicate keywords that link the same page """
+                self.db_cursor.execute('DELETE FROM "%s_keywords" WHERE rowid NOT IN '
+                                       '(SELECT min(rowid) FROM "%s_keywords"'
+                                       'GROUP BY id, keyword)' % (table, table)).fetchall()
+
+                """ give duplicate keywords with different links entry numbers """
                 results = self.db_cursor.execute('SELECT t3.id, t3.title, t2.keyword, t1.count '
                                                  'FROM (SELECT keyword, COUNT(*) AS count FROM "%s_keywords" '
                                                  'GROUP BY keyword HAVING count > 1) AS t1 JOIN "%s_keywords" AS t2 JOIN "%s" AS t3 WHERE t1.keyword = t2.keyword AND t3.id = t2.id '
@@ -172,12 +187,21 @@ class Cppman(Crawler):
         self.results[name] = {'url': url, 'keywords': set(), 'aliases': set()}
 
         for n in self._parse_title(name):
+            """ add as keyword """
             self.results[name]["keywords"].add(n)
+
+            """ add as keyword without std:: """
             if n.find("std::") != -1:
                 self.results[name]["keywords"].add(n.replace('std::', ''))
 
+            """ add with all keywords variations """
             for k in keywords:
                 self.results[name]["aliases"].add((n, k))
+                prefix = _commonprefix(n, k)
+
+                if len(prefix) > 2 and prefix[-2:] == "::":
+                    self.results[name]["aliases"].add((n[len(prefix):], k[len(prefix):]))
+
                 if k.find("std::") != -1:
                     self.results[name]["aliases"].add(
                         (n, k.replace('std::', '')))
