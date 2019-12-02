@@ -112,7 +112,7 @@ rps = [
     (r'<h5[^>]*>\s*(.*)</h5>', r'\n.SS "\1"\n', 0),
     # Group t-lines
     (r'<span></span>', r'', re.S),
-    (r'<span class="t-lines">(?:<span>.+?</span>)+</span>',
+    (r'<span class="t-lines">(?:<span>.+?</span>.*)+</span>',
      lambda x: re.sub('\s*</span><span>\s*', r', ', x.group(0)), re.S),
     # Member type & function second col is group see basic_fstream for example
     (r'<tr class="t-dsc">\s*?<td>((?:(?!</td>).)*?)</td>\s*?'
