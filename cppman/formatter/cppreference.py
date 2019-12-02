@@ -55,6 +55,8 @@ def member_type_function(g):
     else:
         head = head.strip() + ' (3)'
     full = (head + tail).replace('"', '\\(dq')
+    """ remove [static] tag as in string::npos[static] """
+    full = full.replace("[static]", "");
     return '\n.IP "%s"\n%s\n' % (full, g.group(2))
 
 
@@ -257,10 +259,11 @@ def html2groff(data, name):
 
         for sec, content in secs:
             # Member functions
-            if ('MEMBER' in sec and
+            if (('MEMBER' in sec and
                 'NON-MEMBER' not in sec and
                 'INHERITED' not in sec and
-                    sec != 'MEMBER TYPES'):
+                'MEMBER TYPES' != sec) or
+                'CONSTANTS' == sec):
                 content2 = re.sub(r'\n\.IP "([^:]+?)"',
                                   partial(add_header_multi, class_name),
                                   content)
