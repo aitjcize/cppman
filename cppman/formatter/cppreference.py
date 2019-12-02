@@ -45,7 +45,7 @@ def member_type_function(g):
     head = re.sub(r'<.*?>', '', g.group(1)).strip()
     tail = ''
     cppvertag = re.search(
-        '^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*)+$', head)
+        '^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*(,\s*)?)+$', head)
     if cppvertag:
         head = cppvertag.group(1).strip()
         tail = ' ' + cppvertag.group(2)
