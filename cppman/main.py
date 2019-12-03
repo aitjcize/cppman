@@ -114,7 +114,7 @@ class Cppman(Crawler):
                        ('cppreference.com', 'https://en.cppreference.com/w/cpp', '/w/cpp')]
 
             for table, url, path in sources:
-                # drop and recreate tables
+                """ drop and recreate tables """
                 self.db_cursor.execute('DROP TABLE IF EXISTS "%s"' % table)
                 self.db_cursor.execute(
                     'DROP TABLE IF EXISTS "%s_keywords"' % table)
@@ -123,25 +123,34 @@ class Cppman(Crawler):
                                        '(id INTEGER NOT NULL PRIMARY KEY, title VARCHAR(255) NOT NULL UNIQUE, url VARCHAR(255) NOT NULL UNIQUE)' % table)
                 self.db_cursor.execute('CREATE TABLE "%s_keywords" '
                                        '(id INTEGER NOT NULL, keyword VARCHAR(255), FOREIGN KEY(id) REFERENCES "%s"(id))' % (table, table))
-                # crawl and insert all entries
+                """ crawl and insert all entries """
                 results = self.crawl(url)
 
                 for title in results:
-                    # 1. insert title
+                    """ 1. insert title """
                     self.db_cursor.execute(
                         'INSERT INTO "%s" (title, url) VALUES (?, ?)' % table, (title, results[title]["url"]))
                     lastRow = self.db_cursor.execute(
                         'SELECT last_insert_rowid()').fetchall()[0][0]
 
-                    # 2. insert all keywords
+                    """ 2. insert all keywords """
                     for k in results[title]["keywords"]:
                         self.db_cursor.execute(
                             'INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (lastRow, k))
-                # 3. add all aliases
+                """ 3. add all aliases """
                 for title in results:
                     for (k, a) in results[title]["aliases"]:
-                        sql_results = self.db_cursor.execute('SELECT id, keyword FROM "%s_keywords" '
-                                                             'WHERE keyword LIKE "%%::%s::%%" OR keyword LIKE "%s::%%" OR keyword LIKE "%s" OR keyword LIKE "%s %%" OR keyword LIKE "%s)%%" OR keyword LIKE "%s,%%"' % (table, k, k, k, k, k, k)).fetchall()
+                        """ search for combinations of words like std::basic_string::append """
+                        sql_results = self.db_cursor.execute(
+                            'SELECT id, keyword FROM "%s_keywords" '
+                            'WHERE keyword LIKE "%%::%s::%%" '
+                            'OR keyword LIKE "%s::%%" '
+                            'OR keyword LIKE "%s" '
+                            'OR keyword LIKE "%s %%" '
+                            'OR keyword LIKE "%s)%%" '
+                            'OR keyword LIKE "%s,%%"'
+                            % (table, k, k, k, k, k, k)).fetchall()
+
                         for id, keyword in sql_results:
                             keyword = keyword.replace("%s" % k, "%s" % a)
 
