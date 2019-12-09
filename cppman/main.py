@@ -64,7 +64,11 @@ def _sort_crawl(entry):
 
 
 def _sort_search(entry, pattern):
-    """ sort results if std:: is available, than which position the keyword appears """
+    """ Sort results
+        1. sort by 'std::' (an entry with `std::` goes before an entry without)
+        2. sort by which position the keyword appears
+    """
+
     title, keyword, url = entry
     hasStd1 = keyword.find("std::")
     if hasStd1 == -1:
@@ -92,7 +96,7 @@ def _commonprefix(s1, s2):
     return s1
 
 class Cppman(Crawler):
-    """Manage cpp man pages, indexes"""
+    """ Manage cpp man pages, indexes. """
 
     def __init__(self, forced=False, force_columns=-1):
         Crawler.__init__(self)
@@ -102,7 +106,7 @@ class Cppman(Crawler):
         self.force_columns = force_columns
 
     def rebuild_index(self):
-        """Rebuild index database from cplusplus.com and cppreference.com."""
+        """ Rebuild index database from cplusplus.com and cppreference.com. """
 
         self.db_conn = sqlite3.connect(environ.index_db_re)
         self.db_cursor = self.db_conn.cursor()
@@ -114,33 +118,55 @@ class Cppman(Crawler):
                        ('cppreference.com', 'https://en.cppreference.com/w/cpp', '/w/cpp')]
 
             for table, url, path in sources:
-                """ drop and recreate tables """
-                self.db_cursor.execute('DROP TABLE IF EXISTS "%s"' % table)
+                """ Drop and recreate tables. """
                 self.db_cursor.execute(
-                    'DROP TABLE IF EXISTS "%s_keywords"' % table)
+                    'DROP TABLE IF EXISTS "%s"'
+                    % table)
 
-                self.db_cursor.execute('CREATE TABLE "%s" '
-                                       '(id INTEGER NOT NULL PRIMARY KEY, title VARCHAR(255) NOT NULL UNIQUE, url VARCHAR(255) NOT NULL UNIQUE)' % table)
-                self.db_cursor.execute('CREATE TABLE "%s_keywords" '
-                                       '(id INTEGER NOT NULL, keyword VARCHAR(255), FOREIGN KEY(id) REFERENCES "%s"(id))' % (table, table))
-                """ crawl and insert all entries """
+                self.db_cursor.execute(
+                    'DROP TABLE IF EXISTS "%s_keywords"'
+                    % table)
+
+                self.db_cursor.execute(
+                    'CREATE TABLE "%s" ('
+                    'id INTEGER NOT NULL PRIMARY KEY, '
+                    'title VARCHAR(255) NOT NULL UNIQUE, '
+                    'url VARCHAR(255) NOT NULL UNIQUE'
+                    ')' % table)
+
+                self.db_cursor.execute(
+                    'CREATE TABLE "%s_keywords" ('
+                    'id INTEGER NOT NULL, '
+                    'keyword VARCHAR(255), '
+                    'FOREIGN KEY(id) REFERENCES "%s"(id)'
+                    ')' % (table, table))
+
+                """ Crawl and insert all entries. """
                 results = self.crawl(url)
 
                 for title in results:
                     """ 1. insert title """
                     self.db_cursor.execute(
-                        'INSERT INTO "%s" (title, url) VALUES (?, ?)' % table, (title, results[title]["url"]))
+                        'INSERT INTO "%s" (title, url) VALUES (?, ?)'
+                        % table, (title, results[title]["url"]))
+
                     lastRow = self.db_cursor.execute(
                         'SELECT last_insert_rowid()').fetchall()[0][0]
 
                     """ 2. insert all keywords """
                     for k in results[title]["keywords"]:
                         self.db_cursor.execute(
-                            'INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (lastRow, k))
+                            'INSERT INTO "%s_keywords" (id, keyword) '
+                            'VALUES (?, ?)'
+                            % table, (lastRow, k))
+
                 """ 3. add all aliases """
                 for title in results:
                     for (k, a) in results[title]["aliases"]:
-                        """ search for combinations of words like std::basic_string::append """
+                        """ search for combinations of words
+
+                            e.g. std::basic_string::append
+                        """
                         sql_results = self.db_cursor.execute(
                             'SELECT id, keyword FROM "%s_keywords" '
                             'WHERE keyword LIKE "%%::%s::%%" '
@@ -155,19 +181,30 @@ class Cppman(Crawler):
                             keyword = keyword.replace("%s" % k, "%s" % a)
 
                             self.db_cursor.execute(
-                                'INSERT INTO "%s_keywords" (id, keyword) VALUES (?, ?)' % table, (id, keyword))
+                                'INSERT INTO "%s_keywords" (id, keyword) '
+                                'VALUES (?, ?)'
+                                % table, (id, keyword))
+
                 self.db_conn.commit()
 
                 """ remove duplicate keywords that link the same page """
-                self.db_cursor.execute('DELETE FROM "%s_keywords" WHERE rowid NOT IN '
-                                       '(SELECT min(rowid) FROM "%s_keywords"'
-                                       'GROUP BY id, keyword)' % (table, table)).fetchall()
+                self.db_cursor.execute(
+                    'DELETE FROM "%s_keywords" WHERE rowid NOT IN ('
+                    'SELECT min(rowid) FROM "%s_keywords" '
+                    'GROUP BY id, keyword '
+                    ')' % (table, table)).fetchall()
 
                 """ give duplicate keywords with different links entry numbers """
-                results = self.db_cursor.execute('SELECT t3.id, t3.title, t2.keyword, t1.count '
-                                                 'FROM (SELECT keyword, COUNT(*) AS count FROM "%s_keywords" '
-                                                 'GROUP BY keyword HAVING count > 1) AS t1 JOIN "%s_keywords" AS t2 JOIN "%s" AS t3 WHERE t1.keyword = t2.keyword AND t3.id = t2.id '
-                                                 'ORDER BY t2.keyword, t3.title' % (table, table, table)).fetchall()
+                results = self.db_cursor.execute(
+                    'SELECT t3.id, t3.title, t2.keyword, t1.count'
+                    'FROM ('
+                    '      SELECT keyword, COUNT(*) AS count FROM "%s_keywords" '
+                    '      GROUP BY keyword HAVING count > 1) AS t1 '
+                    'JOIN "%s_keywords" AS t2 '
+                    'JOIN "%s" AS t3 '
+                    'WHERE t1.keyword = t2.keyword AND t3.id = t2.id '
+                    'ORDER BY t2.keyword, t3.title'
+                    % (table, table, table)).fetchall()
 
                 keywords = {}
                 results = sorted(results, key=_sort_crawl)
@@ -176,8 +213,10 @@ class Cppman(Crawler):
                         keywords[keyword] = 0
                     keywords[keyword] += 1
                     new_keyword = "%s (%s)" % (keyword, keywords[keyword])
-                    self.db_cursor.execute('UPDATE "%s_keywords" SET keyword=? WHERE '
-                                           'id=? AND keyword=?' % table, (new_keyword, id, keyword))
+                    self.db_cursor.execute(
+                        'UPDATE "%s_keywords" SET keyword=? WHERE '
+                        'id=? AND keyword=?'
+                        % table, (new_keyword, id, keyword))
 
                 self.db_conn.commit()
 
@@ -213,7 +252,10 @@ class Cppman(Crawler):
                 prefix = _commonprefix(n, k)
 
                 if len(prefix) > 2 and prefix[-2:] == "::":
-                    self.results[name]["aliases"].add((n[len(prefix):], k[len(prefix):]))
+                    """ Create names and keyword without prefixes """
+                    new_name = n[len(prefix):]
+                    new_key  = k[len(prefix):]
+                    self.results[name]["aliases"].add((new_name, new_key))
 
                 if k.find("std::") != -1:
                     self.results[name]["aliases"].add(
@@ -431,11 +473,13 @@ class Cppman(Crawler):
 
     def _fetch_page_by_keyword(self, keyword):
         """ fetches result for a keyword """
-        return self.cursor.execute('SELECT t1.title, t2.keyword, t1.url '
-                                   'FROM "%s" AS t1 '
-                                   'JOIN "%s_keywords" AS t2 '
-                                   'WHERE t1.id = t2.id AND t2.keyword '
-                                   'LIKE ? ORDER BY t2.keyword' % (self.source, self.source), [keyword]).fetchall()
+        return self.cursor.execute(
+            'SELECT t1.title, t2.keyword, t1.url '
+            'FROM "%s" AS t1 '
+            'JOIN "%s_keywords" AS t2 '
+            'WHERE t1.id = t2.id AND t2.keyword '
+            'LIKE ? ORDER BY t2.keyword'
+            % (self.source, self.source), [keyword]).fetchall()
 
     def _search_keyword(self, pattern):
         """ multiple fetches for each pattern """
