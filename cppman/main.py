@@ -205,6 +205,10 @@ class Cppman(Crawler):
 
             """ add with all keywords variations """
             for k in keywords:
+                """ add std:: to typedef if original type is in std namespace """
+                if n.find("std::") != -1 and k.find("std::") == -1:
+                    k = "std::" + k;
+
                 self.results[name]["aliases"].add((n, k))
                 prefix = _commonprefix(n, k)
 
