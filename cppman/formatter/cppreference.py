@@ -45,7 +45,7 @@ def member_type_function(g):
     head = re.sub(r'<.*?>', '', g.group(1)).strip()
     tail = ''
     cppvertag = re.search(
-        '^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*)+$', head)
+        '^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*(,\s*)?)+$', head)
     if cppvertag:
         head = cppvertag.group(1).strip()
         tail = ' ' + cppvertag.group(2)
@@ -55,6 +55,8 @@ def member_type_function(g):
     else:
         head = head.strip() + ' (3)'
     full = (head + tail).replace('"', '\\(dq')
+    """ remove [static] tag as in string::npos[static] """
+    full = full.replace("[static]", "");
     return '\n.IP "%s"\n%s\n' % (full, g.group(2))
 
 
@@ -110,7 +112,7 @@ rps = [
     (r'<h5[^>]*>\s*(.*)</h5>', r'\n.SS "\1"\n', 0),
     # Group t-lines
     (r'<span></span>', r'', re.S),
-    (r'<span class="t-lines">(?:<span>.+?</span>)+</span>',
+    (r'<span class="t-lines">(?:<span>.+?</span>.*)+</span>',
      lambda x: re.sub('\s*</span><span>\s*', r', ', x.group(0)), re.S),
     # Member type & function second col is group see basic_fstream for example
     (r'<tr class="t-dsc">\s*?<td>((?:(?!</td>).)*?)</td>\s*?'
@@ -257,10 +259,11 @@ def html2groff(data, name):
 
         for sec, content in secs:
             # Member functions
-            if ('MEMBER' in sec and
+            if (('MEMBER' in sec and
                 'NON-MEMBER' not in sec and
                 'INHERITED' not in sec and
-                    sec != 'MEMBER TYPES'):
+                'MEMBER TYPES' != sec) or
+                'CONSTANTS' == sec):
                 content2 = re.sub(r'\n\.IP "([^:]+?)"',
                                   partial(add_header_multi, class_name),
                                   content)

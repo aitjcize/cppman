@@ -187,8 +187,7 @@ class Crawler(object):
                 # Pop from an empty set
                 break
             except (httplib.HTTPException, EnvironmentError):
-                with self.targets_lock:
-                    self._add_target(url, depth+1)
+                self._add_target(url, depth+1)
 
         with self.concurrency_lock:
             self.concurrency -= 1
