@@ -61,6 +61,18 @@ or install the git version
 
     $ sudo apt-get install cppman
 
+4. MacOS X: cppman is available in Homebrew and MacPorts.
+
+.. code-block:: bash
+
+    $ brew install cppman
+
+or
+
+.. code-block:: bash
+
+    $ sudo port install cppman
+
 Package Maintainers
 -------------------
 * Arch Linux: myself
