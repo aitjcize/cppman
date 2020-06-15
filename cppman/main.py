@@ -420,9 +420,9 @@ class Cppman(Crawler):
 
         source = environ.config.source
         print('Caching manpages from %s ...' % source)
-        data = cursor.execute('SELECT * FROM "%s"' % source).fetchall()
+        data = cursor.execute('SELECT title, url FROM "%s"' % source).fetchall()
 
-        for name, url, _ in data:
+        for name, url in data:
             print('Caching %s ...' % name)
             retries = 3
             while retries > 0:
