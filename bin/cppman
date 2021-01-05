@@ -42,7 +42,7 @@ from cppman.environ import config
 from cppman.util import update_mandb_path, update_man3_link
 
 program_name = sys.argv[0]
-program_version = '0.5.1'
+program_version = '0.5.2'
 
 
 def version():

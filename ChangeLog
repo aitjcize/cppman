@@ -2,6 +2,13 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.5.2 (January 5th, 2021):
+
+	Buf fixed:
+	* Python 3.9 compatibility
+	* Fix index building
+	* Fix keyword searching
+
 cppman 0.5.1 (June 15th, 2020):
 
 	Buf fixed:
