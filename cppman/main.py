@@ -196,7 +196,7 @@ class Cppman(Crawler):
 
                 """ give duplicate keywords with different links entry numbers """
                 results = self.db_cursor.execute(
-                    'SELECT t3.id, t3.title, t2.keyword, t1.count'
+                    'SELECT t3.id, t3.title, t2.keyword, t1.count '
                     'FROM ('
                     '      SELECT keyword, COUNT(*) AS count FROM "%s_keywords" '
                     '      GROUP BY keyword HAVING count > 1) AS t1 '

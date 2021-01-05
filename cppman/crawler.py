@@ -88,7 +88,7 @@ class Crawler(object):
             try:
                 for t in self.threads:
                     t.join(1)
-                    if not t.isAlive():
+                    if not t.is_alive():
                         self.threads.remove(t)
             except KeyboardInterrupt:
                 sys.exit(1)
