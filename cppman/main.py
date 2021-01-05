@@ -299,15 +299,15 @@ class Cppman(Crawler):
              split of the last parenthesis  operator==,!=,<,<=(std::vector)
              tested with
             ```
-              operator==,!=,<,<=,>,>=(std::vector)  
             operator==,!=,<,<=,>,>=(std::vector)
-              operator==,!=,<,<=,>,>= 
+            operator==,!=,<,<=,>,>=(std::vector)
             operator==,!=,<,<=,>,>=
-              std::rel_ops::operator!=,>,<=,>=  
-            std::atomic::operator= 
-            std::array::operator[]  
-             std::function::operator() 
-             std::vector::at
+            operator==,!=,<,<=,>,>=
+            std::rel_ops::operator!=,>,<=,>=
+            std::atomic::operator=
+            std::array::operator[]
+            std::function::operator()
+            std::vector::at
             std::relational operators (vector)
             std::vector::begin, std::vector::cbegin
             std::abs(float), std::fabs
@@ -479,7 +479,7 @@ class Cppman(Crawler):
             'JOIN "%s_keywords" AS t2 '
             'WHERE t1.id = t2.id AND t2.keyword '
             'LIKE ? ORDER BY t2.keyword'
-            % (self.source, self.source), [keyword]).fetchall()
+            % (self.source, self.source), ['%%%s%%' % keyword]).fetchall()
 
     def _search_keyword(self, pattern):
         """ multiple fetches for each pattern """
