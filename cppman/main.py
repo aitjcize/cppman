@@ -529,7 +529,7 @@ class Cppman(Crawler):
         if pid == 0:
             os.execl('/bin/sh', '/bin/sh', environ.pager_script, pager_type,
                      self.get_page_path(environ.source, page_name),
-                     str(columns), environ.pager_config, page_name)
+                     str(columns), environ.pager_config, pattern)
         return pid
 
     def find(self, pattern):
