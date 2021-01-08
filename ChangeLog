@@ -2,6 +2,11 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.5.3 (January 8th, 2021):
+
+	Buf fixed:
+	* VIM pager re-rendering.
+
 cppman 0.5.2 (January 5th, 2021):
 
 	Buf fixed:
