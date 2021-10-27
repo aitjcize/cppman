@@ -1,6 +1,6 @@
 cppman()
 {
-    command cppman ${1//\//::}
+    command cppman "${*//\//::}"
 }
 _cppman()
 { 
