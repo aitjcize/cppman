@@ -1,20 +1,23 @@
-_cppman ()
+cppman()
 {
-	if [ "${#COMP_WORDS[@]}" -gt 2 ]; then
-		return
-	fi
-	if [ -z "${COMP_WORDS[1]}" ]; then
-		return
-	fi
-	P=${COMP_LINE[0]}
-	W=${COMP_WORDS[1]}
-
-	PERLP=$(printf 'if (m/^(.*?) - (.*)$/) { print "$1$/"; }' $W)
-
-	params="$($P -f "$W" | perl -ne "$PERLP" | sort -u | xargs -d '\n' printf '%q ')"
-	echo $params > test.log
-
-	COMPREPLY=($(compgen -W "$params" "$W"))
-
+    command cppman "${*//\//::}"
 }
+_cppman()
+{ 
+    local W params IFS=$' \t\n'
+    if [ -z "${COMP_WORDS[1]}" ]; then
+        return
+    fi
+    W=${COMP_WORDS[1]}
+    W=${W//\//::}; W=${W//\*/\\*}; W=${W//[/\\[}
+    params="$(
+        command cppman -f "$W" |
+        perl -ne 'if (m/^(.*?) - (.*)$/) { print "$1$/"; }' |
+        sed -n 's/([^)]\+)//g; /^'"${W}"'/p'
+    )"
+    IFS=$'\n'
+    params=${params//::/\/}
+    COMPREPLY=( $(compgen -W "$params" -- ${COMP_WORDS[1]}) )
+}
+
 complete -F _cppman cppman
