@@ -12,7 +12,7 @@ _data_files = [
         ('share/doc/cppman', ['README.rst', 'AUTHORS', 'COPYING', 'ChangeLog']),
         ('share/man/man1', ['misc/cppman.1']),
         ('share/bash-completion/completions', ['misc/completions/cppman.bash']),
-        ('share/zsh-completion/completions', ['misc/completions/cppman.zsh'])
+        ('share/zsh/vendor-completions/', ['misc/completions/zsh/_cppman'])
         ]
 
 setup(

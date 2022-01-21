@@ -1,0 +1,33 @@
+#compdef cppman
+_cppman_pages ()
+{
+	P=${words[1]}
+	if [ $CURRENT -gt $NORMARG ]; then
+		return
+	fi
+	W=${words[$NORMARG]}
+	if [ -z "$W" ]; then
+		return
+	fi
+        # (f)$(...)      use shell output as arrays with line breaks as separators
+        # ${...%% *}     remove everything after the first space in each array element
+        # ${(M)...:#$W*} only keep elements that match $W*, i.e. start with $W
+        params=(${(M)${${(f)"$($P -f $W)"}%% *}:#$W*})
+
+	compadd "$@" -- $params
+}
+
+# (1 -) don't suggest any further after an option. Used because the code does sys.exit() after these.
+_arguments -n \
+  "(1 -)"{-s,--source=}"[Select source]:SOURCE:(cppreference.com cplusplus.com)" \
+  "(1 -)"{-c,--cache-all}"[Cache all available man pages from cppreference.com and cplusplus.com to enable offline browsing]" \
+  "(1 -)"{-C,--clear-cache}"[Clear all cached files.]" \
+  "(1 -)"{-f,--find-page=}"[Find man page.]:KEYWORD: " \
+  "(1 -)"{-h,--help}"[show help message and exit]" \
+  "(1 -)"{-o,--force-update}"[Force cppman to update existing cache when '--cache-all' or browsing man pages that were already cached.]" \
+  "(1 -)"{-m,--use-mandb=}"[If true, cppman adds manpage path to mandb so that you can view C++ manpages with 'man' command.]:MANDB:(true false)" \
+  "(1 -)"{-p,--pager=}"[Select pager to use.]:PAGER:(vim nvim less system)" \
+  "(1 -)"{-r,--rebuild-index}"[rebuild index database for the selected source.]" \
+  "(1 -)"{-v,--version}"[Show version information.]" \
+  "--force-columns=[Force terminal columns]:FORCE_COLUMNS:" \
+  "1:man page:_cppman_pages" \
