@@ -2,21 +2,26 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.5.4 (Oct 3rd, 2022):
+
+	Features added:
+	* Update index.db
+
 cppman 0.5.3 (January 8th, 2021):
 
-	Buf fixed:
+	Bug fixed:
 	* VIM pager re-rendering.
 
 cppman 0.5.2 (January 5th, 2021):
 
-	Buf fixed:
+	Bug fixed:
 	* Python 3.9 compatibility
 	* Fix index building
 	* Fix keyword searching
 
 cppman 0.5.1 (June 15th, 2020):
 
-	Buf fixed:
+	Bug fixed:
 	* Tones of bug fixed, thanks @SGSSGene, again!
 
 cppman 0.5.0 (August 18th, 2018):
@@ -26,7 +31,7 @@ cppman 0.5.0 (August 18th, 2018):
 	* Separate keyword table for better queries.
 	* Add neovim as pager support
 
-	Buf fixed:
+	Bug fixed:
 	* Tones of bug fixed, thanks @SGSSGene
 
 cppman 0.4.9 (April 24th, 2016):
