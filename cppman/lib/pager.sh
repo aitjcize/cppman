@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # pager.sh
 #
@@ -59,6 +59,10 @@ remove_escape() {
     sed "s/$escape\[[^m]*m//g" | col -x -b
 }
 
+if [ -z "$(which agroff)" ]; then
+  echo "error: groff not found, please install the groff command"
+  exit 1
+fi
 
 if [ "$pager_type" = "nvim" ]; then
   if ! which nvim >/dev/null 2>&1; then
