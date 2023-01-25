@@ -24,18 +24,26 @@
 
 from __future__ import print_function
 
-import http.client as httplib
-import os
 import re
 import sys
 from threading import Lock, Thread
-from urllib.parse import quote, urljoin, urlparse, urlunparse
+from urllib.parse import urljoin, urlparse, urlunparse
+import urllib.request
 
 from bs4 import BeautifulSoup
 
+class NoRedirection(urllib.request.HTTPErrorProcessor):
+    """A handler that disables redirection"""
+    def http_response(self, request, response):
+        if response.code in Crawler.F_REDIRECT_CODES:
+            return response
+        return super().http_response(request, response)
+
+    https_response = http_response
 
 class Crawler(object):
     F_ANY, F_SAME_HOST, F_SAME_PATH = list(range(3))
+    F_REDIRECT_CODES = (301, 302)
 
     def __init__(self):
         self.queued = set()
@@ -144,22 +152,10 @@ class Crawler(object):
                     depth, url = sorted(self.targets)[0]
                     self.targets.remove((depth, url))
 
-                url_p = urlparse(url)
+                opener = urllib.request.build_opener(NoRedirection)
+                res = opener.open(url, timeout=10)
 
-                if url_p.scheme == "http":
-                    conn = httplib.HTTPConnection(url_p.netloc, timeout=10)
-                elif url_p.scheme == "https":
-                    conn = httplib.HTTPSConnection(url_p.netloc, timeout=10)
-                else:
-                    raise RuntimeError('Unknown protocol %s' % url_p.scheme)
-
-                conn.request('GET', url_p.path)
-                res = conn.getresponse()
-
-                if res.status == 404:
-                    continue
-
-                if res.status == 301 or res.status == 302:
+                if res.status in self.F_REDIRECT_CODES:
                     target = self._fix_link(url, res.getheader('location'))
                     self._add_target(target, depth+1)
                     continue
@@ -186,7 +182,11 @@ class Crawler(object):
             except KeyError:
                 # Pop from an empty set
                 break
-            except (httplib.HTTPException, EnvironmentError):
+            except urllib.error.HTTPError as err:
+                if err.code == 404:
+                    continue
+                self._add_target(url, depth+1)
+            except (urllib.error.URLError, EnvironmentError):
                 self._add_target(url, depth+1)
 
         with self.concurrency_lock:
