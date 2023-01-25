@@ -32,6 +32,9 @@ import urllib.request
 
 from bs4 import BeautifulSoup
 
+# See https://tools.ietf.org/html/rfc3986#section-3.3
+_CONTAINS_DISALLOWED_URL_PCHAR_RE = re.compile('[\x00-\x20\x7f]')
+
 class NoRedirection(urllib.request.HTTPErrorProcessor):
     """A handler that disables redirection"""
     def http_response(self, request, response):
@@ -103,7 +106,10 @@ class Crawler(object):
         return self.results
 
     def _fix_link(self, root, link):
-        link = urlparse(link.strip())
+        # Encode invalid characters
+        link = re.sub(_CONTAINS_DISALLOWED_URL_PCHAR_RE,
+                      lambda m: '%{:02X}'.format(ord(m.group())), link.strip())
+        link = urlparse(link)
         if (link.fragment != ""):
             link = link._replace(fragment="")
         return urljoin(root, urlunparse(link))
