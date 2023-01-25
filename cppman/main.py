@@ -114,7 +114,7 @@ class Cppman(Crawler):
             self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf|svg)$')
             self.set_follow_mode(Crawler.F_SAME_PATH)
 
-            sources = [('cplusplus.com', 'http://www.cplusplus.com/reference/', None),
+            sources = [('cplusplus.com', 'https://cplusplus.com/reference/', None),
                        ('cppreference.com', 'https://en.cppreference.com/w/cpp', '/w/cpp')]
 
             for table, url, path in sources:
