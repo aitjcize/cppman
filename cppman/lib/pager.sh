@@ -59,7 +59,7 @@ remove_escape() {
     sed "s/$escape\[[^m]*m//g" | col -x -b
 }
 
-if [ -z "$(which agroff)" ]; then
+if [ -z "$(which groff)" ]; then
   echo "error: groff not found, please install the groff command"
   exit 1
 fi
