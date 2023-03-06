@@ -26,9 +26,12 @@ from __future__ import print_function
 
 import re
 import sys
+import time
 from threading import Lock, Thread
 from urllib.parse import urljoin, urlparse, urlunparse
 import urllib.request
+import urllib.error
+import http.client
 
 from bs4 import BeautifulSoup
 
@@ -51,6 +54,10 @@ class Crawler(object):
     def __init__(self):
         self.queued = set()
         self.targets = set()
+        self.failed_targets = set()
+        self.max_failed_retries = 3
+        self.failed_retry = 0
+        self.downloaded = False
         self.threads = []
         self.concurrency = 0
         self.max_outstanding = 16
@@ -92,18 +99,57 @@ class Crawler(object):
             self.url = self.url._replace(path=path)
         self.url = self.url._replace(fragment="")
 
-        self._add_target(url, 1)
-        self._spawn_new_worker()
+        self.failed_targets = set()
+        self.downloaded = True
+        self.failed_retry = self.max_failed_retries
 
-        while self.threads:
-            try:
-                for t in self.threads:
-                    t.join(1)
-                    if not t.is_alive():
-                        self.threads.remove(t)
-            except KeyboardInterrupt:
-                sys.exit(1)
+        self._add_target(url, 1)
+        while True:
+            self._spawn_new_worker()
+
+            while True:
+                with self.concurrency_lock:
+                    threads = list(self.threads)
+                if not threads:
+                    break
+                try:
+                    for t in threads:
+                        t.join(1)
+                        if not t.is_alive():
+                            with self.concurrency_lock:
+                                self.threads.remove(t)
+                except KeyboardInterrupt:
+                    sys.exit(1)
+
+            n_failed = len(self.failed_targets)
+            if n_failed == 0:
+                break
+            if self.downloaded: # at least one URL succeeded
+                self.failed_retry = self.max_failed_retries
+            else:
+                self.failed_retry -= 1
+            if self.failed_retry <= 0:
+                print("No retries are left to download failed URLs")
+                break
+            print("Some URLs failed to download ({}). Retrying ({})...".format(
+                  n_failed, self.failed_retry))
+            self.targets = self.failed_targets
+            self.failed_targets = set()
+            self.downloaded = False
+            time.sleep(2)
+
+        if self.failed_targets:
+            print("=== Failed URLs ({}):".format(len(self.failed_targets)))
+            for depth, url in self.failed_targets:
+                print("{} (depth {})".format(url, depth))
+        print("=== Done {}".format(url))
+
         return self.results
+
+    def process_document(self, url, content, depth):
+        """callback to insert index"""
+        # Should be implemented by a derived class. Make pylint happy
+        return True
 
     def _fix_link(self, root, link):
         # Encode invalid characters
@@ -141,59 +187,73 @@ class Crawler(object):
             self.queued.add(url)
             self.targets.add((depth, url))
 
+    def _target_failed(self, url, depth):
+        with self.targets_lock:
+            self.failed_targets.add((depth, url))
+
     def _spawn_new_worker(self):
         with self.concurrency_lock:
-            self.concurrency += 1
-            t = Thread(target=self._worker, args=(self.concurrency,))
-            t.daemon = True
-            self.threads.append(t)
-            t.start()
+            if self.concurrency < self.max_outstanding:
+                self.concurrency += 1
+                t = Thread(target=self._worker, args=(self.concurrency,))
+                t.daemon = True
+                self.threads.append(t)
+                t.start()
 
     def _worker(self, sid):
-        while self.targets:
+        while True:
+            with self.targets_lock:
+                if not self.targets:
+                    break
+                depth, url = sorted(self.targets)[0]
+                self.targets.remove((depth, url))
+
+            opener = urllib.request.build_opener(NoRedirection)
+            request_error = None
             try:
-                with self.targets_lock:
-                    if len(self.targets) == 0:
-                        continue
-                    depth, url = sorted(self.targets)[0]
-                    self.targets.remove((depth, url))
-
-                opener = urllib.request.build_opener(NoRedirection)
                 res = opener.open(url, timeout=10)
-
-                if res.status in self.F_REDIRECT_CODES:
-                    target = self._fix_link(url, res.getheader('location'))
-                    self._add_target(target, depth+1)
-                    continue
-
-                # Check content type
-                try:
-                    if not re.search(
-                        self.content_type_filter,
-                            res.getheader('Content-Type')):
-                        continue
-                except TypeError:  # getheader result is None
-                    continue
-
-                content = res.read().decode()
-                if self.process_document(url, content, depth):
-
-                    # Find links in document
-                    links = self.link_parser(url, content)
-                    for link in links:
-                        self._add_target(link, depth+1)
-
-                if self.concurrency < self.max_outstanding:
-                    self._spawn_new_worker()
-            except KeyError:
-                # Pop from an empty set
-                break
+                with self.targets_lock:
+                    self.downloaded = True
             except urllib.error.HTTPError as err:
                 if err.code == 404:
                     continue
-                self._add_target(url, depth+1)
-            except (urllib.error.URLError, EnvironmentError):
-                self._add_target(url, depth+1)
+                request_error = err
+            except Exception as err:
+                request_error = err
+            if request_error is not None:
+                print("URL failed ({}): {}".format(url, request_error))
+                self._target_failed(url, depth)
+                continue
+
+            if res.status in self.F_REDIRECT_CODES:
+                target = self._fix_link(url, res.getheader('location'))
+                self._add_target(target, depth+1)
+                continue
+
+            # Check content type
+            try:
+                if not re.search(
+                    self.content_type_filter,
+                        res.getheader('Content-Type')):
+                    continue
+            except TypeError:  # getheader result is None
+                print("Getting Content-Type failed ({})".format(url))
+                continue
+
+            try:
+                content = res.read().decode()
+            except http.client.HTTPException as err:
+                print("Content read() failed ({}): {}".format(url, err))
+                self._target_failed(url, depth)
+                continue
+
+            if self.process_document(url, content, depth):
+                # Find links in document
+                links = self.link_parser(url, content)
+                for link in links:
+                    self._add_target(link, depth+1)
+
+            self._spawn_new_worker()
 
         with self.concurrency_lock:
             self.concurrency -= 1
