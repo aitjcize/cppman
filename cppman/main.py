@@ -265,7 +265,7 @@ class Cppman(Crawler):
 
     def _extract_name(self, data):
         """Extract man page name from web page."""
-        name = re.search('<h1[^>]*>(.+?)</h1>', data).group(1)
+        name = re.search('<[hH]1[^>]*>(.+?)</[hH]1>', data, re.DOTALL).group(1)
         name = re.sub(r'<([^>]+)>', r'', name)
         name = re.sub(r'&gt;', r'>', name)
         name = re.sub(r'&lt;', r'<', name)
