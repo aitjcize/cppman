@@ -93,7 +93,6 @@ class Crawler(object):
         return links
 
     def crawl(self, url, path=None):
-        self.results = {}
         self.url = urlparse(url)
         if path:
             self.url = self.url._replace(path=path)
@@ -143,8 +142,6 @@ class Crawler(object):
             for depth, url in self.failed_targets:
                 print("{} (depth {})".format(url, depth))
         print("=== Done {}".format(url))
-
-        return self.results
 
     def process_document(self, url, content, depth):
         """callback to insert index"""
