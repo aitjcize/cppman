@@ -22,10 +22,12 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+import collections
 import gzip
 import html
 import importlib
 import os
+import os.path
 import re
 import shutil
 import sqlite3
@@ -36,6 +38,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 from cppman import environ, util
 from cppman.crawler import Crawler
+from urllib.parse import urlparse, unquote
 
 
 
@@ -95,6 +98,16 @@ def _commonprefix(s1, s2):
             return s1[:i]
     return s1
 
+def _removeprefix(string, prefix):
+    if prefix and string.startswith(prefix):
+        return string[len(prefix):]
+    return string
+
+def _removesuffix(string, suffix):
+    if suffix and string.endswith(suffix):
+        return string[:-len(suffix)]
+    return string
+
 class Cppman(Crawler):
     """ Manage cpp man pages, indexes. """
 
@@ -142,7 +155,9 @@ class Cppman(Crawler):
                     ')' % (table, table))
 
                 """ Crawl and insert all entries. """
-                results = self.crawl(url)
+                self.results = collections.defaultdict(list)
+                self.crawl(url)
+                results = self._results_with_unique_title()
 
                 for title in results:
                     """ 1. insert title """
@@ -232,15 +247,16 @@ class Cppman(Crawler):
         name = self._extract_name(content).replace('\n', '')
         keywords = self._extract_keywords(content)
 
-        self.results[name] = {'url': url, 'keywords': set(), 'aliases': set()}
+        entry = {'url': url, 'keywords': set(), 'aliases': set()}
+        self.results[name].append(entry)
 
         for n in self._parse_title(name):
             """ add as keyword """
-            self.results[name]["keywords"].add(n)
+            entry["keywords"].add(n)
 
             """ add as keyword without std:: """
             if n.find("std::") != -1:
-                self.results[name]["keywords"].add(n.replace('std::', ''))
+                entry["keywords"].add(n.replace('std::', ''))
 
             """ add with all keywords variations """
             for k in keywords:
@@ -248,20 +264,44 @@ class Cppman(Crawler):
                 if n.find("std::") != -1 and k.find("std::") == -1:
                     k = "std::" + k;
 
-                self.results[name]["aliases"].add((n, k))
+                entry["aliases"].add((n, k))
                 prefix = _commonprefix(n, k)
 
                 if len(prefix) > 2 and prefix[-2:] == "::":
                     """ Create names and keyword without prefixes """
                     new_name = n[len(prefix):]
                     new_key  = k[len(prefix):]
-                    self.results[name]["aliases"].add((new_name, new_key))
+                    entry["aliases"].add((new_name, new_key))
 
                 if k.find("std::") != -1:
-                    self.results[name]["aliases"].add(
+                    entry["aliases"].add(
                         (n, k.replace('std::', '')))
 
         return True
+
+    def _results_with_unique_title(self):
+        """process crawling results and return title -> entry dictionary;
+           add part of the path to entries having the same title
+        """
+        results = dict()
+        for title, entries in self.results.items():
+            if len(entries) == 1:
+                results[title] = entries[0]
+            else:
+                paths = [_removesuffix(urlparse(entry['url'])[2], '/') for entry in entries]
+                prefix = os.path.commonpath(paths)
+                if prefix:
+                    prefix += '/'
+                suffix = '/' + os.path.basename(paths[0])
+                for path in paths:
+                    if not path.endswith(suffix):
+                        suffix = ''
+                        break
+                for index, entry in enumerate(entries):
+                    path = _removeprefix(paths[index], prefix)
+                    path = _removesuffix(path, suffix)
+                    results["{} ({})".format(title, unquote(path))] = entry
+        return results
 
     def _extract_name(self, data):
         """Extract man page name from web page."""
