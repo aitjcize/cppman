@@ -398,7 +398,8 @@ class Cppman(Crawler):
                         typedefTable = True
                     elif typedefTable:
                         res = re.search('^\s*(\S*)\s+.*$', tds[0].get_text())
-                        names.append(res.group(1))
+                        if res and res.group(1):
+                            names.append(res.group(1))
                     elif not typedefTable:
                         break
             if typedefTable:
