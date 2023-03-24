@@ -2,6 +2,12 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.5.5 (Mar 24th, 2023):
+
+	Features added:
+	* Improve crawler reliability.
+	* Update index.db
+
 cppman 0.5.4 (Oct 3rd, 2022):
 
 	Features added:
