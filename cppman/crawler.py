@@ -32,6 +32,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 import urllib.request
 import urllib.error
 import http.client
+import cppman.util
 
 from bs4 import BeautifulSoup
 
@@ -205,7 +206,7 @@ class Crawler(object):
                 depth, url = sorted(self.targets)[0]
                 self.targets.remove((depth, url))
 
-            opener = urllib.request.build_opener(NoRedirection)
+            opener = cppman.util.build_opener(NoRedirection)
             request_error = None
             try:
                 res = opener.open(url, timeout=10)
