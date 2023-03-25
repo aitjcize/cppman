@@ -24,14 +24,14 @@
 
 import os
 import shutil
-import struct
 import subprocess
-import sys
-import termios
+import urllib.request
 
 import bs4
 from cppman import environ
 
+# User-Agent header value to use with all requests
+_USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0"
 
 def update_mandb_path():
     """Add $XDG_CACHE_HOME/cppman/man to $HOME/.manpath"""
@@ -108,3 +108,18 @@ def html2man(data, formatter):
 
 def fixupHTML(data):
     return str(bs4.BeautifulSoup(data, "html5lib"))
+
+def urlopen(url, *args, **kwargs):
+    """A wrapper around urllib.request.urlopen() which adds custom headers"""
+    if isinstance(url, urllib.request.Request):
+        req = url
+    else:
+        req = urllib.request.Request(url)
+    req.add_header('User-Agent', _USER_AGENT)
+    return urllib.request.urlopen(req, *args, **kwargs)
+
+def build_opener(*args, **kwargs):
+    """A wrapper around urllib.request.build_opener() which adds custom headers"""
+    opener = urllib.request.build_opener(*args, **kwargs)
+    opener.addheaders = [('User-Agent', _USER_AGENT)]
+    return opener

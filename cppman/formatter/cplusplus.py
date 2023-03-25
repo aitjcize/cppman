@@ -24,10 +24,9 @@
 
 import datetime
 import re
-import urllib.request
 
 from cppman.formatter.tableparser import parse_table
-from cppman.util import fixupHTML, html2man
+from cppman.util import fixupHTML, html2man, urlopen
 
 # Format replacement RE list
 # The '.SE' pseudo macro is described in the function: html2groff
@@ -223,7 +222,7 @@ def html2groff(data, name):
 
 def func_test():
     """Test if there is major format changes in cplusplus.com"""
-    ifs = urllib.request.urlopen('http://www.cplusplus.com/printf')
+    ifs = urlopen('http://www.cplusplus.com/printf')
     result = html2groff(fixupHTML(ifs.read()), 'printf')
     assert '.SH "NAME"' in result
     assert '.SH "TYPE"' in result
@@ -232,7 +231,7 @@ def func_test():
 
 def test():
     """Simple Text"""
-    ifs = urllib.request.urlopen('http://www.cplusplus.com/vector')
+    ifs = urlopen('http://www.cplusplus.com/vector')
     print(html2groff(fixupHTML(ifs.read()), 'std::vector'), end=' ')
     # with open('test.html') as ifs:
     #    print html2groff(fixupHTML(ifs.read()), 'std::vector'),
