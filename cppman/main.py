@@ -67,11 +67,17 @@ def _sort_crawl(entry):
 
 def _sort_search(entry, pattern):
     """ Sort results
+        0. exact match goes first
         1. sort by 'std::' (an entry with `std::` goes before an entry without)
         2. sort by which position the keyword appears
     """
 
     title, keyword, url = entry
+
+    if keyword == pattern:
+        # Exact match - lowest key value
+        return (-1, -1, 0, keyword)
+
     hasStd1 = keyword.find("std::")
     if hasStd1 == -1:
         hasStd1 = 1
