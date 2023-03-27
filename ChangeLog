@@ -2,6 +2,11 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.5.6 (Mar 27th, 2023):
+
+	Bug fixed:
+	* Default UA blocked by cppreference.com
+
 cppman 0.5.5 (Mar 24th, 2023):
 
 	Features added:
