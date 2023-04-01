@@ -43,6 +43,12 @@ def member_type_function(g):
         return ""
     head = re.sub(r'<.*?>', '', g.group(1)).strip()
     tail = ''
+
+    spectag = re.search(r'^(.*?)(\[(?:static|virtual)\])(.*)$', head)
+    if spectag:
+        head = spectag.group(1).strip() + ' ' + spectag.group(3).strip()
+        tail = ' ' + spectag.group(2)
+
     cppvertag = re.search(
         '^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*(,\s*)?)+$', head)
     if cppvertag:
@@ -53,9 +59,8 @@ def member_type_function(g):
         head = ', '.join([x.strip() + ' (3)' for x in head.split(',')])
     else:
         head = head.strip() + ' (3)'
+
     full = (head + tail).replace('"', '\\(dq')
-    """ remove [static] tag as in string::npos[static] """
-    full = full.replace("[static]", "");
     return '\n.IP "%s"\n%s\n' % (full, g.group(2))
 
 
