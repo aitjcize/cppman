@@ -162,6 +162,7 @@ def main():
         pid = cm.man(args[0])
     except RuntimeError as e:
         print(e)
+        sys.exit(16)
     else:
         os.waitpid(pid, 0)
 
