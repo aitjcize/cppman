@@ -91,7 +91,7 @@ case $pager_type in
     } 3<&0
     ;;
   less)
-    render | less
+    render | less -r
     ;;
   pipe)
     render | remove_escape
