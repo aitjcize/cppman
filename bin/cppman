@@ -161,7 +161,8 @@ def main():
     try:
         pid = cm.man(args[0])
     except RuntimeError as e:
-        print(e)
+        print(e, file=sys.stderr)
+        sys.exit(16)
     else:
         os.waitpid(pid, 0)
 
@@ -172,6 +173,6 @@ if __name__ == '__main__':
         sys.exit()
     except (Exception, KeyboardInterrupt) as e:
         if type(e) == KeyboardInterrupt:
-            print('\nAborted.')
+            print('\nAborted.', file=sys.stderr)
         else:
-            print('error:', e)
+            print('error:', e, file=sys.stderr)
