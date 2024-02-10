@@ -129,7 +129,7 @@ class Cppman(Crawler):
         self.db_conn = sqlite3.connect(environ.index_db_re)
         self.db_cursor = self.db_conn.cursor()
         try:
-            self.add_url_filter('\.(jpg|jpeg|gif|png|js|css|swf|svg)$')
+            self.add_url_filter(r'\.(jpg|jpeg|gif|png|js|css|swf|svg)$')
             self.set_follow_mode(Crawler.F_SAME_PATH)
 
             sources = [('cplusplus.com', 'https://cplusplus.com/reference/', None),
@@ -399,10 +399,10 @@ class Cppman(Crawler):
             for tr in x.find_all('tr'):
                 tds = tr.find_all('td')
                 if len(tds) == 2:
-                    if re.match("\s*Type\s*", tds[0].get_text()):
+                    if re.match(r"\s*Type\s*", tds[0].get_text()):
                         typedefTable = True
                     elif typedefTable:
-                        res = re.search('^\s*(\S*)\s+.*$', tds[0].get_text())
+                        res = re.search(r'^\s*(\S*)\s+.*$', tds[0].get_text())
                         if res and res.group(1):
                             names.append(res.group(1))
                     elif not typedefTable:
@@ -420,7 +420,7 @@ class Cppman(Crawler):
                 if e.name == "table":
                     for tr in e.find_all('tr'):
                         text = re.sub('\n', ' ', tr.get_text())
-                        res = re.search('^.* (\S+)\s*=.*$', text)
+                        res = re.search(r'^.* (\S+)\s*=.*$', text)
                         if res:
                             names.append(res.group(1))
         # search for "Helper types" list
@@ -433,7 +433,7 @@ class Cppman(Crawler):
                 if e.name == "table":
                     for tr in e.find_all('tr'):
                         text = re.sub('\n', ' ', tr.get_text())
-                        res = re.search('^.* (\S+)\s*=.*$', text)
+                        res = re.search(r'^.* (\S+)\s*=.*$', text)
                         if res:
                             names.append(res.group(1))
         return [html.unescape(n) for n in names]
@@ -583,7 +583,7 @@ class Cppman(Crawler):
 
         results = self._search_keyword(pattern)
 
-        pat = re.compile('(.*?)(%s)(.*?)( \(.*\))?$' %
+        pat = re.compile(r'(.*?)(%s)(.*?)( \(.*\))?$' %
                          re.escape(pattern), re.I)
 
         if results:

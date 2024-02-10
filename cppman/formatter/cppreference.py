@@ -50,7 +50,7 @@ def member_type_function(g):
         tail = ' ' + spectag.group(2)
 
     cppvertag = re.search(
-        '^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*(,\s*)?)+$', head)
+        r'^(.*?)(\[(?:(?:since|until) )?C\+\+\d+\]\s*(,\s*)?)+$', head)
     if cppvertag:
         head = cppvertag.group(1).strip()
         tail = ' ' + cppvertag.group(2)
@@ -117,7 +117,7 @@ rps = [
     # Group t-lines
     (r'<span></span>', r'', re.S),
     (r'<span class="t-lines">(?:<span>.+?</span>.*)+</span>',
-     lambda x: re.sub('\s*</span><span>\s*', r', ', x.group(0)), re.S),
+     lambda x: re.sub(r'\s*</span><span>\s*', r', ', x.group(0)), re.S),
     # Member type & function second col is group see basic_fstream for example
     (r'<tr class="t-dsc">\s*?<td>((?:(?!</td>).)*?)</td>\s*?'
      r'<td>((?:(?!</td>).)*?)<table[^>]*>((?:(?!</table>).)*?)</table>'
