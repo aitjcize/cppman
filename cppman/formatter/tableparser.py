@@ -144,7 +144,7 @@ class Node(object):
             ci = 0
             for i in range(total):
                 if i in rowspan:
-                    fd.write('\^%s' % ('|' if i < total - 1 else ''))
+                    fd.write(r'\^%s' % ('|' if i < total - 1 else ''))
                     if rowspan[i] == 1:
                         del rowspan[i]
                     else:
