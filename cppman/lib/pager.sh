@@ -71,7 +71,7 @@ if [ "$pager_type" = "nvim" ]; then
 fi
 if [ "$pager_type" = "vim" ]; then
   if ! which vim >/dev/null 2>&1; then
-    if ! which nvim >/dev/null 2>&1; then
+    if which nvim >/dev/null 2>&1; then
       pager_type=nvim
     else
       pager_type=less
