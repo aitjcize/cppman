@@ -2,6 +2,13 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.5.7 (Jun 27th, 2024):
+
+	Bug fixed:
+	* cppreference.com: fix [static], [virtual]
+	* pager: propoerly fallback to less (#173)
+	* Properly escape regex string literals
+
 cppman 0.5.6 (Mar 27th, 2023):
 
 	Bug fixed:
