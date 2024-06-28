@@ -1,5 +1,3 @@
-.. image:: http://img.shields.io/travis/aitjcize/cppman.svg?style=flat
-   :target: https://travis-ci.org/aitjcize/cppman
 .. image:: http://img.shields.io/pypi/v/cppman.svg?style=flat
    :target: https://pypi.python.org/pypi/cppman
 .. image::  https://img.shields.io/github/downloads/aitjcize/cppman/total.svg
@@ -77,7 +75,6 @@ Package Maintainers
 -------------------
 * Arch Linux: myself
 * Debian: `czchen <https://github.com/czchen>`_
-* Gentoo: `rindeal <https://github.com/rindeal>`_
 * MacPorts: `eborisch <https://github.com/eborisch>`_
 
 FAQ
