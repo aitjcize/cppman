@@ -84,15 +84,22 @@ case $pager_type in
     [ -z "$PAGER" ] && PAGER=less
     render | $PAGER
     ;;
-  vim|nvim)
 
+  vim|nvim)
     render | remove_escape 3<&- | {
-      $pager_type -R -c "let g:page_name=\"$page_name\"" -S $vim_config /dev/fd/3 </dev/tty
+      $pager_type \
+        --cmd "let g:is_cppman_active=1" \
+        -R \
+        -c "let g:page_name=\"$page_name\"" \
+        -S $vim_config \
+        /dev/fd/3 </dev/tty
     } 3<&0
     ;;
+
   less)
     render | less -r
     ;;
+
   pipe)
     render | remove_escape
 esac
