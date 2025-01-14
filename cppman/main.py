@@ -198,7 +198,7 @@ class Cppman(Crawler):
                             % (table, k, k, k, k, k, k)).fetchall()
 
                         for id, keyword in sql_results:
-                            keyword = keyword.replace("%s" % k, "%s" % a)
+                            keyword = re.sub(re.escape("%s" % k), "%s" % a, keyword, flags=re.IGNORECASE)
 
                             self.db_cursor.execute(
                                 'INSERT INTO "%s_keywords" (id, keyword) '
