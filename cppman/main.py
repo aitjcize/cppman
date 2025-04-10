@@ -24,7 +24,6 @@
 
 import collections
 import gzip
-import html
 import importlib
 import os
 import os.path
@@ -34,11 +33,10 @@ import sqlite3
 import subprocess
 import sys
 
-from bs4 import BeautifulSoup
 from cppman import environ, util
 from cppman.crawler import Crawler
+from cppman.entry import Entry
 from urllib.parse import urlparse, unquote
-
 
 
 def _sort_crawl(entry):
@@ -168,13 +166,13 @@ class Cppman(Crawler):
                     """ 1. insert title """
                     self.db_cursor.execute(
                         'INSERT INTO "%s" (title, url) VALUES (?, ?)'
-                        % table, (title, results[title]["url"]))
+                        % table, (title, results[title].url))
 
                     lastRow = self.db_cursor.execute(
                         'SELECT last_insert_rowid()').fetchall()[0][0]
 
                     """ 2. insert all keywords """
-                    for k in results[title]["keywords"]:
+                    for k in results[title].keywords():
                         self.db_cursor.execute(
                             'INSERT INTO "%s_keywords" (id, keyword) '
                             'VALUES (?, ?)'
@@ -182,7 +180,7 @@ class Cppman(Crawler):
 
                 """ 3. add all aliases """
                 for title in results:
-                    for (k, a) in results[title]["aliases"]:
+                    for (k, a) in results[title].all_aliases():
                         """ search for combinations of words
 
                             e.g. std::basic_string::append
@@ -249,38 +247,9 @@ class Cppman(Crawler):
     def process_document(self, url, content, depth):
         """callback to insert index"""
         print("Indexing '%s' (depth %s)..." % (url, depth))
-        name = self._extract_name(content).replace('\n', '')
-        keywords = self._extract_keywords(content)
 
-        entry = {'url': url, 'keywords': set(), 'aliases': set()}
-        self.results[name].append(entry)
-
-        for n in self._parse_title(name):
-            """ add as keyword """
-            entry["keywords"].add(n)
-
-            """ add as keyword without std:: """
-            if n.find("std::") != -1:
-                entry["keywords"].add(n.replace('std::', ''))
-
-            """ add with all keywords variations """
-            for k in keywords:
-                """ add std:: to typedef if original type is in std namespace """
-                if n.find("std::") != -1 and k.find("std::") == -1:
-                    k = "std::" + k;
-
-                entry["aliases"].add((n, k))
-                prefix = _commonprefix(n, k)
-
-                if len(prefix) > 2 and prefix[-2:] == "::":
-                    """ Create names and keyword without prefixes """
-                    new_name = n[len(prefix):]
-                    new_key  = k[len(prefix):]
-                    entry["aliases"].add((new_name, new_key))
-
-                if k.find("std::") != -1:
-                    entry["aliases"].add(
-                        (n, k.replace('std::', '')))
+        entry = Entry(url, content)
+        self.results[entry.name].append(entry)
 
         return True
 
@@ -293,7 +262,7 @@ class Cppman(Crawler):
             if len(entries) == 1:
                 results[title] = entries[0]
             else:
-                paths = [_removesuffix(urlparse(entry['url'])[2], '/') for entry in entries]
+                paths = [_removesuffix(urlparse(entry.url)[2], '/') for entry in entries]
                 prefix = os.path.commonpath(paths)
                 if prefix:
                     prefix += '/'
@@ -307,14 +276,6 @@ class Cppman(Crawler):
                     path = _removesuffix(path, suffix)
                     results["{} ({})".format(title, unquote(path))] = entry
         return results
-
-    def _extract_name(self, data):
-        """Extract man page name from web page."""
-        name = re.search('<[hH]1[^>]*>(.+?)</[hH]1>', data, re.DOTALL).group(1)
-        name = re.sub(r'<([^>]+)>', r'', name)
-        name = re.sub(r'&gt;', r'>', name)
-        name = re.sub(r'&lt;', r'<', name)
-        return html.unescape(name)
 
     def _parse_expression(self, expr):
         """
@@ -338,105 +299,6 @@ class Cppman(Crawler):
         prefix = m.group(1)
         tail = m.group(2)
         return [prefix, tail]
-
-    def _parse_title(self, title):
-        """
-             split of the last parenthesis  operator==,!=,<,<=(std::vector)
-             tested with
-            ```
-            operator==,!=,<,<=,>,>=(std::vector)
-            operator==,!=,<,<=,>,>=(std::vector)
-            operator==,!=,<,<=,>,>=
-            operator==,!=,<,<=,>,>=
-            std::rel_ops::operator!=,>,<=,>=
-            std::atomic::operator=
-            std::array::operator[]
-            std::function::operator()
-            std::vector::at
-            std::relational operators (vector)
-            std::vector::begin, std::vector::cbegin
-            std::abs(float), std::fabs
-            std::unordered_set::begin(size_type), std::unordered_set::cbegin(size_type)
-            ```
-        """
-        """ remove all template stuff """
-        title = re.sub(r" ?<[^>]+>", "", title)
-
-        m = re.match(
-            r'^\s*((?:\(size_type\)|(?:.|\(\))*?)*)((?:\([^)]+\))?)\s*$', title)
-
-        postfix = m.group(2)
-
-        t_names = m.group(1).split(',')
-        t_names = [n.strip() for n in t_names]
-        prefix = self._parse_expression(t_names[0])[0]
-        names = []
-        for n in t_names:
-            r = self._parse_expression(n)
-            if prefix == r[0]:
-                names.append(n + postfix)
-            else:
-                names.append(prefix + r[1] + postfix)
-        return names
-
-    def _extract_keywords(self, text):
-        """
-            extract aliases like std::string, template specializations like std::atomic_bool
-            and helper functions like std::is_same_v
-        """
-        soup = BeautifulSoup(text, "lxml")
-        names = []
-
-        # search for typedef list
-        for x in soup.find_all('table'):
-            # just searching for "Type" is not enough, see std::is_same
-            p = x.find_previous_sibling('h3')
-            if p:
-                if p.get_text().strip() == "Member types":
-                    continue
-
-            typedefTable = False
-            for tr in x.find_all('tr'):
-                tds = tr.find_all('td')
-                if len(tds) == 2:
-                    if re.match(r"\s*Type\s*", tds[0].get_text()):
-                        typedefTable = True
-                    elif typedefTable:
-                        res = re.search(r'^\s*(\S*)\s+.*$', tds[0].get_text())
-                        if res and res.group(1):
-                            names.append(res.group(1))
-                    elif not typedefTable:
-                        break
-            if typedefTable:
-                break
-
-        # search for "Helper variable template" list
-        for x in soup.find_all('h3'):
-            variableTemplateHeader = False
-            if x.find('span', id="Helper_variable_template"):
-                e = x.find_next_sibling()
-                while e.name == "":
-                    e = e.find_next_sibling()
-                if e.name == "table":
-                    for tr in e.find_all('tr'):
-                        text = re.sub('\n', ' ', tr.get_text())
-                        res = re.search(r'^.* (\S+)\s*=.*$', text)
-                        if res:
-                            names.append(res.group(1))
-        # search for "Helper types" list
-        for x in soup.find_all('h3'):
-            variableTemplateHeader = False
-            if x.find('span', id="Helper_types"):
-                e = x.find_next_sibling()
-                while e.name == "":
-                    e = e.find_next_sibling()
-                if e.name == "table":
-                    for tr in e.find_all('tr'):
-                        text = re.sub('\n', ' ', tr.get_text())
-                        res = re.search(r'^.* (\S+)\s*=.*$', text)
-                        if res:
-                            names.append(res.group(1))
-        return [html.unescape(n) for n in names]
 
     def cache_all(self):
         """Cache all available man pages"""
