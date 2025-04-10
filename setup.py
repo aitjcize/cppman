@@ -16,6 +16,9 @@ _data_files = [
         ('share/fish/vendor_completions.d/', ['misc/completions/fish/cppman.fish'])
         ]
 
+with open('requirements.txt') as f:
+    _requirements = f.read().splitlines()
+
 setup(
         name = 'cppman',
         version = '0.5.7',
@@ -28,7 +31,7 @@ setup(
         package_data = {'cppman': _package_data},
         data_files = _data_files,
         scripts = ['bin/cppman'],
-        install_requires=['beautifulsoup4', 'html5lib'],
+        install_requires=_requirements,
         classifiers = [
             'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
