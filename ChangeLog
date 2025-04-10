@@ -2,6 +2,12 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.5.9 (Apr 10th, 2025):
+
+	Features added:
+	* Present users with a menu of keyword results in multiple hits
+	* update index.db
+
 cppman 0.5.7 (Jun 27th, 2024):
 
 	Bug fixed:
