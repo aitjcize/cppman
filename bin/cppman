@@ -108,13 +108,13 @@ def main():
         cm.cache_all()
         sys.exit(0)
 
+    cm = Cppman()
+
     if options.clear_cache:
-        cm = Cppman()
         cm.clear_cache()
         sys.exit(0)
 
     if options.keyword:
-        cm = Cppman()
         cm.find(options.keyword)
         sys.exit(0)
 
@@ -147,7 +147,6 @@ def main():
         sys.exit(0)
 
     if options.rebuild_index:
-        cm = Cppman()
         cm.rebuild_index()
         sys.exit(0)
 
@@ -155,11 +154,12 @@ def main():
         sys.stderr.write('What manual page do you want?\n')
         sys.exit(1)
 
-    cm = Cppman(options.force, options.force_columns)
-    failure = False
+    keyword = cm.fuzzy_find(args[0])
+    if not keyword:
+        sys.exit(1)
 
     try:
-        pid = cm.man(args[0])
+        pid = cm.man(keyword)
     except RuntimeError as e:
         print(e, file=sys.stderr)
         sys.exit(16)

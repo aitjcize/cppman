@@ -596,6 +596,35 @@ class Cppman(Crawler):
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
+    def fuzzy_find(self, pattern):
+        """Find pages in database and present an interactive selection menu."""
+        results = self._search_keyword(pattern)
+
+        if not results:
+            raise RuntimeError('%s: nothing appropriate.' % pattern)
+
+        if len(results) == 1:
+            return results[0][1]
+
+        for i, (name, keyword, url) in enumerate(results, 1):
+            print(f"{i}. {keyword} - {name}")
+
+        while True:
+            try:
+                selection = input("\nPlease enter the selection: ")
+                if not selection:
+                    return None
+
+                idx = int(selection) - 1
+                if 0 <= idx < len(results):
+                    return results[idx][1]
+                print("Invalid selection. Please try again.")
+            except ValueError:
+                print("Please enter a valid number.")
+            except KeyboardInterrupt:
+                print("\nOperation cancelled.")
+                return None
+
     def update_mandb(self, quiet=True):
         """Update mandb."""
         if not environ.config.UpdateManPath:
