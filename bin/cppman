@@ -115,8 +115,12 @@ def main():
         sys.exit(0)
 
     if options.keyword:
-        cm.find(options.keyword)
-        sys.exit(0)
+        try:
+            cm.find(options.keyword)
+            sys.exit(0)
+        except RuntimeError as e:
+            print(e, file=sys.stderr)
+            sys.exit(16)
 
     if options.source:
         if options.source not in config.SOURCES:
@@ -154,11 +158,11 @@ def main():
         sys.stderr.write('What manual page do you want?\n')
         sys.exit(1)
 
-    keyword = cm.fuzzy_find(args[0])
-    if not keyword:
-        sys.exit(1)
-
     try:
+        keyword = cm.fuzzy_find(args[0])
+        if not keyword:
+            sys.exit(1)
+
         pid = cm.man(keyword)
     except RuntimeError as e:
         print(e, file=sys.stderr)
