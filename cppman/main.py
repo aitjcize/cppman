@@ -596,9 +596,11 @@ class Cppman(Crawler):
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
-    def fuzzy_find(self, pattern):
+    def fuzzy_find(self, pattern, max_results):
         """Find pages in database and present an interactive selection menu."""
         results = self._search_keyword(pattern)
+        if max_results >= 1:
+            results = results[:max_results]
 
         if not results:
             raise RuntimeError('%s: nothing appropriate.' % pattern)

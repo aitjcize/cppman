@@ -91,7 +91,9 @@ def main():
         make_option('-v', '--version', action='store_true', dest='version',
                     default=False, help='Show version information.'),
         make_option('--force-columns', action='store', dest='force_columns',
-                    type=int, default=-1, help='Force terminal columns.')
+                    type=int, default=-1, help='Force terminal columns.'),
+        make_option('-n','--max-results', action='store', dest='max_results',
+                    type=int, default=-1, help='Maximum number of search results to show.')
     ]
 
     parser = OptionParser(
@@ -159,7 +161,7 @@ def main():
         sys.exit(1)
 
     try:
-        keyword = cm.fuzzy_find(args[0])
+        keyword = cm.fuzzy_find(args[0], options.max_results)
         if not keyword:
             sys.exit(1)
 
