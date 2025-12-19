@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+from cppman.__version__ import __version__
 
 _package_data = [
         'lib/index.db',
@@ -21,7 +26,7 @@ with open('requirements.txt') as f:
 
 setup(
         name = 'cppman',
-        version = '0.5.9',
+        version = __version__,
         description = 'C++ 98/11/14/17/20 manual pages for Linux/MacOS',
         author = 'Wei-Ning Huang (AZ)',
         author_email = 'aitjcize@gmail.com',

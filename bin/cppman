@@ -40,9 +40,10 @@ if program.startswith('./') or program.startswith('bin/'):
 from cppman.main import Cppman
 from cppman.environ import config
 from cppman.util import update_mandb_path, update_man3_link
+from cppman.__version__ import __version__
 
 program_name = sys.argv[0]
-program_version = '0.5.9'
+program_version = __version__
 
 
 def version():
