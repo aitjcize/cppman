@@ -2,6 +2,18 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.6.0 (Dec 19th, 2025):
+
+	Features added:
+	* Implement hybrid search strategy with smart std:: prefix matching
+	* Show first match directly by default (no selection menu)
+	* Move interactive selection menu to -f flag
+	* Add pagination support to selection menu (20 items per page)
+	* Navigation commands: 'n'/'next' and 'p'/'prev' for page navigation
+	* Refactor version management to use single source of truth (__version__.py)
+	* Add GitHub Actions workflow for automated releases to PyPI
+	* Update documentation (help text and man page)
+
 cppman 0.5.9 (Apr 10th, 2025):
 
 	Features added:

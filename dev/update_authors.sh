@@ -1,6 +1,6 @@
 #!/bin/bash
 
-AUTHOR='AZ Huang <aitjcize@gmail.com>'
+AUTHOR='Wei-Ning Huang <aitjcize@gmail.com>'
 
 cat << EOF > AUTHORS
 Developers

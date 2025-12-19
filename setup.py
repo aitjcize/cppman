@@ -2,10 +2,16 @@
 
 from distutils.core import setup
 import os
-import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
-from cppman.__version__ import __version__
+def get_version():
+    version_file = os.path.join(os.path.dirname(__file__), 'cppman', '__version__.py')
+    with open(version_file, 'r') as f:
+        for line in f:
+            if line.startswith('__version__'):
+                return line.split('=')[1].strip().strip("'\"")
+    raise RuntimeError('Unable to find version string.')
+
+__version__ = get_version()
 
 _package_data = [
         'lib/index.db',
