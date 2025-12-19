@@ -70,7 +70,7 @@ def main():
                     help='Clear all cached files.'),
         make_option('-f', '--find-page', action='store', type='string',
                     dest='keyword', default=None,
-                    help='Find man page.'),
+                    help='Find man page and show selection menu if multiple matches.'),
         make_option('-o', '--force-update', action='store_true',
                     dest='force', default=False,
                     help="Force cppman to update existing cache when "
@@ -97,7 +97,10 @@ def main():
     ]
 
     parser = OptionParser(
-        usage='Usage: cppman [OPTION...] PAGE...', option_list=option_list)
+        usage='Usage: cppman [OPTION...] PAGE...\n\n'
+              'When PAGE is specified without -f, cppman shows the first match directly.\n'
+              'Search automatically tries std:: prefix first for better results.',
+        option_list=option_list)
 
     options, args = parser.parse_args()
 
@@ -118,7 +121,11 @@ def main():
 
     if options.keyword:
         try:
-            cm.find(options.keyword)
+            keyword = cm.fuzzy_find(options.keyword, options.max_results, show_menu=True)
+            if not keyword:
+                sys.exit(1)
+            pid = cm.man(keyword)
+            os.waitpid(pid, 0)
             sys.exit(0)
         except RuntimeError as e:
             print(e, file=sys.stderr)
@@ -161,7 +168,7 @@ def main():
         sys.exit(1)
 
     try:
-        keyword = cm.fuzzy_find(args[0], options.max_results)
+        keyword = cm.fuzzy_find(args[0], options.max_results, show_menu=False)
         if not keyword:
             sys.exit(1)
 

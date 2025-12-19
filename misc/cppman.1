@@ -6,9 +6,11 @@ cppman - C++ manual page viewer / fetcher
 .I OPTIONS...
 .B ] PAGE...
 .SH DESCRIPTION
-cppman generates C++ manual pages from cplusplus.com and provide a man\-like interface to view man pages.
+cppman generates C++ manual pages from cplusplus.com and cppreference.com and provides a man\-like interface to view man pages.
 .sp
 By default, cppman fetches man pages on-the-fly, by running the command 'cppman \-c', all available manpages are cached, making offline browsing possible. This is also required if you want to use the system 'man' command.
+.sp
+When searching for a page (e.g., 'cppman map'), cppman automatically tries the std:: prefix first (std::map) for better results. If a page name is specified without the \-f option, cppman displays the first match directly. Use \-f to show an interactive selection menu with pagination support (20 items per page).
 .SS Browsing man pages
 cppman uses Vi Improved as a pager.
 .br
@@ -24,7 +26,7 @@ cache all available man pages from cplusplus.com to enable offline browsing
 .IP "\-C, \-\-clear\-cache"
 clear all cached files
 .IP "\-f KEYWORD, \-\-find\-page=KEYWORD"
-find man page
+find man page and show interactive selection menu if multiple matches are found. The menu displays up to 20 results per page. Use 'n' or 'next' to go to the next page, 'p' or 'prev' to go to the previous page, or enter a number to select a specific page.
 .IP "\-o, \-\-force\-update"
 force cppman to update existing cache when '\-\-cache\-all' or browsing man pages that were already cached
 .IP "\-m MANDB, \-\-use\-mandb=MANDB"
@@ -33,7 +35,9 @@ Accepts 'true' or 'false'. If true, cppman adds manpage path to mandb so that yo
 Select pager to use, accepts 'vim', 'nvim' or 'less'. The default value is 'vim'.
 If 'nvim' is selected, but not available, 'vim' is used as a fallback and vice versa. If either is selected, but neither is available, 'less' is used as a fallback.
 .IP "\-r, \-\-rebuild\-index"
-rebuild index database from cplusplus.com
+rebuild index database from cplusplus.com and cppreference.com
+.IP "\-n NUM, \-\-max\-results=NUM"
+maximum number of search results to show in the selection menu
 .IP "\-v, \-\-version"
 show version information
 .IP "\-h, \-\-help"

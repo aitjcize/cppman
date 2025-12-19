@@ -537,6 +537,21 @@ class Cppman(Crawler):
         self.source = environ.source
 
         self.cursor.execute('PRAGMA case_sensitive_like=ON')
+
+        std_results = []
+        if not pattern.startswith('std::'):
+            std_pattern = 'std::' + pattern
+            std_results = self._fetch_page_by_keyword("%s" % std_pattern)
+            std_results.extend(self._fetch_page_by_keyword("%s %%" % std_pattern))
+            std_results.extend(self._fetch_page_by_keyword("%% %s" % std_pattern))
+            std_results.extend(self._fetch_page_by_keyword("%% %s %%" % std_pattern))
+            std_results.extend(self._fetch_page_by_keyword("%s%%" % std_pattern))
+            std_results = list(set(std_results))
+
+            if len(std_results) >= 5:
+                conn.close()
+                return sorted(std_results, key=lambda e: _sort_search(e, std_pattern))
+
         results = self._fetch_page_by_keyword("%s" % pattern)
         results.extend(self._fetch_page_by_keyword("%s %%" % pattern))
         results.extend(self._fetch_page_by_keyword("%% %s" % pattern))
@@ -545,6 +560,8 @@ class Cppman(Crawler):
         results.extend(self._fetch_page_by_keyword("%s%%" % pattern))
         if len(results) == 0:
             results = self._fetch_page_by_keyword("%%%s%%" % pattern)
+
+        results.extend(std_results)
 
         conn.close()
         return sorted(list(set(results)), key=lambda e: _sort_search(e, pattern))
@@ -596,8 +613,8 @@ class Cppman(Crawler):
         else:
             raise RuntimeError('%s: nothing appropriate.' % pattern)
 
-    def fuzzy_find(self, pattern, max_results):
-        """Find pages in database and present an interactive selection menu."""
+    def fuzzy_find(self, pattern, max_results, show_menu=False):
+        """Find pages in database and optionally present an interactive selection menu."""
         results = self._search_keyword(pattern)
         if max_results >= 1:
             results = results[:max_results]
@@ -608,21 +625,48 @@ class Cppman(Crawler):
         if len(results) == 1:
             return results[0][1]
 
-        for i, (name, keyword, url) in enumerate(results, 1):
-            print(f"{i}. {keyword} - {name}")
+        if not show_menu:
+            return results[0][1]
+
+        page_size = 20
+        current_page = 0
+        total_pages = (len(results) + page_size - 1) // page_size
 
         while True:
+            start_idx = current_page * page_size
+            end_idx = min(start_idx + page_size, len(results))
+
+            print(f"\n--- Page {current_page + 1}/{total_pages} ---")
+            for i in range(start_idx, end_idx):
+                name, keyword, url = results[i]
+                print(f"{i + 1}. {keyword} - {name}")
+
+            if total_pages > 1:
+                nav_help = []
+                if current_page > 0:
+                    nav_help.append("'p' for previous")
+                if current_page < total_pages - 1:
+                    nav_help.append("'n' for next")
+                print(f"\nEnter number to select, {', '.join(nav_help)}, or press Enter to cancel")
+
             try:
-                selection = input("\nPlease enter the selection: ")
+                selection = input("\nPlease enter the selection: ").strip().lower()
                 if not selection:
                     return None
+
+                if selection in ('n', 'next') and current_page < total_pages - 1:
+                    current_page += 1
+                    continue
+                elif selection in ('p', 'prev', 'previous') and current_page > 0:
+                    current_page -= 1
+                    continue
 
                 idx = int(selection) - 1
                 if 0 <= idx < len(results):
                     return results[idx][1]
                 print("Invalid selection. Please try again.")
             except ValueError:
-                print("Please enter a valid number.")
+                print("Please enter a valid number or navigation command.")
             except KeyboardInterrupt:
                 print("\nOperation cancelled.")
                 return None
