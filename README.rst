@@ -7,7 +7,7 @@ cppman
 ======
 C++ manual pages for Linux, with source from `cplusplus.com <http://cplusplus.com/>`_ and `cppreference.com <https://cppreference.com/>`_, supporting all C++ versions provided by the sources.
 
-.. image:: https://raw.github.com/aitjcize/cppman/master/wiki/screenshot.png
+.. image:: https://raw.github.com/aitjcize/cppman/main/wiki/screenshot.png
 
 Features
 --------
@@ -29,7 +29,7 @@ Demo
 ----
 Using vim as pager
 
-.. image:: https://raw.github.com/aitjcize/cppman/master/wiki/demo.gif
+.. image:: https://raw.github.com/aitjcize/cppman/main/wiki/demo.gif
 
 Installation
 ------------
