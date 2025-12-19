@@ -30,10 +30,15 @@ _data_files = [
 with open('requirements.txt') as f:
     _requirements = f.read().splitlines()
 
+with open('README.rst', encoding='utf-8') as f:
+    _long_description = f.read()
+
 setup(
         name = 'cppman',
         version = __version__,
-        description = 'C++ 98/11/14/17/20 manual pages for Linux/MacOS',
+        description = 'C++ manual pages for Linux/MacOS',
+        long_description = _long_description,
+        long_description_content_type = 'text/x-rst',
         author = 'Wei-Ning Huang (AZ)',
         author_email = 'aitjcize@gmail.com',
         url = 'https://github.com/aitjcize/cppman',
