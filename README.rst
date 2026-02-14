@@ -96,6 +96,15 @@ Contributing
 4. Push to the branch (``git push origin my-new-feature``)
 5. Create new Pull Request
 
+Support
+-------
+
+If you find this project useful, consider buying me a coffee! ☕
+
+.. image:: https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black
+   :target: https://buymeacoffee.com/aitjcize
+   :alt: Buy Me A Coffee
+
 Notes
 -----
 * manpages-cpp is renamed to cppman since September 19, 2012
