@@ -56,7 +56,8 @@ render() {
 
 remove_escape() {
     local escape=$(printf '\033')
-    sed "s/$escape\[[^m]*m//g" | col -x -b
+    local backspace=$(printf '\b')
+    sed -e "s/$escape\[[^m]*m//g" -e "s/.$backspace//g" | expand
 }
 
 if [ -z "$(which groff)" ]; then
