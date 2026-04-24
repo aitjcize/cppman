@@ -102,7 +102,7 @@ case $pager_type in
     ;;
 
   less)
-    render | less -r
+    render | less -R
     ;;
 
   pipe)
