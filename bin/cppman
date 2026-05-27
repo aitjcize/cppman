@@ -83,7 +83,8 @@ def main():
                     "with `man' command. The default value is 'false'."),
         make_option('-p', '--pager', action='store', dest='pager',
                     help="Select pager to use, accepts 'vim', 'nvim', 'less'"
-                    "or 'system'. 'system' uses $PAGER environment as pager. "
+                    "'system' or 'mansystem'. 'system' uses $PAGER environment as pager. "
+                    "'mansystem' uses $MANPAGER environment as pager. "
                     "The default value is 'vim'."),
         make_option('-r', '--rebuild-index', action='store_true',
                     dest='rebuild_index', default=False,
