@@ -41,12 +41,12 @@ def update_mandb_path():
 
     lines = []
 
-    """ read all lines """
+    """ read all lines if the file already exists """
     try:
         with open(manpath_file, 'r') as f:
             lines = f.readlines()
-    except IOError:
-        return
+    except FileNotFoundError:
+        pass
 
     """ remove MANDATORY_MANPATH and MANDB_MAP entry """
     lines = [line for line in lines if man_dir not in line]
