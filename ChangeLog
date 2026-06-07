@@ -2,6 +2,16 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.6.1 (Jun 7th, 2026):
+
+	Bug fixed:
+	* pager: use less -R to render ANSI escape sequences
+	* pager: replace col with sed/expand for musl compatibility
+	* util: create ~/.manpath when missing so `cppman -m true` works
+	  on a fresh system
+	* cppman: add 'mansystem' pager option ($MANPAGER)
+	* cppman: clarify --rebuild-index help text (rebuilds both sources)
+
 cppman 0.6.0 (Dec 19th, 2025):
 
 	Features added:
