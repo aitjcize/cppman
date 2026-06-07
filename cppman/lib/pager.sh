@@ -84,6 +84,10 @@ case $pager_type in
     [ -z "$PAGER" ] && PAGER=less
     render | $PAGER
     ;;
+  mansystem)
+    [ -z "$MANPAGER" ] && PAGER=less
+    render | $MANPAGER
+    ;;
 
   vim|nvim)
     render | remove_escape 3<&- | {
