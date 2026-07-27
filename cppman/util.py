@@ -31,7 +31,8 @@ import bs4
 from cppman import environ
 
 # User-Agent header value to use with all requests
-_USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0"
+_USER_AGENT = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+               "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 
 def update_mandb_path():
     """Add $XDG_CACHE_HOME/cppman/man to $HOME/.manpath"""
