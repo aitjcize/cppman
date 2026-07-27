@@ -92,7 +92,9 @@ def groff2man(data):
     """Read groff-formatted text and output man pages."""
     width = get_width()
 
-    cmd = 'groff -t -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)
+    # Input is UTF-8; -k (preconv) with -Kutf8 makes groff decode it correctly
+    # instead of leaking raw byte escapes for non-ASCII characters (see #190).
+    cmd = 'groff -t -k -Kutf8 -Tascii -m man -rLL=%dn -rLT=%dn' % (width, width)
     handle = subprocess.Popen(
         cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)

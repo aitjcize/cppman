@@ -50,8 +50,12 @@ vim_config=$4
 page_name=$5
 
 render() {
+  # Cached pages are stored as UTF-8, so tell groff (via preconv, -k) that the
+  # input encoding is UTF-8. Without this, non-ASCII characters such as U+2010
+  # HYPHEN or box-drawing table borders are misdecoded and leak into the output
+  # (e.g. shown as raw \xe2\x80\x90 byte escapes). See #190.
   gunzip -c "$page_path" | \
-    groff -t -c -m man -T$output_dev -rLL=${col}n -rLT=${col}n 2>/dev/null
+    groff -t -c -k -Kutf8 -m man -T$output_dev -rLL=${col}n -rLT=${col}n 2>/dev/null
 }
 
 remove_escape() {
