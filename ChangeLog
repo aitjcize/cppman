@@ -2,6 +2,17 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.6.2 (Jul 27th, 2026):
+
+	Bug fixed:
+	* Fix release pipeline: the PyPI/GitHub release job waited on a check
+	  named "test", but the matrix test job reports as "test (3.12)", so the
+	  gate never matched and 0.6.1 was never published (#199)
+	* Functional tests now skip gracefully when cppreference.com or
+	  cplusplus.com are unreachable or block CI runners (Cloudflare 403),
+	  instead of failing the build
+	* Modernize the default User-Agent string
+
 cppman 0.6.1 (Jun 7th, 2026):
 
 	Bug fixed:
