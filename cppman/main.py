@@ -24,6 +24,7 @@
 
 import collections
 import gzip
+import hashlib
 import html
 import importlib
 import os
@@ -679,8 +680,24 @@ class Cppman(Crawler):
         cmd = 'mandb %s' % (' -q' if quiet else '')
         subprocess.Popen(cmd, shell=True).wait()
 
+    # Most filesystems limit a single filename component to 255 bytes
+    # (NAME_MAX). Reserve room for the ".3.gz" suffix.
+    MAX_PAGE_NAME_LEN = 255 - len('.3.gz')
+
     def get_normalized_page_name(self, name):
-        return name.replace('/', '_')
+        name = name.replace('/', '_')
+        # Some pages document a whole group of overloads and carry a very long
+        # comma-separated name (e.g. the std::filesystem::path::has_* group),
+        # which overflows NAME_MAX and raises [Errno 36]. Truncate and append a
+        # short hash of the full name so the result stays within the limit
+        # while remaining unique and deterministic across read/write. See #141.
+        encoded = name.encode('utf-8')
+        if len(encoded) <= self.MAX_PAGE_NAME_LEN:
+            return name
+        digest = hashlib.sha1(encoded).hexdigest()[:16]
+        keep = self.MAX_PAGE_NAME_LEN - len(digest) - 1
+        truncated = encoded[:keep].decode('utf-8', 'ignore')
+        return '%s-%s' % (truncated, digest)
 
     def get_page_path(self, source, name):
         name = self.get_normalized_page_name(name)
