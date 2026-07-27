@@ -133,8 +133,13 @@ class Cppman(Crawler):
             self.add_url_filter(r'\.(jpg|jpeg|gif|png|js|css|swf|svg)$')
             self.set_follow_mode(Crawler.F_SAME_PATH)
 
+            # cppreference.com moved its content from /w/cpp/... to /cpp/...:
+            # the old root now 301-redirects to the new one. Because the crawler
+            # runs in F_SAME_PATH mode, the redirect target (/cpp) no longer
+            # matches the old /w/cpp anchor, so crawling /w/cpp silently indexed
+            # nothing. Point at the current URL structure.
             sources = [('cplusplus.com', 'https://cplusplus.com/reference/', None),
-                       ('cppreference.com', 'https://en.cppreference.com/w/cpp', '/w/cpp')]
+                       ('cppreference.com', 'https://en.cppreference.com/cpp', '/cpp')]
 
             for table, url, path in sources:
                 """ Drop and recreate tables. """
@@ -164,6 +169,11 @@ class Cppman(Crawler):
                 self.results = collections.defaultdict(list)
                 self.crawl(url)
                 results = self._results_with_unique_title()
+
+                if not results:
+                    print("WARNING: no pages were indexed for %s. The site "
+                          "layout may have changed or the source was "
+                          "unreachable; %s will be left empty." % (table, table))
 
                 for title in results:
                     """ 1. insert title """
