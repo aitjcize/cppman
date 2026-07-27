@@ -17,7 +17,9 @@ jobs:
       uses: lewagon/wait-on-check-action@v1.3.4
       with:
         ref: ${{ github.ref }}
-        check-name: 'test'
+        # The test job runs under a matrix, so its check is named "test (3.12)"
+        # rather than "test"; match it with a regexp instead of an exact name.
+        check-regexp: '^test'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         wait-interval: 10
     
