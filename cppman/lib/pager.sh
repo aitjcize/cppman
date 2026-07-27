@@ -95,14 +95,20 @@ case $pager_type in
     ;;
 
   vim|nvim)
-    render | remove_escape 3<&- | {
-      $pager_type \
-        --cmd "let g:is_cppman_active=1" \
-        -R \
-        -c "let g:page_name=\"$page_name\"" \
-        -S $vim_config \
-        /dev/fd/3 </dev/tty
-    } 3<&0
+    # Render to a temporary file instead of feeding the editor through the
+    # process-substitution fd /dev/fd/3. Some environments (and certain nvim
+    # builds) cannot open that fd and fail with "/dev/fd/3 Permission Denied",
+    # leaving a blank page. A real file is portable and works everywhere. The
+    # editor still reads the keyboard from the terminal via </dev/tty. See #163.
+    tmpfile=$(mktemp "${TMPDIR:-/tmp}/cppman.XXXXXX")
+    trap 'rm -f "$tmpfile"' EXIT
+    render | remove_escape > "$tmpfile"
+    $pager_type \
+      --cmd "let g:is_cppman_active=1" \
+      -R \
+      -c "let g:page_name=\"$page_name\"" \
+      -S "$vim_config" \
+      "$tmpfile" </dev/tty
     ;;
 
   less)
