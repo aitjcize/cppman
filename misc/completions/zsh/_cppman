@@ -27,7 +27,7 @@ _arguments -n \
   "(1 -)"{-o,--force-update}"[Force cppman to update existing cache when '--cache-all' or browsing man pages that were already cached.]" \
   "(1 -)"{-m,--use-mandb=}"[If true, cppman adds manpage path to mandb so that you can view C++ manpages with 'man' command.]:MANDB:(true false)" \
   "(1 -)"{-p,--pager=}"[Select pager to use.]:PAGER:(vim nvim less system mansystem)" \
-  "(1 -)"{-r,--rebuild-index}"[rebuild index database for the selected source.]" \
+  "(1 -)"{-r,--rebuild-index}"[rebuild index database from both sources (cppreference.com and cplusplus.com).]" \
   "(1 -)"{-v,--version}"[Show version information.]" \
   "--force-columns=[Force terminal columns]:FORCE_COLUMNS:" \
   "1:man page:_cppman_pages" \
