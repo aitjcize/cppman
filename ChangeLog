@@ -2,6 +2,21 @@
 cppman Changelog
 ------------------------------------------------------------------------------
 
+cppman 0.6.3 (Jul 27th, 2026):
+
+	Bug fixed:
+	* crawler: cppreference.com moved its pages from /w/cpp/... to /cpp/...,
+	  which made `cppman -r` silently index nothing for cppreference; follow
+	  the new URL structure and warn when a source yields zero pages. The
+	  bundled index database has been regenerated accordingly.
+	* Fix "[Errno 36] File name too long" when caching pages that document a
+	  large group of overloads (#141)
+	* pager: render non-ASCII characters correctly instead of leaking raw
+	  byte escapes for hyphens and table borders (#190)
+	* pager: render to a temporary file for the vim/nvim pager to avoid
+	  "/dev/fd/3 Permission Denied" on some systems (#163)
+	* completions: correct the -r/--rebuild-index description (#154)
+
 cppman 0.6.2 (Jul 27th, 2026):
 
 	Bug fixed:
