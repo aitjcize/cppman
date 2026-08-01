@@ -3,6 +3,6 @@ bs4==0.0.2
 html5lib==1.1
 lxml==6.1.0
 six==1.17.0
-soupsieve==2.6
+soupsieve==2.8.4
 typing_extensions==4.13.1
 webencodings==0.5.1
